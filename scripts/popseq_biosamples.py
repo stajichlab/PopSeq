@@ -154,6 +154,50 @@ def fetch_batch(accessions, debug=False):
     return out
 
 
+def shard_path(shard_dir, index):
+    return os.path.join(shard_dir, f"batch_{index:06d}.csv")
+
+
+def load_shards(shard_dir):
+    """Return (rows_by_id, columns_seen, next_index) from a checkpoint directory.
+
+    Resume is keyed on the accession, not on the batch number, so a changed batch
+    size or a reordered input list still resumes correctly.
+    """
+    rows, seen, highest = {}, set(), -1
+    if not shard_dir or not os.path.isdir(shard_dir):
+        return rows, seen, 0
+    for name in sorted(os.listdir(shard_dir)):
+        if not (name.startswith("batch_") and name.endswith(".csv")):
+            continue
+        try:
+            highest = max(highest, int(name[6:-4]))
+        except ValueError:
+            pass
+        try:
+            with open(os.path.join(shard_dir, name), "rt", newline="") as fh:
+                for r in csv.DictReader(fh):
+                    if r.get(ID_COL):
+                        rows[r[ID_COL]] = {k: v for k, v in r.items() if v}
+                        seen.update(r.keys())
+        except Exception as exc:  # noqa: BLE001
+            # A shard truncated by a killed job is dropped, not repaired. Its
+            # accessions then look unfetched and are retried.
+            print(f"  shard {name} unreadable ({exc}); refetching it", file=sys.stderr)
+    return rows, seen, highest + 1
+
+
+def write_shard(shard_dir, index, records):
+    cols = [ID_COL] + sorted({k for r in records.values() for k in r} - {ID_COL})
+    tmp = shard_path(shard_dir, index) + ".tmp"
+    with open(tmp, "wt", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+        w.writeheader()
+        for key in sorted(records):
+            w.writerow(records[key])
+    os.replace(tmp, shard_path(shard_dir, index))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("-e", "--email", required=True, help="NCBI Entrez email (required by NCBI)")
@@ -163,6 +207,12 @@ def main():
     p.add_argument("--from-runs", help="a catalog runs CSV; reads its sample_accession column")
     p.add_argument("-u", "--update", action="store_true", help="re-query accessions already present")
     p.add_argument("--batch", type=int, default=BATCH, help=f"accessions per request (default {BATCH})")
+    p.add_argument("--shard-dir",
+                   help="append each batch to its own file here and resume from them. "
+                        "REQUIRED above a few thousand accessions: without it the whole "
+                        "table is rewritten after every batch, which is O(n^2).")
+    p.add_argument("--consolidate", action="store_true",
+                   help="merge --shard-dir into --output and stop; no fetching")
     p.add_argument("--debug", action="store_true")
     args = p.parse_args()
 
@@ -176,9 +226,22 @@ def main():
         sleep = SLEEP_NO_KEY
         print("No NCBI_API_KEY set; limited to 3 requests/s.", file=sys.stderr)
 
-    rows, columns = load_existing(args.output)
-    if rows:
-        print(f"Loaded {len(rows)} existing records from {args.output}", file=sys.stderr)
+    if args.shard_dir:
+        os.makedirs(args.shard_dir, exist_ok=True)
+        rows, seen_cols, next_index = load_shards(args.shard_dir)
+        columns = sorted(seen_cols)
+        if rows:
+            print(f"Resumed {len(rows)} records from {args.shard_dir}", file=sys.stderr)
+        if args.consolidate:
+            write_table(args.output, rows, columns)
+            print(f"Consolidated {len(rows)} records, {len(columns)} columns, "
+                  f"into {args.output}", file=sys.stderr)
+            return 0
+    else:
+        rows, columns = load_existing(args.output)
+        next_index = 0
+        if rows:
+            print(f"Loaded {len(rows)} existing records from {args.output}", file=sys.stderr)
 
     wanted = read_accessions(args)
     todo = wanted if args.update else [a for a in wanted if a not in rows]
@@ -211,8 +274,13 @@ def main():
             print(f"{label}: {len(missing)} returned no record, first {missing[:3]}", file=sys.stderr)
             failures.extend(missing)
 
-        # Flush after every batch so a crash resumes instead of restarting.
-        write_table(args.output, rows, sorted(seen))
+        # Checkpoint. With --shard-dir this costs one batch; without it the whole
+        # table is rewritten, which is why --shard-dir is required at scale.
+        if args.shard_dir:
+            write_shard(args.shard_dir, next_index, fetched)
+            next_index += 1
+        else:
+            write_table(args.output, rows, sorted(seen))
         done = min(i + args.batch, len(todo))
         rate = done / max(time.time() - start, 1e-9)
         print(f"{label}: {len(fetched)} fetched, {done}/{len(todo)} done, {rate:.1f}/s", file=sys.stderr)
@@ -220,6 +288,9 @@ def main():
 
     write_table(args.output, rows, sorted(seen))
     print(f"Wrote {len(rows)} records, {len(seen)} columns, to {args.output}", file=sys.stderr)
+    if args.shard_dir:
+        print(f"Checkpoints kept in {args.shard_dir}; delete once the output is verified.",
+              file=sys.stderr)
 
     if failures:
         path = f"{args.output}.failed.txt"
