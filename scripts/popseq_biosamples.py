@@ -65,7 +65,10 @@ def load_existing(path):
 def write_table(path, rows, columns):
     """Atomic write: build beside the target, then rename."""
     ordered = [ID_COL] + [c for c in columns if c != ID_COL]
-    tmp = f"{path}.tmp"
+    # The temp name must keep the real extension. Appending ".tmp" hid the ".gz"
+    # from open_maybe_gzip, so a file named .csv.gz was written as plain text and
+    # then renamed. Found 2026-11-06 on a 218,608-row consolidate.
+    tmp = f"{path}.tmp.gz" if str(path).endswith(".gz") else f"{path}.tmp"
     with open_maybe_gzip(tmp, "wt") as fh:
         writer = csv.DictWriter(fh, fieldnames=ordered, extrasaction="ignore")
         writer.writeheader()
