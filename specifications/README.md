@@ -21,6 +21,11 @@ nothing in them is approved for PopSeq.
 |---|---|---|
 | `MATpredict_spec_handoff.md` | MATPredict | fungal-wide ENA survey, AWS Open Data fetch route, window subsampling, per-run state records, contamination screening |
 | `GmG_spec_handoff.md` | GmG / popsketch | 2,002 runs already fetched across 7 species, concurrency failures, what centralizing needs |
+| `MATpredict_reply_to_004.md` | MATPredict | measured AWS transfer rate over 4,211 runs, corrected `unavailable_at_ncbi` rate, a correction to my reading of their filters |
+
+**Naming:** numbered files are specifications. Handoffs and replies use
+`<Project>_<kind>.md` so the two schemes cannot collide. `MATpredict_reply_to_004.md` was
+renamed from `005-matpredict-reply.md` on 2026-11-06 for this reason.
 
 Specs 001 and 002 were revised after reading these. See the Changes section of each.
 

@@ -48,11 +48,24 @@ storage but not transfer.
    curl -L -C - https://sra-pub-run-odp.s3.amazonaws.com/sra/<RUN>/<RUN> -o <RUN>.sra
    ```
    This is MATPredict's primary route and it is not in the TE_fungi_copy measurement at
-   all. It is a plain resumable HTTPS GET of the `.sra`, which means a broken transfer
-   continues instead of restarting. MATPredict measured about 1 GB downloaded and 110 s
-   for a whole task on 2026-10-26, but that figure includes conversion and typing, so it
-   is **not a transfer rate** and must not be quoted as one. A 404 means the run is not
-   mirrored, which happens for some European runs; fall through to route 1.
+   all. It is a plain resumable HTTPS GET of the `.sra`, so a broken transfer continues
+   instead of restarting.
+
+   **Measured: median 10.3 MB/s per task** (p10 3.2, p90 20.1, max 31.1), over **4,211 runs
+   and 6,343 GB** moved, from `<run>.run.json` records. This is the best-evidenced transfer
+   figure anyone in the lab has: the competing numbers for `prefetch` (20-23 MB/s) and ENA
+   FTP (0.4 MB/s) each rest on a single run.
+
+   Read it with MATPredict's own limits: it is one task on a compute node, not an aggregate;
+   `secs_download` includes retry sleeps and any failed AWS attempt, so the true rate is a
+   little higher; and it is `.sra` bytes, not FASTQ, which are several times larger.
+   Concurrency was throttled by a SLURM array (for example `%4`) and was not recorded per
+   run, so the rate's behaviour under load is unknown.
+
+   **A 404 here is close to final. Do not retry it, and do not expect `prefetch` to rescue
+   it.** Of 26 runs that missed on AWS and fell back to `prefetch`, **`prefetch` rescued
+   none**: 25 were absent from NCBI and 1 failed to download. The fall-through to route 1
+   below is therefore cheap to attempt once and should never be looped.
 
 1. **NCBI `prefetch` then `parallel-fastq-dump`.**
    ```
@@ -200,7 +213,8 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 `unavailable_at_ncbi` is a real and separate state, not a failure. Two projects measured it
 independently:
 
-- MATPredict: about **1 run in 100** (example `ERR2188722`, 2026-10-26).
+- MATPredict: **25 of 4,548 runs, 0.55 percent, about 1 in 180** (example `ERR2188722`).
+  This supersedes the "about 1 in 100" in their handoff; it is the larger count.
 - GmG: **21 of 300** *P. oryzae* runs, all `ERR` accessions from four ENA studies
   (`PRJEB128687`, `PRJEB14371`, `PRJEB22035`, `PRJEB45710`), each confirmed by a `sra-stat`
   404. List at `popsra/p_oryzae_missing.txt`.
@@ -231,3 +245,6 @@ works 100 percent of the time look identical in a table of successes.
   21 of the 28 are permanently absent from NCBI and only 7 were transient, so concurrency
   is not demonstrated as the cause. Added their measured per-study clustering of
   `unavailable_at_ncbi`.
+- 2026-11-06: added MATPredict's measured AWS Open Data transfer rate (10.3 MB/s median over
+  4,211 runs), their corrected `unavailable_at_ncbi` rate of 0.55 percent, and the finding
+  that a `prefetch` fallback after an AWS 404 rescued 0 of 26 runs.
