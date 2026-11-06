@@ -63,9 +63,36 @@ def get(url, params, tries=4):
     raise RuntimeError(f"eutils failed after {tries} tries: {full}\n{last}")
 
 
-def esearch(taxid):
+ENA_TAXNAME = "https://www.ebi.ac.uk/ena/taxonomy/rest/scientific-name/"
+
+
+def resolve_taxid(name):
+    """Species name -> taxid, via ENA. Returns None when the name does not resolve."""
+    import json
+    try:
+        d = json.loads(get_plain(ENA_TAXNAME + urllib.parse.quote(name), tries=2))
+        return int(d[0]["taxId"]) if d else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def get_plain(url, tries=3):
+    last = None
+    for attempt in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "PopSeq/0.1"})
+            with urllib.request.urlopen(req, timeout=120) as fh:
+                return fh.read().decode("utf-8", errors="replace")
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+            time.sleep(2 * (attempt + 1))
+    raise RuntimeError(f"GET failed: {url}\n{last}")
+
+
+def esearch(taxid, extra=""):
+    term = NCBI_TERM.format(taxid=taxid) + extra
     xml = get(f"{EUTILS}/esearch.fcgi", {
-        "db": "sra", "term": NCBI_TERM.format(taxid=taxid),
+        "db": "sra", "term": term,
         "retmax": 0, "usehistory": "y",
     })
     def tag(t):
@@ -79,10 +106,66 @@ def open_maybe_gzip(path, mode="rt"):
     return gzip.open(path, mode, newline="") if str(path).endswith(".gz") else open(path, mode, newline="")
 
 
+def fetch_window(taxid, extra, label, shard_dir, page, max_depth, depth=0):
+    """Fetch one query window, subdividing when retstart would go deep.
+
+    Deep retstart paging into an NCBI history server degrades badly. Measured
+    2026-11-06 on the whole fungal kingdom: 4.3 s per page over the first 80 pages,
+    34 s per page by page 140, heading for hours. Keeping every window shallow is
+    what makes this tractable, so a window over max_depth is split by publication
+    year, and a year still over the limit is split by month.
+    """
+    count, webenv, qkey = esearch(taxid, extra)
+    if count == 0:
+        return 0
+    if count > max_depth and depth < 2:
+        if depth == 0:
+            parts = [(f" AND {y}[PDAT]", f"{label}.{y}") for y in range(2008, 2028)]
+        else:
+            year = label.rsplit(".", 1)[-1]
+            parts = [(f" AND {year}/{m:02d}[PDAT]", f"{label}.{m:02d}") for m in range(1, 13)]
+        total = 0
+        for sub_extra, sub_label in parts:
+            total += fetch_window(taxid, extra + sub_extra, sub_label,
+                                  shard_dir, page, max_depth, depth + 1)
+        return total
+
+    if count > max_depth:
+        print(f"    {label}: {count} runs still over {max_depth} after month split; "
+              f"paging deep anyway", file=sys.stderr)
+
+    fetched = 0
+    for i, offset in enumerate(range(0, count, page)):
+        out = os.path.join(shard_dir, f"{label}.p{i:04d}.csv")
+        if os.path.exists(out):
+            fetched += page
+            continue
+        body = get(f"{EUTILS}/efetch.fcgi", {
+            "db": "sra", "query_key": qkey, "WebEnv": webenv,
+            "rettype": "runinfo", "retmode": "text",
+            "retstart": offset, "retmax": page,
+        })
+        tmp = out + ".tmp"
+        with open(tmp, "wt") as fh:
+            fh.write(body)
+        os.replace(tmp, out)
+        fetched += page
+        time.sleep(0.11)
+    return min(fetched, count)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--taxid", type=int, required=True)
+    p.add_argument("--taxid", type=int, help="single taxon to reconcile")
+    p.add_argument("--species-list",
+                   help="species summary CSV (gz ok) with a 'species' and 'isolates' "
+                        "column; reconciles each species separately so retstart stays "
+                        "shallow")
+    p.add_argument("--min-isolates", type=int, default=100,
+                   help="with --species-list, skip species below this (default 100)")
+    p.add_argument("--max-depth", type=int, default=5000,
+                   help="split a query by year, then month, above this many runs")
     p.add_argument("--ena", required=True, help="ENA run table (tsv or tsv.gz) to compare against")
     p.add_argument("--out-dir", default=".")
     p.add_argument("--shard-dir", required=True, help="checkpoint directory for efetch pages")
@@ -92,39 +175,46 @@ def main():
     os.makedirs(args.shard_dir, exist_ok=True)
     os.makedirs(args.out_dir, exist_ok=True)
 
-    count, webenv, qkey = esearch(args.taxid)
-    print(f"NCBI reports {count} runs for taxid {args.taxid}", file=sys.stderr)
-    if not count:
-        return 1
-
-    done = {int(n[5:-4]) for n in os.listdir(args.shard_dir)
-            if n.startswith("page_") and n.endswith(".csv")}
-    if done:
-        print(f"Resuming: {len(done)} pages already on disk", file=sys.stderr)
+    # Read the species list exactly once. It may be a process substitution or a pipe,
+    # which cannot be reopened; reading it a second time silently produced an empty
+    # scope and a reconciliation of nothing against nothing.
+    spp = []
+    wanted = None
+    if args.species_list:
+        with open_maybe_gzip(args.species_list, "rt") as fh:
+            spp = [r for r in csv.DictReader(fh)
+                   if int(r.get("isolates") or 0) >= args.min_isolates]
+        wanted = {r["species"] for r in spp}
 
     start = time.time()
-    for i, offset in enumerate(range(0, count, args.page)):
-        if i in done:
-            continue
-        body = get(f"{EUTILS}/efetch.fcgi", {
-            "db": "sra", "query_key": qkey, "WebEnv": webenv,
-            "rettype": "runinfo", "retmode": "text",
-            "retstart": offset, "retmax": args.page,
-        })
-        tmp = os.path.join(args.shard_dir, f"page_{i:05d}.csv.tmp")
-        with open(tmp, "wt") as fh:
-            fh.write(body)
-        os.replace(tmp, tmp[:-4])
-        if i % 20 == 0:
-            el = time.time() - start
-            pages = count // args.page + 1
-            print(f"  page {i}/{pages}  {offset + args.page}/{count}  {el:.0f}s", file=sys.stderr)
-        time.sleep(0.11)
+    if args.species_list:
+        print(f"{len(spp)} species at or above {args.min_isolates} isolates", file=sys.stderr)
+        for n, r in enumerate(spp, 1):
+            name = r["species"]
+            label = name.replace(" ", "_").replace("/", "_")
+            marker = os.path.join(args.shard_dir, f"{label}.DONE")
+            if os.path.exists(marker):
+                continue
+            tx = resolve_taxid(name)
+            if not tx:
+                print(f"[{n}/{len(spp)}] {name}: no taxid, skipped", file=sys.stderr)
+                open(marker, "w").write("no taxid\n")
+                continue
+            got = fetch_window(tx, "", label, args.shard_dir, args.page, args.max_depth)
+            open(marker, "w").write(f"taxid {tx}, about {got} runs\n")
+            print(f"[{n}/{len(spp)}] {name} (txid {tx}): ~{got} runs, "
+                  f"{time.time() - start:.0f}s elapsed", file=sys.stderr)
+    else:
+        if not args.taxid:
+            p.error("one of --taxid or --species-list is required")
+        got = fetch_window(args.taxid, "", f"txid{args.taxid}",
+                           args.shard_dir, args.page, args.max_depth)
+        print(f"taxid {args.taxid}: ~{got} runs in {time.time() - start:.0f}s", file=sys.stderr)
 
     # Collect NCBI run accessions.
     ncbi = {}
     for name in sorted(os.listdir(args.shard_dir)):
-        if not (name.startswith("page_") and name.endswith(".csv")):
+        if not name.endswith(".csv"):
             continue
         with open(os.path.join(args.shard_dir, name), "rt", newline="") as fh:
             for r in csv.DictReader(fh):
@@ -133,13 +223,35 @@ def main():
                     ncbi[run] = r
     print(f"NCBI distinct runs: {len(ncbi)}", file=sys.stderr)
 
+    # Scope the ENA side to the same species. Without this, --species-list compares a
+    # few species of NCBI against the whole of ENA and every other species shows up as
+    # "ENA only", which is true and useless.
+    if wanted is not None:
+        print(f"Scoping ENA to {len(wanted)} species", file=sys.stderr)
+
     ena = {}
     with open_maybe_gzip(args.ena, "rt") as fh:
         for r in csv.DictReader(fh, delimiter="\t"):
             run = (r.get("run_accession") or "").strip()
-            if run:
-                ena[run] = r
+            if not run:
+                continue
+            if wanted is not None:
+                sp = " ".join((r.get("scientific_name") or "").split()[:2])
+                if sp not in wanted:
+                    continue
+            ena[run] = r
     print(f"ENA distinct runs:  {len(ena)}", file=sys.stderr)
+
+    # The NCBI side can also carry runs whose species is outside the scope, because
+    # txid[Organism:exp] includes subordinate taxa whose deposited name differs.
+    if wanted is not None:
+        drop = {k for k, v in ncbi.items()
+                if " ".join((v.get("ScientificName") or "").split()[:2]) not in wanted}
+        if drop:
+            print(f"  dropping {len(drop)} NCBI runs outside the species scope",
+                  file=sys.stderr)
+            for k in drop:
+                del ncbi[k]
 
     ena_only = sorted(set(ena) - set(ncbi))
     ncbi_only = sorted(set(ncbi) - set(ena))
@@ -152,10 +264,11 @@ def main():
                 row = source[a]
                 w.writerow([row.get(f, "") for f in fields])
 
-    dump(os.path.join(args.out_dir, f"{args.taxid}.ena_only_runs.csv.gz"), ena_only, ena,
+    stem = f"{args.taxid}" if args.taxid else "fungi_byspecies"
+    dump(os.path.join(args.out_dir, f"{stem}.ena_only_runs.csv.gz"), ena_only, ena,
          ["run_accession", "sample_accession", "study_accession", "scientific_name",
           "read_count", "base_count", "center_name", "first_public"])
-    dump(os.path.join(args.out_dir, f"{args.taxid}.ncbi_only_runs.csv.gz"), ncbi_only, ncbi,
+    dump(os.path.join(args.out_dir, f"{stem}.ncbi_only_runs.csv.gz"), ncbi_only, ncbi,
          ["Run", "BioSample", "SRAStudy", "ScientificName", "spots", "bases",
           "CenterName", "ReleaseDate", "LibraryStrategy", "LibrarySource", "Platform"])
 
