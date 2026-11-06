@@ -7,7 +7,42 @@ Built so that any project asking a question across many strains of a fungus does
 write its own ENA query, its own eligibility filter, and its own download loop. Three
 projects in this lab already did.
 
-**Status: skeleton. Nothing has been harvested yet.**
+**Status: the catalog is harvested and queryable. Nothing has been downloaded yet.**
+
+245,822 runs / 217,911 isolates / 6,486 species taxids, from the ENA snapshot of
+2026-11-06, reconciled against NCBI for the 113 species with 100 or more isolates.
+
+## Using the catalog from another tool
+
+Read `catalog/index.json` first. It names every table, its grain, its key, its
+columns, its SHA-256, and the caveats that apply. Nothing else needs reading.
+
+Then ask it questions. No network, no database, no credentials:
+
+```bash
+# what is worth profiling at all
+uv run python scripts/popseq_query.py species --min-isolates 100 --format tsv
+
+# 100 Aspergillus fumigatus strains at 30x or better, spread across studies,
+# as an nf-core sample sheet
+uv run python scripts/popseq_query.py panel --taxid 746128 \
+    --n 100 --min-depth 30 --format samples > samples.csv
+
+# everything known about one species, including its clonality, as JSON
+uv run python scripts/popseq_query.py describe --taxid 1047171
+```
+
+Exit 0 on success, 2 when the species is not found or the name is ambiguous,
+3 when the filters leave nothing. Verb names, flag names, JSON keys and exit
+codes are the contract; table paths and columns are not. See
+`specifications/007-query-interface.md`.
+
+Three caveats the interface will not hide from you: every count is a floor
+(issue #2), a run count is not a strain count (52 of the 113 largest species
+take half or more of their isolates from one study), and `est_depth_x` comes
+from metadata rather than from the reads.
+
+[What is in the archive](figures/README.md) has the figures.
 
 ## Start here
 
