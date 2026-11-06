@@ -75,6 +75,10 @@ def redact(text):
 ENA_TAXNAME = "https://www.ebi.ac.uk/ena/taxonomy/rest/scientific-name/"
 
 
+class RankArtifact(Exception):
+    """The name resolved to a taxon far above species rank."""
+
+
 def resolve_taxid(name):
     """Species name -> taxid, via ENA. Returns None when the name does not resolve."""
     import json
@@ -115,7 +119,7 @@ def open_maybe_gzip(path, mode="rt"):
     return gzip.open(path, mode, newline="") if str(path).endswith(".gz") else open(path, mode, newline="")
 
 
-def fetch_window(taxid, extra, label, shard_dir, page, max_depth, depth=0):
+def fetch_window(taxid, extra, label, shard_dir, page, max_depth, depth=0, expected=None):
     """Fetch one query window, subdividing when retstart would go deep.
 
     Deep retstart paging into an NCBI history server degrades badly. Measured
@@ -127,6 +131,19 @@ def fetch_window(taxid, extra, label, shard_dir, page, max_depth, depth=0):
     count, webenv, qkey = esearch(taxid, extra)
     if count == 0:
         return 0
+
+    # Guard against a rank artifact. The species column of the summary table is the
+    # first two words of the deposited scientific_name, so a run deposited at a rank
+    # above species produces a row like "Fungi", "Saccharomycotina" or "Histoplasma".
+    # Resolving that name gives the taxid of the whole clade: "Fungi" resolves to 4751
+    # and pulls all 255,437 fungal runs. Measured 2026-11-06, after it ran for 17
+    # minutes subdividing the kingdom by year inside a job meant to do one species.
+    if depth == 0 and expected and count > max(10 * expected, expected + 1000):
+        raise RankArtifact(
+            f"NCBI returns {count} runs for taxid {taxid} but the ENA summary expects "
+            f"about {expected}. This name is almost certainly above species rank."
+        )
+
     if count > max_depth and depth < 2:
         if depth == 0:
             parts = [(f" AND {y}[PDAT]", f"{label}.{y}") for y in range(2008, 2028)]
@@ -136,7 +153,7 @@ def fetch_window(taxid, extra, label, shard_dir, page, max_depth, depth=0):
         total = 0
         for sub_extra, sub_label in parts:
             total += fetch_window(taxid, extra + sub_extra, sub_label,
-                                  shard_dir, page, max_depth, depth + 1)
+                                  shard_dir, page, max_depth, depth + 1, expected)
         return total
 
     if count > max_depth:
@@ -199,6 +216,7 @@ def main():
     if args.species_list:
         print(f"{len(spp)} species at or above {args.min_isolates} isolates", file=sys.stderr)
         failed = []
+        skipped = []
         for n, r in enumerate(spp, 1):
             name = r["species"]
             label = name.replace(" ", "_").replace("/", "_")
@@ -211,7 +229,15 @@ def main():
                 open(marker, "w").write("no taxid\n")
                 continue
             try:
-                got = fetch_window(tx, "", label, args.shard_dir, args.page, args.max_depth)
+                got = fetch_window(tx, "", label, args.shard_dir, args.page,
+                                   args.max_depth, expected=int(r.get("runs") or 0))
+            except RankArtifact as exc:
+                # Recorded as done, because retrying will not help. It is a naming
+                # problem in the summary table, not a transfer problem.
+                print(f"[{n}/{len(spp)}] {name}: SKIPPED, {exc}", file=sys.stderr)
+                open(marker, "w").write(f"skipped: rank artifact; {exc}\n")
+                skipped.append(name)
+                continue
             except Exception as exc:  # noqa: BLE001
                 # No DONE marker, so a rerun retries this species. Pages already
                 # written are kept and skipped. One bad species must not end the run.
@@ -294,6 +320,9 @@ def main():
     print(f"\nENA only : {len(ena_only)} runs ({pct:.2f}% of ENA) -> unavailable_at_ncbi candidates")
     print(f"NCBI only: {len(ncbi_only)} runs")
     print(f"In both  : {len(set(ena) & set(ncbi))}")
+    if args.species_list and skipped:
+        print(f"\n{len(skipped)} names skipped as above species rank: {skipped}",
+              file=sys.stderr)
     if args.species_list and failed:
         print(f"\n{len(failed)} species failed and have no DONE marker; "
               f"rerun to retry them: {failed[:8]}", file=sys.stderr)
