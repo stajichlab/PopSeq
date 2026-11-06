@@ -16,8 +16,10 @@ popsketch audits a set of read files from FracMinHash sketches (k=21, scaled 200
 - Code: `analysis/popgen_sra/01_select_runs.py`, `02_ena_urls.py`, `03_fetch_sketch.sbatch`, `04_run_species.sh` in GmG, in PR #156 (open, unmerged).
 
 ## State (2026-11-06)
-Sketches done: z_tritici 300, c_neoformans 300, c_beticola 300, p_nodorum 300, b_cinerea 300, n_discreta 223, p_oryzae 279 of 300 (2,002 of 2,023). The queue is empty, so the 21 missing P. oryzae runs failed again on rerun; cause not yet examined.
-- About 28 downloads failed the first time (`parallel-fastq-dump` exit 64, mostly P. oryzae). Looked transient; one run succeeded on a manual retry.
+Sketches done: z_tritici 300, c_neoformans 300, c_beticola 300, p_nodorum 300, b_cinerea 300, n_discreta 223, p_oryzae 279 of 300 (2,002 of 2,023).
+- 28 downloads failed the first time (`parallel-fastq-dump` exit 64). Two different causes (corrected 2026-11-06; the first version of this note called them all transient):
+  - 7 SRR runs (C. beticola 4, Z. tritici 1, C. neoformans 1, B. cinerea 1) were transient. All 7 succeeded on rerun, at a cap of 3 concurrent. It is NOT shown that concurrency caused them.
+  - 21 P. oryzae runs are permanent: `sra-stat` returns 404 "failed to resolve accession" for all 21 (checked each one). All are ERR runs from four ENA studies (PRJEB128687 7, PRJEB14371 6, PRJEB22035 7, PRJEB45710 1). They exist at ENA, not at NCBI. List: `popsra/p_oryzae_missing.txt`. Whether ENA delivers them is not yet tested.
 - Results so far (before the full runs): P. nodorum (265 of 300 in the analysis) and C. beticola show no clear clusters at any `--min-floors` 1-8. The other species are not yet analysed.
 
 ## What centralizing would need (decisions for the curator)

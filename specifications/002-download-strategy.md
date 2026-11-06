@@ -128,12 +128,16 @@ detected it.
 - Load each module on its own line. A `module load ... | tail` pipe runs in a subshell and
   has no effect.
 - Downloads go to `/bigdata`. Never to node-local `/scratch`, which is lost when the job ends.
-- **Cap concurrent downloads.** GmG/popsketch measured `parallel-fastq-dump` exiting 64 at
-  about 35 concurrent downloads, with about 28 of 2,023 runs failing on the first pass and
-  at least one succeeding on a manual retry. Throttle a SLURM array with `%N`. The safe
-  value is unmeasured; 20 is a starting point and benchmark 7.1 should find the real one.
-- **Retry before reporting a failure.** The observed failures looked transient. A single
-  attempt per run turns a transient error into a missing sample.
+- **Cap concurrent downloads.** GmG/popsketch saw `parallel-fastq-dump` exit 64 for 28 of
+  2,023 runs on the first pass, while running about 35 concurrently. **Concurrency was not
+  shown to be the cause.** GmG corrected this on 2026-11-06: 7 of the 28 were transient and
+  all 7 succeeded on rerun at a cap of 3, which is consistent with a cap helping but does not
+  demonstrate it. A cap is cheap insurance, not a proven fix. The safe value is unmeasured;
+  20 is a starting point and benchmark 7.1 should find the real one.
+- **Retry before reporting a failure**, but distinguish the two causes. Of those 28 runs,
+  21 were **permanent**: `sra-stat` returns 404 for every one, they are all `ERR` accessions
+  from four ENA studies, and they exist at ENA but not at NCBI. That is
+  `unavailable_at_ncbi`, not a transient error, and retrying at NCBI will never succeed.
 
 ## The sidecar
 
@@ -193,9 +197,24 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 | `transfer_failed` | the transfer did not complete on any route |
 | `unavailable_at_ncbi` | the run exists at ENA but neither AWS Open Data nor `prefetch` has it |
 
-`unavailable_at_ncbi` is a real and separate state, not a failure. MATPredict measured it at
-about **1 run in 100** (example: `ERR2188722` on 2026-10-26). A pipeline that treats it as a
-failure will retry it forever. Record it and move on; the run is reachable over ENA only.
+`unavailable_at_ncbi` is a real and separate state, not a failure. Two projects measured it
+independently:
+
+- MATPredict: about **1 run in 100** (example `ERR2188722`, 2026-10-26).
+- GmG: **21 of 300** *P. oryzae* runs, all `ERR` accessions from four ENA studies
+  (`PRJEB128687`, `PRJEB14371`, `PRJEB22035`, `PRJEB45710`), each confirmed by a `sra-stat`
+  404. List at `popsra/p_oryzae_missing.txt`.
+
+GmG's rate is far above MATPredict's because the state is **not evenly distributed**: it
+clusters by submitting archive and therefore by study. A species whose data came mostly from
+European submitters will have many; one from NCBI submitters will have none. So a pipeline
+must not treat 1 percent as a budget. It must check per run.
+
+**This is the strongest argument for ENA remaining in the route list** even if the benchmark
+shows NCBI is faster. For these runs ENA is not a fallback, it is the only source. Whether
+ENA actually delivers them is untested; GmG notes this explicitly.
+
+A pipeline that treats this state as a failure will retry it forever. Record it and move on.
 
 Failures are recorded because a route that works 95 percent of the time and a route that
 works 100 percent of the time look identical in a table of successes.
@@ -207,3 +226,8 @@ works 100 percent of the time look identical in a table of successes.
   Added the AWS Open Data route (route 0), which the first draft missed entirely. Added the
   `windows` and `stride` tiers and the rule against `head` for cross-sample measurement.
   Added the concurrency cap and the `unavailable_at_ncbi` state.
+- 2026-11-06: corrected the concurrency claim after GmG revised their handoff. The first
+  version of this spec implied ~35 concurrent downloads caused the 28 failures. GmG showed
+  21 of the 28 are permanently absent from NCBI and only 7 were transient, so concurrency
+  is not demonstrated as the cause. Added their measured per-study clustering of
+  `unavailable_at_ncbi`.
