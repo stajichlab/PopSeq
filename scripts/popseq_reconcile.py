@@ -196,6 +196,10 @@ def main():
     p.add_argument("--out-dir", default=".")
     p.add_argument("--shard-dir", required=True, help="checkpoint directory for efetch pages")
     p.add_argument("--page", type=int, default=PAGE)
+    p.add_argument("--taxmap", default="catalog/taxonomy_species_map.csv.gz",
+                   help="taxid to species_taxid map from popseq_taxonomy.py")
+    p.add_argument("--compare-only", action="store_true",
+                   help="skip fetching; reconcile from the shards already on disk")
     args = p.parse_args()
 
     os.makedirs(args.shard_dir, exist_ok=True)
@@ -212,11 +216,12 @@ def main():
                    if int(r.get("isolates") or 0) >= args.min_isolates]
         wanted = {r["species"] for r in spp}
 
+    failed, skipped = [], []
     start = time.time()
-    if args.species_list:
+    if args.compare_only:
+        print("compare-only: using the shards already on disk", file=sys.stderr)
+    elif args.species_list:
         print(f"{len(spp)} species at or above {args.min_isolates} isolates", file=sys.stderr)
-        failed = []
-        skipped = []
         for n, r in enumerate(spp, 1):
             name = r["species"]
             label = name.replace(" ", "_").replace("/", "_")
@@ -248,7 +253,7 @@ def main():
             open(marker, "w").write(f"taxid {tx}, about {got} runs\n")
             print(f"[{n}/{len(spp)}] {name} (txid {tx}): ~{got} runs, "
                   f"{time.time() - start:.0f}s elapsed", file=sys.stderr)
-    else:
+    elif not args.compare_only:
         if not args.taxid:
             p.error("one of --taxid or --species-list is required")
         got = fetch_window(args.taxid, "", f"txid{args.taxid}",
@@ -270,8 +275,36 @@ def main():
     # Scope the ENA side to the same species. Without this, --species-list compares a
     # few species of NCBI against the whole of ENA and every other species shows up as
     # "ENA only", which is true and useless.
-    if wanted is not None:
-        print(f"Scoping ENA to {len(wanted)} species", file=sys.stderr)
+    # Scope by species taxid, never by name. Issue #1: a name-based scope splits one
+    # taxon across its synonyms. NCBI labels 1,062 runs "Candida parapsilosis" and 575
+    # "Lodderomyces parapsilosis"; both carry taxid 5480. Comparing names reported 844
+    # of them as missing from NCBI when they were present under the other name.
+    taxmap = {}
+    if args.taxmap and os.path.exists(args.taxmap):
+        with open_maybe_gzip(args.taxmap, "rt") as fh:
+            for r in csv.DictReader(fh):
+                if r.get("species_taxid"):
+                    taxmap[int(r["taxid"])] = int(r["species_taxid"])
+        print(f"taxonomy map: {len(taxmap)} taxids with a species ancestor",
+              file=sys.stderr)
+
+    def sp_taxid(raw):
+        try:
+            t = int(str(raw).strip())
+        except (TypeError, ValueError):
+            return None
+        return taxmap.get(t, t if not taxmap else taxmap.get(t))
+
+    wanted_tx = None
+    if wanted is not None and taxmap:
+        name_to_tx = {}
+        with open_maybe_gzip(args.taxmap, "rt") as fh:
+            for r in csv.DictReader(fh):
+                if r.get("species_name") and r.get("species_taxid"):
+                    name_to_tx.setdefault(r["species_name"], int(r["species_taxid"]))
+        wanted_tx = {name_to_tx[n] for n in wanted if n in name_to_tx}
+        print(f"Scoping to {len(wanted_tx)} species taxids "
+              f"(from {len(wanted)} names)", file=sys.stderr)
 
     ena = {}
     with open_maybe_gzip(args.ena, "rt") as fh:
@@ -279,20 +312,15 @@ def main():
             run = (r.get("run_accession") or "").strip()
             if not run:
                 continue
-            if wanted is not None:
-                sp = " ".join((r.get("scientific_name") or "").split()[:2])
-                if sp not in wanted:
-                    continue
+            if wanted_tx is not None and sp_taxid(r.get("tax_id")) not in wanted_tx:
+                continue
             ena[run] = r
     print(f"ENA distinct runs:  {len(ena)}", file=sys.stderr)
 
-    # The NCBI side can also carry runs whose species is outside the scope, because
-    # txid[Organism:exp] includes subordinate taxa whose deposited name differs.
-    if wanted is not None:
-        drop = {k for k, v in ncbi.items()
-                if " ".join((v.get("ScientificName") or "").split()[:2]) not in wanted}
+    if wanted_tx is not None:
+        drop = {k for k, v in ncbi.items() if sp_taxid(v.get("TaxID")) not in wanted_tx}
         if drop:
-            print(f"  dropping {len(drop)} NCBI runs outside the species scope",
+            print(f"  dropping {len(drop)} NCBI runs outside the taxid scope",
                   file=sys.stderr)
             for k in drop:
                 del ncbi[k]
