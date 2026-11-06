@@ -1,0 +1,209 @@
+# Spec 002: download strategy
+
+Status: **blocked.** The route order below is a proposal. It cannot become stable until
+benchmark 7.1 in `PLAN.md` is run, because two projects in this lab hold measurements that
+appear to disagree. See "The unresolved conflict".
+
+## Depth tiers
+
+A caller states what it needs. The fetcher never guesses.
+
+| Tier | What it gets | Typical size | Cached? | Destination |
+|---|---|---|---|---|
+| `head` | first N read pairs, default 500,000 | ~100 MB | no | `$SCRATCH` |
+| `windows` | N spots drawn from W evenly spaced windows, default 2,000,000 in 8 | ~1 GB | no | `$SCRATCH` |
+| `stride` | every Nth read pair | ~1 Gb of bases | no | `$SCRATCH` |
+| `full` | the entire run | 0.5-15 GB | yes | `cache/<taxid>/<RUN>/` |
+
+Only `full` is cached. The subsampled tiers cost less to refetch than to index and manage.
+
+### Do not use `head` for anything population-scale
+
+The three projects each chose a different subsample, and they are not equivalent:
+
+| Project | Strategy | Stated reason |
+|---|---|---|
+| GmG `reads_sra` | first 500,000 pairs over an ENA range request | the only way to stop an HTTPS stream early |
+| MATPredict | 2,000,000 spots in 8 evenly spaced windows, `fastq-dump -N <start> -X <end>` | "spreading windows avoids a head-of-file bias" |
+| GmG `popsketch` | every Nth pair via `parallel-fastq-dump` | "old SRA files are position-sorted" |
+
+Two independent projects concluded that the head of a run is not a random sample of it.
+Reads in a FASTQ are ordered by flowcell position, so the first N pairs come from one
+region of one tile, and anything that varies across the flowcell varies with them.
+
+**Rule: `head` is only for a question that is insensitive to read origin**, such as asking
+which organism a run contains. For any measurement compared across samples, use `windows`
+or `stride`. The cost difference is small; the bias is not.
+
+`windows` is the default subsample. It is the one with a stated reason to prefer it over
+`stride`, and `stride` requires reading the whole run to produce its output, so it saves
+storage but not transfer.
+
+## Route order (proposed, not settled)
+
+### Tier `full`
+
+0. **AWS Open Data over HTTPS**, resumable:
+   ```
+   curl -L -C - https://sra-pub-run-odp.s3.amazonaws.com/sra/<RUN>/<RUN> -o <RUN>.sra
+   ```
+   This is MATPredict's primary route and it is not in the TE_fungi_copy measurement at
+   all. It is a plain resumable HTTPS GET of the `.sra`, which means a broken transfer
+   continues instead of restarting. MATPredict measured about 1 GB downloaded and 110 s
+   for a whole task on 2026-10-26, but that figure includes conversion and typing, so it
+   is **not a transfer rate** and must not be quoted as one. A 404 means the run is not
+   mirrored, which happens for some European runs; fall through to route 1.
+
+1. **NCBI `prefetch` then `parallel-fastq-dump`.**
+   ```
+   prefetch <RUN> -O <dir on /bigdata> --max-size 30G
+   parallel-fastq-dump --sra-id <dir>/<RUN>/<RUN>.sra --threads 8 \
+       --outdir <fastq dir> --split-files --gzip --tmpdir "${SCRATCH:?}"
+   ```
+   Measured on the UCR HPCC login node on 2026-10-24: about 20-23 MB/s. Verified end to end
+   with `ERR3401300` (1.6 GB, 16,860,539 pairs): `prefetch` about 80 s, conversion about 3 min.
+
+2. **ENA Aspera (`ascp`)**, when the ENA record carries a `fastq_aspera` field.
+   `module load aspera/4.2.13.820`. **UNMEASURED on this cluster.** Aspera is often faster
+   than FTP over long distances because it does not use TCP congestion control. That is a
+   general claim about the protocol, not a measurement here, and must not be quoted as one.
+
+3. **ENA HTTPS** (`https://ftp.sra.ebi.ac.uk/...`).
+
+4. **`fasterq-dump`**, last resort.
+
+### Tiers `head` and `sample`
+
+**ENA HTTPS first**, because it is the only route that can stop early. A range request on a
+gzipped FASTQ can be abandoned once N pairs are decompressed. `prefetch` has no partial mode:
+asking it for the first 500,000 pairs costs the whole run.
+
+Fall back to `fasterq-dump` with a read limit.
+
+## The unresolved conflict
+
+| Source | Measurement |
+|---|---|
+| `TE_fungi_copy/CLAUDE.md`, 2026-10-24, login node | `prefetch` 20-23 MB/s; ENA FTP over `curl` about 0.4 MB/s; one ENA connection refused |
+| `GmG/reports/validation/reads_sra.md` | ENA HTTPS delivered 100 of 100 runs, 9.57 GB, `fastq-dump` fallback never needed |
+
+These may not actually conflict. GmG pulls small HTTP byte ranges and closes the connection
+once enough lines are decompressed, which is a different access pattern from streaming a whole
+run. But **nobody has compared them directly**, and until someone does, the default above is
+a proposal carried over from one project, not a finding.
+
+Benchmark 7.1: 10 runs spanning 0.5 to 10 GB, each fetched by all three routes, on a compute
+node and on the login node. Record MB/s, wall time, and failures.
+
+## Verification is mandatory
+
+There is no checksum for a converted FASTQ. The count check is the only protection.
+
+1. Get the expected count once, at planning time, and store it:
+   ```
+   curl -s "https://www.ebi.ac.uk/ena/portal/api/filereport?accession=<RUN>&result=read_run&fields=read_count,base_count,library_layout&format=tsv"
+   ```
+   Store it in the run table. **Compute nodes may have no internet**, so a job must check
+   against a stored value, not a live query.
+2. After conversion, count both mates. Each must equal `read_count`, which is read **pairs**.
+   ```
+   N=$(( $(zcat "<RUN>_1.fastq.gz" | wc -l) / 4 ))
+   ```
+3. A mismatch **fails the task**. It does not warn.
+4. Delete the `.sra` only after the check passes.
+
+This rule exists because it has already caught a real corruption. On 2026-10-24 a leftover
+ENA loop resumed a download onto an SRA-derived file and corrupted mate 1. Nothing else
+detected it.
+
+## Rules that are not negotiable
+
+- **Both mates of a run come from one source.** Never mix an ENA file with an SRA-derived
+  file for the same run.
+- When moving a run to another route, first stop every process that can still write to it
+  (`pgrep -af "fetch|curl|prefetch|ascp"`), then delete the partial files, then start over.
+  A looping downloader can wake up much later and resume onto a file another route replaced.
+- Add `</dev/null` to any loop containing `prefetch`, `curl`, or `ascp`. They read stdin and
+  will consume the loop's input.
+- Load each module on its own line. A `module load ... | tail` pipe runs in a subshell and
+  has no effect.
+- Downloads go to `/bigdata`. Never to node-local `/scratch`, which is lost when the job ends.
+- **Cap concurrent downloads.** GmG/popsketch measured `parallel-fastq-dump` exiting 64 at
+  about 35 concurrent downloads, with about 28 of 2,023 runs failing on the first pass and
+  at least one succeeding on a manual retry. Throttle a SLURM array with `%N`. The safe
+  value is unmeasured; 20 is a starting point and benchmark 7.1 should find the real one.
+- **Retry before reporting a failure.** The observed failures looked transient. A single
+  attempt per run turns a transient error into a missing sample.
+
+## The sidecar
+
+Every cached run carries `cache/<taxid>/<RUN>/<RUN>.json`:
+
+```json
+{
+  "run": "ERR3401300",
+  "taxid": 109871,
+  "biosample": "SAMEA5704822",
+  "route": "ncbi_prefetch",
+  "tier": "full",
+  "fetched_utc": "2026-11-06T15:04:11Z",
+  "bytes_total": 1683114928,
+  "seconds_fetch": 81.4,
+  "seconds_convert": 184.2,
+  "mb_per_s": 20.7,
+  "read_count_expected": 16860539,
+  "read_count_mate1": 16860539,
+  "read_count_mate2": 16860539,
+  "verified": true,
+  "tools": {"sratoolkit": "3.2.0", "parallel-fastq-dump": "0.6.7"}
+}
+```
+
+**A cached run with no sidecar is not trusted** and is re-verified before use. An unverified
+file that looks complete is the failure mode this whole section exists to prevent.
+
+## Size estimation
+
+Before anything is downloaded:
+
+```
+gzipped_fastq_bytes  ~=  base_count / 3.5
+coverage             =   base_count / (assumed_genome_mb * 1e6)
+```
+
+The `/3.5` divisor is **inherited from the TE_fungi_copy SRA survey and has not been checked
+here.** Benchmark 7.2 checks it against the 42 FASTQ files already on disk in that project.
+Every storage estimate in `PLAN.md` depends on it, so it is checked before any of them is
+quoted to anyone.
+
+## Performance capture
+
+Every attempt, including every failure, appends one row to `benchmarks/downloads.csv`:
+
+```csv
+utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
+```
+
+`outcome` is one of:
+
+| State | Meaning |
+|---|---|
+| `ok` | downloaded and the read count matched |
+| `verify_failed` | downloaded, read count did not match ENA. The file is deleted. |
+| `transfer_failed` | the transfer did not complete on any route |
+| `unavailable_at_ncbi` | the run exists at ENA but neither AWS Open Data nor `prefetch` has it |
+
+`unavailable_at_ncbi` is a real and separate state, not a failure. MATPredict measured it at
+about **1 run in 100** (example: `ERR2188722` on 2026-10-26). A pipeline that treats it as a
+failure will retry it forever. Record it and move on; the run is reachable over ENA only.
+
+Failures are recorded because a route that works 95 percent of the time and a route that
+works 100 percent of the time look identical in a table of successes.
+
+## Changes
+
+- 2026-11-06: first draft. Route order proposed, blocked on benchmark 7.1.
+- 2026-11-06: revised after reading `MATpredict_spec_handoff.md` and `GmG_spec_handoff.md`.
+  Added the AWS Open Data route (route 0), which the first draft missed entirely. Added the
+  `windows` and `stride` tiers and the rule against `head` for cross-sample measurement.
+  Added the concurrency cap and the `unavailable_at_ncbi` state.

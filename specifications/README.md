@@ -1,0 +1,41 @@
+# Specifications
+
+One file per topic. These are the interface contracts other projects code against.
+
+| Spec | Topic | Status |
+|---|---|---|
+| `001-catalog-schema.md` | species YAML, run CSV, biosample CSV field definitions | draft |
+| `002-download-strategy.md` | routes, depth tiers, verification, sidecars | draft, blocked on benchmark 7.1 |
+| `003-sample-sheets.md` | `samples.csv` and `metadata.csv` contract | draft |
+
+## Handoffs
+
+Written by each project's own session, describing what that project actually did. They are
+**evidence, not specification**: they record measurements and decisions made elsewhere, and
+nothing in them is approved for PopSeq.
+
+| File | From | What it covers |
+|---|---|---|
+| `MATpredict_spec_handoff.md` | MATPredict | fungal-wide ENA survey, AWS Open Data fetch route, window subsampling, per-run state records, contamination screening |
+| `GmG_spec_handoff.md` | GmG / popsketch | 2,002 runs already fetched across 7 species, concurrency failures, what centralizing needs |
+
+Specs 001 and 002 were revised after reading these. See the Changes section of each.
+
+## How a spec changes
+
+A spec is an interface other projects depend on. Changing one breaks their code.
+
+1. **Additive changes** (a new optional column, a new enum value) can be made in a commit that
+   says what was added. Readers that ignore unknown columns keep working.
+2. **Breaking changes** (renaming a column, changing a key, changing a path) need the old
+   form to keep working for a deprecation period. Add the new form, write both, announce it,
+   remove the old form in a later commit.
+3. Every spec carries a **Changes** section at the bottom with dates. A spec with no history
+   cannot be trusted by someone writing against it.
+
+## Status values
+
+- **draft** — being written, do not code against it yet.
+- **blocked** — written, but depends on a measurement that has not been made. The blocking
+  item is named.
+- **stable** — other projects may code against it. Breaking changes follow rule 2 above.

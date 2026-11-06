@@ -1,0 +1,19 @@
+# Large data. Never tracked. See AGENTS.md section 10.
+cache/
+logs/
+*.fastq
+*.fastq.gz
+*.sra
+
+# Derived index, regenerable from catalog/. See AGENTS.md section 9.
+catalog/popseq.duckdb
+catalog/popseq.duckdb.wal
+
+# Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Editor and OS
+.DS_Store
+*.swp
