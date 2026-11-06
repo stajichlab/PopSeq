@@ -1,0 +1,72 @@
+{
+ "popseq_schema": "1.0.0",
+ "species_taxid": 2689400,
+ "species_name": "Xylaria necrophora",
+ "summary": {
+  "species_taxid": "2689400",
+  "species_name": "Xylaria necrophora",
+  "runs": "166",
+  "isolates": "166",
+  "studies": "1",
+  "total_gbase": "217.0",
+  "est_download_tb": "0.062",
+  "paired_runs": "0",
+  "single_runs": "166",
+  "first_year": "2025",
+  "last_year": "2025"
+ },
+ "clonality": {
+  "species_taxid": "2689400",
+  "species_name": "Xylaria necrophora",
+  "studies": "1",
+  "isolates": "166",
+  "isolates_per_study": "166.0",
+  "largest_study": "166"
+ },
+ "coverage": null,
+ "runs_by_exclusion_label": {
+  "none": 166
+ },
+ "ncbi_status": {
+  "in_ncbi": 166,
+  "ena_only": 0,
+  "not_checked": 0
+ },
+ "caveats": [
+  "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",
+  "A run count is not a strain count. 52 of the 113 largest species take half or more of their isolates from a single study.",
+  "est_depth_x is base_count over a reference assembly size: metadata, not a measurement on the reads.",
+  "Only the 113 species with 100 or more isolates were reconciled against NCBI. Elsewhere ncbi_status is not_checked, which is not the same as absent."
+ ],
+ "default_panel": {
+  "filters": {
+   "platform": "ILLUMINA",
+   "layout": "PAIRED",
+   "strategy": "WGS",
+   "include_excluded": false,
+   "require_fastq": true,
+   "n": 100
+  },
+  "selection_rule": null,
+  "selected": 0,
+  "isolates_available": 0,
+  "studies_in_panel": 0,
+  "runs": [],
+  "run_fields": [
+   "run_accession",
+   "sample_accession",
+   "study_accession",
+   "strain",
+   "read_count",
+   "base_count",
+   "est_depth_x",
+   "country",
+   "collection_date",
+   "first_public",
+   "ncbi_status",
+   "fastq_ftp"
+  ],
+  "note": "A pre-rendered answer to the common request. For any other filter use the CLI, the popseq package or the MCP server. fastq_ftp has no scheme: prepend https://. The Aspera path is the same path against fasp.sra.ebi.ac.uk."
+ },
+ "self": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2689400.json"
+}

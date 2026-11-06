@@ -149,7 +149,12 @@ def main():
         "repository": REPO,
         "shared_filesystem_path": SHARED_PATH,
         "query_interface": {
-            "command": "uv run python scripts/popseq_query.py",
+            "command": "uv run popseq",
+            "python": "import popseq; popseq.panel(taxid=746128, n=100)",
+            "mcp": "uv run --extra mcp python -m popseq.mcp_server (stdio)",
+            "static_json": "catalog/api/index.json and catalog/api/<taxid>.json, "
+                           "fetchable over raw.githubusercontent.com with no clone",
+            "legacy_command": "uv run python scripts/popseq_query.py (shim)",
             "verbs": {
                 "species": "list species with counts; the discovery entry point",
                 "runs": "all runs of one species, filtered",

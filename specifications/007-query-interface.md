@@ -14,8 +14,8 @@ So the catalog advertises one interface and keeps the tables private behind it.
 
 ## The contract
 
-`scripts/popseq_query.py` with four verbs. **Verb names, flag names, JSON key
-names and exit codes are the contract.** Table paths and columns are not; they may
+Four verbs. **Verb names, flag names, JSON key names and exit codes are the
+contract.** Table paths and columns are not; they may
 change under a consumer without notice, which is the point.
 
 | verb | answers |
@@ -48,6 +48,45 @@ that file first and needs no other documentation.
 columns are **ENA URLs, not local paths**, because a run that has not been fetched
 has no local path and inventing one would be a lie. A consumer either streams from
 those URLs or runs the fetcher and rewrites the sheet against local files.
+
+## Four ways to reach it
+
+One implementation, `popseq/query.py`. Everything below is a wrapper over it, so
+none of them can drift from the others.
+
+| reach | for | how |
+|---|---|---|
+| **CLI** | shell, Makefile, SLURM script | `uv run popseq panel --taxid 746128 --n 100` |
+| **Python package** | a pipeline that runs in-process | `import popseq; popseq.panel(taxid=746128, n=100)` |
+| **MCP server** | an agent session, as a tool | `uv run --extra mcp python -m popseq.mcp_server` |
+| **Static JSON** | anything that can fetch a URL | `catalog/api/<taxid>.json` on raw.githubusercontent.com |
+
+`scripts/popseq_query.py` still works. It is a shim onto `popseq.cli`, kept
+because this spec advertised that path before the package existed.
+
+**The Python package** raises `SpeciesNotFound` and `EmptyResult`, which are the
+exceptions behind exit codes 2 and 3. A batch caller asking about many species
+should call `popseq.preload(taxids)` first: the run table is read once instead of
+once per species. Measured: 2.0 s to hold 220,917 rows, after which 20 panels take
+0.58 s rather than 44 s. The answers are identical either way.
+
+**The MCP server** exposes `popseq_index`, `popseq_species`, `popseq_describe`,
+`popseq_panel` and `popseq_runs`. Register it with:
+
+```bash
+claude mcp add popseq -- uv --directory /bigdata/stajichlab/shared/projects/Fungi/PopSeq \
+    run --extra mcp python -m popseq.mcp_server
+```
+
+It needs `mcp>=2.0`, which renamed `FastMCP` to `MCPServer`. It opens no socket
+and holds no credentials.
+
+**The static JSON** covers the 113 species with 100 or more isolates, 5.9 MB in
+all. Each file holds the full `describe` payload plus a pre-selected panel of up
+to 100 strains at the default filters. It answers the common request in advance;
+anything else needs one of the other three, because the filter space is too large
+to pre-render. Regenerate with `scripts/popseq_api.py` after the catalog changes,
+or the files go stale silently.
 
 ## Design decisions, and why
 

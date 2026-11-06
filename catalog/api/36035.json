@@ -1,0 +1,196 @@
+{
+ "popseq_schema": "1.0.0",
+ "species_taxid": 36035,
+ "species_name": "Saccharomycodes ludwigii",
+ "summary": {
+  "species_taxid": "36035",
+  "species_name": "Saccharomycodes ludwigii",
+  "runs": "114",
+  "isolates": "109",
+  "studies": "5",
+  "total_gbase": "138.3",
+  "est_download_tb": "0.0395",
+  "paired_runs": "114",
+  "single_runs": "0",
+  "first_year": "2018",
+  "last_year": "2023"
+ },
+ "clonality": {
+  "species_taxid": "36035",
+  "species_name": "Saccharomycodes ludwigii",
+  "studies": "5",
+  "isolates": "109",
+  "isolates_per_study": "21.8",
+  "largest_study": "63"
+ },
+ "coverage": {
+  "species_taxid": "36035",
+  "species_name": "Saccharomycodes ludwigii",
+  "runs_with_estimate": "114",
+  "median_cov": "77.3",
+  "p10_cov": "49.5",
+  "p90_cov": "161.2",
+  "runs_ge_15x": "112",
+  "runs_ge_30x": "112"
+ },
+ "runs_by_exclusion_label": {
+  "none": 9,
+  "evolution": 63,
+  "cross": 42
+ },
+ "ncbi_status": {
+  "in_ncbi": 114,
+  "ena_only": 0,
+  "not_checked": 0
+ },
+ "caveats": [
+  "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",
+  "A run count is not a strain count. 52 of the 113 largest species take half or more of their isolates from a single study.",
+  "est_depth_x is base_count over a reference assembly size: metadata, not a measurement on the reads.",
+  "Only the 113 species with 100 or more isolates were reconciled against NCBI. Elsewhere ncbi_status is not_checked, which is not the same as absent."
+ ],
+ "default_panel": {
+  "filters": {
+   "platform": "ILLUMINA",
+   "layout": "PAIRED",
+   "strategy": "WGS",
+   "include_excluded": false,
+   "require_fastq": true,
+   "n": 100
+  },
+  "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
+  "selected": 8,
+  "isolates_available": 8,
+  "studies_in_panel": 3,
+  "runs": [
+   {
+    "run_accession": "SRR12082191",
+    "sample_accession": "SAMN15357649",
+    "study_accession": "PRJNA639224",
+    "strain": "NCYC 734",
+    "read_count": "7775884",
+    "base_count": "2348316968",
+    "est_depth_x": "187.9",
+    "country": "United Kingdom",
+    "collection_date": "1971",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/091/SRR12082191/SRR12082191_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/091/SRR12082191/SRR12082191_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR16974257",
+    "sample_accession": "SAMN20341459",
+    "study_accession": "PRJNA736342",
+    "strain": "NRRL Y-12793",
+    "read_count": "1212866",
+    "base_count": "607632082",
+    "est_depth_x": "48.6",
+    "country": "USA: Madison, Wisconsin",
+    "collection_date": "2016",
+    "first_public": "2023-07-29",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/057/SRR16974257/SRR16974257_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/057/SRR16974257/SRR16974257_2.fastq.gz"
+   },
+   {
+    "run_accession": "ERR2814817",
+    "sample_accession": "SAMEA4945973",
+    "study_accession": "PRJEB27462",
+    "strain": "UTAD17",
+    "read_count": "10398195",
+    "base_count": "5219893890",
+    "est_depth_x": "417.6",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2018-09-28",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR281/007/ERR2814817/ERR2814817_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR281/007/ERR2814817/ERR2814817_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR12082188",
+    "sample_accession": "SAMN15357652",
+    "study_accession": "PRJNA639224",
+    "strain": "NCYC 3345",
+    "read_count": "7008868",
+    "base_count": "2116678136",
+    "est_depth_x": "169.3",
+    "country": "missing",
+    "collection_date": "1974",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/088/SRR12082188/SRR12082188_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/088/SRR12082188/SRR12082188_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR12082190",
+    "sample_accession": "SAMN15357650",
+    "study_accession": "PRJNA639224",
+    "strain": "NCYC 849",
+    "read_count": "6810875",
+    "base_count": "2056884250",
+    "est_depth_x": "164.6",
+    "country": "United Kingdom",
+    "collection_date": "1958",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/090/SRR12082190/SRR12082190_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/090/SRR12082190/SRR12082190_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR12082194",
+    "sample_accession": "SAMN15357646",
+    "study_accession": "PRJNA639224",
+    "strain": "DSM 70550",
+    "read_count": "6071002",
+    "base_count": "1833442604",
+    "est_depth_x": "146.7",
+    "country": "France",
+    "collection_date": "missing",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/094/SRR12082194/SRR12082194_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/094/SRR12082194/SRR12082194_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR12082192",
+    "sample_accession": "SAMN15357648",
+    "study_accession": "PRJNA639224",
+    "strain": "NCYC 732",
+    "read_count": "5792609",
+    "base_count": "1749367918",
+    "est_depth_x": "139.9",
+    "country": "Italy",
+    "collection_date": "1933",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/092/SRR12082192/SRR12082192_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/092/SRR12082192/SRR12082192_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR12082193",
+    "sample_accession": "SAMN15357647",
+    "study_accession": "PRJNA639224",
+    "strain": "CBS 1168",
+    "read_count": "5684605",
+    "base_count": "1716750710",
+    "est_depth_x": "137.3",
+    "country": "missing",
+    "collection_date": "missing",
+    "first_public": "2021-10-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/093/SRR12082193/SRR12082193_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/093/SRR12082193/SRR12082193_2.fastq.gz"
+   }
+  ],
+  "run_fields": [
+   "run_accession",
+   "sample_accession",
+   "study_accession",
+   "strain",
+   "read_count",
+   "base_count",
+   "est_depth_x",
+   "country",
+   "collection_date",
+   "first_public",
+   "ncbi_status",
+   "fastq_ftp"
+  ],
+  "note": "A pre-rendered answer to the common request. For any other filter use the CLI, the popseq package or the MCP server. fastq_ftp has no scheme: prepend https://. The Aspera path is the same path against fasp.sra.ebi.ac.uk."
+ },
+ "self": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/36035.json"
+}

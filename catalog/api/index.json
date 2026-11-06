@@ -1,0 +1,1166 @@
+{
+ "popseq_schema": "1.0.0",
+ "generated": "2026-11-06",
+ "what": "One static JSON file per fungal species with 100 or more isolates. Each holds the full description of the species and a pre-selected panel of up to 100 strains to profile.",
+ "scope": "public whole-genome Illumina sequencing runs of fungal isolates, as ENA and NCBI describe them",
+ "archive_snapshot": "2026-11-06",
+ "richer_queries": {
+  "command": "uv run popseq",
+  "python": "import popseq; popseq.panel(taxid=746128, n=100)",
+  "mcp": "uv run --extra mcp python -m popseq.mcp_server (stdio)",
+  "static_json": "catalog/api/index.json and catalog/api/<taxid>.json, fetchable over raw.githubusercontent.com with no clone",
+  "legacy_command": "uv run python scripts/popseq_query.py (shim)",
+  "verbs": {
+   "species": "list species with counts; the discovery entry point",
+   "runs": "all runs of one species, filtered",
+   "panel": "select N strains, one per isolate, spread across studies",
+   "describe": "everything known about one species, as JSON"
+  },
+  "exit_codes": {
+   "0": "ok",
+   "2": "species not found or ambiguous",
+   "3": "filters left nothing"
+  },
+  "stable": "Verb names, flag names and the JSON key names are the contract. Table paths and columns may change underneath."
+ },
+ "caveats": [
+  "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so the true per-species totals are higher (issue #2).",
+  "A run count is not a strain count and an isolate count is not an independent-sample count. 52 of the 113 largest species take half or more of their isolates from one study. Read catalog/summary/clonality.csv.gz before treating a species as a population.",
+  "est_depth_x comes from metadata, not from the reads.",
+  "Only 113 species were reconciled against NCBI. For every other species ncbi_status is not_checked, which is not the same as absent.",
+  "Nothing here has been downloaded or verified. These are archive records."
+ ],
+ "species_count": 113,
+ "species": [
+  {
+   "species_taxid": 4932,
+   "species_name": "Saccharomyces cerevisiae",
+   "isolates": 109875,
+   "runs": 124915,
+   "studies": 1142,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4932.json",
+   "bytes": 55609
+  },
+  {
+   "species_taxid": 498019,
+   "species_name": "Candidozyma auris",
+   "isolates": 27900,
+   "runs": 28023,
+   "studies": 155,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/498019.json",
+   "bytes": 55970
+  },
+  {
+   "species_taxid": 746128,
+   "species_name": "Aspergillus fumigatus",
+   "isolates": 4511,
+   "runs": 4639,
+   "studies": 135,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/746128.json",
+   "bytes": 55736
+  },
+  {
+   "species_taxid": 1047171,
+   "species_name": "Zymoseptoria tritici",
+   "isolates": 4403,
+   "runs": 4632,
+   "studies": 212,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1047171.json",
+   "bytes": 55693
+  },
+  {
+   "species_taxid": 5207,
+   "species_name": "Cryptococcus neoformans",
+   "isolates": 4080,
+   "runs": 5937,
+   "studies": 399,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5207.json",
+   "bytes": 53746
+  },
+  {
+   "species_taxid": 5476,
+   "species_name": "Candida albicans",
+   "isolates": 3358,
+   "runs": 3516,
+   "studies": 201,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5476.json",
+   "bytes": 55194
+  },
+  {
+   "species_taxid": 4896,
+   "species_name": "Schizosaccharomyces pombe",
+   "isolates": 3184,
+   "runs": 3784,
+   "studies": 83,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4896.json",
+   "bytes": 55083
+  },
+  {
+   "species_taxid": 5141,
+   "species_name": "Neurospora crassa",
+   "isolates": 2149,
+   "runs": 2340,
+   "studies": 964,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5141.json",
+   "bytes": 55731
+  },
+  {
+   "species_taxid": 5478,
+   "species_name": "Nakaseomyces glabratus",
+   "isolates": 1690,
+   "runs": 1777,
+   "studies": 72,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5478.json",
+   "bytes": 55880
+  },
+  {
+   "species_taxid": 318829,
+   "species_name": "Pyricularia oryzae",
+   "isolates": 1607,
+   "runs": 1810,
+   "studies": 77,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/318829.json",
+   "bytes": 55454
+  },
+  {
+   "species_taxid": 27291,
+   "species_name": "Saccharomyces paradoxus",
+   "isolates": 1359,
+   "runs": 1514,
+   "studies": 26,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/27291.json",
+   "bytes": 55846
+  },
+  {
+   "species_taxid": 5059,
+   "species_name": "Aspergillus flavus",
+   "isolates": 1342,
+   "runs": 1350,
+   "studies": 94,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5059.json",
+   "bytes": 55762
+  },
+  {
+   "species_taxid": 5480,
+   "species_name": "Lodderomyces parapsilosis",
+   "isolates": 1218,
+   "runs": 1222,
+   "studies": 57,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5480.json",
+   "bytes": 55986
+  },
+  {
+   "species_taxid": 5007,
+   "species_name": "Brettanomyces bruxellensis",
+   "isolates": 1153,
+   "runs": 1165,
+   "studies": 16,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5007.json",
+   "bytes": 54462
+  },
+  {
+   "species_taxid": 5482,
+   "species_name": "Candida tropicalis",
+   "isolates": 1046,
+   "runs": 1049,
+   "studies": 43,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5482.json",
+   "bytes": 55766
+  },
+  {
+   "species_taxid": 27350,
+   "species_name": "Puccinia striiformis",
+   "isolates": 1024,
+   "runs": 1043,
+   "studies": 33,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/27350.json",
+   "bytes": 55867
+  },
+  {
+   "species_taxid": 34373,
+   "species_name": "Blumeria graminis",
+   "isolates": 949,
+   "runs": 960,
+   "studies": 11,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/34373.json",
+   "bytes": 55622
+  },
+  {
+   "species_taxid": 28985,
+   "species_name": "Kluyveromyces lactis",
+   "isolates": 946,
+   "runs": 946,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/28985.json",
+   "bytes": 56588
+  },
+  {
+   "species_taxid": 5507,
+   "species_name": "Fusarium oxysporum",
+   "isolates": 833,
+   "runs": 1497,
+   "studies": 95,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5507.json",
+   "bytes": 55908
+  },
+  {
+   "species_taxid": 4914,
+   "species_name": "Lachancea waltii",
+   "isolates": 792,
+   "runs": 793,
+   "studies": 3,
+   "panel_available": 3,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4914.json",
+   "bytes": 3978
+  },
+  {
+   "species_taxid": 122368,
+   "species_name": "Cercospora beticola",
+   "isolates": 746,
+   "runs": 752,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/122368.json",
+   "bytes": 55441
+  },
+  {
+   "species_taxid": 595493,
+   "species_name": "Saccharomyces cerevisiae x Saccharomyces paradoxus",
+   "isolates": 676,
+   "runs": 700,
+   "studies": 58,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/595493.json",
+   "bytes": 54917
+  },
+  {
+   "species_taxid": 176275,
+   "species_name": "Beauveria bassiana",
+   "isolates": 663,
+   "runs": 694,
+   "studies": 16,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/176275.json",
+   "bytes": 57401
+  },
+  {
+   "species_taxid": 40410,
+   "species_name": "Cryptococcus deneoformans",
+   "isolates": 635,
+   "runs": 731,
+   "studies": 28,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/40410.json",
+   "bytes": 54802
+  },
+  {
+   "species_taxid": 2739387,
+   "species_name": "Trichophyton indotineae",
+   "isolates": 600,
+   "runs": 607,
+   "studies": 14,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2739387.json",
+   "bytes": 55871
+  },
+  {
+   "species_taxid": 5353,
+   "species_name": "Lentinula edodes",
+   "isolates": 557,
+   "runs": 800,
+   "studies": 233,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5353.json",
+   "bytes": 58355
+  },
+  {
+   "species_taxid": 230603,
+   "species_name": "Saccharomyces uvarum",
+   "isolates": 557,
+   "runs": 574,
+   "studies": 22,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/230603.json",
+   "bytes": 55956
+  },
+  {
+   "species_taxid": 4909,
+   "species_name": "Pichia kudriavzevii",
+   "isolates": 514,
+   "runs": 606,
+   "studies": 389,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4909.json",
+   "bytes": 55745
+  },
+  {
+   "species_taxid": 1080349,
+   "species_name": "Saccharomyces eubayanus",
+   "isolates": 513,
+   "runs": 1053,
+   "studies": 33,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1080349.json",
+   "bytes": 56304
+  },
+  {
+   "species_taxid": 13684,
+   "species_name": "Parastagonospora nodorum",
+   "isolates": 482,
+   "runs": 669,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/13684.json",
+   "bytes": 56364
+  },
+  {
+   "species_taxid": 53485,
+   "species_name": "Pyrenophora teres",
+   "isolates": 466,
+   "runs": 506,
+   "studies": 9,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/53485.json",
+   "bytes": 55009
+  },
+  {
+   "species_taxid": 5518,
+   "species_name": "Fusarium graminearum",
+   "isolates": 458,
+   "runs": 460,
+   "studies": 35,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5518.json",
+   "bytes": 56476
+  },
+  {
+   "species_taxid": 5022,
+   "species_name": "Plenodomus lingam",
+   "isolates": 457,
+   "runs": 598,
+   "studies": 11,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5022.json",
+   "bytes": 56811
+  },
+  {
+   "species_taxid": 4952,
+   "species_name": "Yarrowia lipolytica",
+   "isolates": 454,
+   "runs": 468,
+   "studies": 205,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4952.json",
+   "bytes": 55226
+  },
+  {
+   "species_taxid": 208348,
+   "species_name": "Puccinia triticina",
+   "isolates": 427,
+   "runs": 664,
+   "studies": 14,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/208348.json",
+   "bytes": 55332
+  },
+  {
+   "species_taxid": 5113,
+   "species_name": "Epichloe typhina",
+   "isolates": 425,
+   "runs": 425,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5113.json",
+   "bytes": 55325
+  },
+  {
+   "species_taxid": 489137,
+   "species_name": "Saccharomyces cerevisiae x Saccharomyces uvarum",
+   "isolates": 419,
+   "runs": 515,
+   "studies": 12,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/489137.json",
+   "bytes": 55559
+  },
+  {
+   "species_taxid": 5116,
+   "species_name": "Cryphonectria parasitica",
+   "isolates": 410,
+   "runs": 411,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5116.json",
+   "bytes": 55953
+  },
+  {
+   "species_taxid": 29879,
+   "species_name": "Neurospora discreta",
+   "isolates": 373,
+   "runs": 377,
+   "studies": 90,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/29879.json",
+   "bytes": 55149
+  },
+  {
+   "species_taxid": 27344,
+   "species_name": "Puccinia coronata",
+   "isolates": 367,
+   "runs": 367,
+   "studies": 5,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/27344.json",
+   "bytes": 55743
+  },
+  {
+   "species_taxid": 35725,
+   "species_name": "Macrophomina phaseolina",
+   "isolates": 360,
+   "runs": 367,
+   "studies": 10,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/35725.json",
+   "bytes": 56515
+  },
+  {
+   "species_taxid": 37727,
+   "species_name": "Talaromyces marneffei",
+   "isolates": 358,
+   "runs": 360,
+   "studies": 7,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/37727.json",
+   "bytes": 55874
+  },
+  {
+   "species_taxid": 27337,
+   "species_name": "Verticillium dahliae",
+   "isolates": 356,
+   "runs": 517,
+   "studies": 19,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/27337.json",
+   "bytes": 54834
+  },
+  {
+   "species_taxid": 109871,
+   "species_name": "Batrachochytrium dendrobatidis",
+   "isolates": 355,
+   "runs": 358,
+   "studies": 11,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/109871.json",
+   "bytes": 55763
+  },
+  {
+   "species_taxid": 40559,
+   "species_name": "Botrytis cinerea",
+   "isolates": 353,
+   "runs": 449,
+   "studies": 17,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/40559.json",
+   "bytes": 57099
+  },
+  {
+   "species_taxid": 3028765,
+   "species_name": "Trichaptum abietinum",
+   "isolates": 337,
+   "runs": 343,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/3028765.json",
+   "bytes": 57599
+  },
+  {
+   "species_taxid": 93612,
+   "species_name": "Exserohilum turcicum",
+   "isolates": 331,
+   "runs": 332,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/93612.json",
+   "bytes": 55014
+  },
+  {
+   "species_taxid": 5297,
+   "species_name": "Puccinia graminis",
+   "isolates": 327,
+   "runs": 566,
+   "studies": 68,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5297.json",
+   "bytes": 53987
+  },
+  {
+   "species_taxid": 460519,
+   "species_name": "Komagataella phaffii",
+   "isolates": 319,
+   "runs": 321,
+   "studies": 26,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/460519.json",
+   "bytes": 56082
+  },
+  {
+   "species_taxid": 5341,
+   "species_name": "Agaricus bisporus",
+   "isolates": 318,
+   "runs": 338,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5341.json",
+   "bytes": 55447
+  },
+  {
+   "species_taxid": 5180,
+   "species_name": "Sclerotinia sclerotiorum",
+   "isolates": 314,
+   "runs": 314,
+   "studies": 9,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5180.json",
+   "bytes": 58460
+  },
+  {
+   "species_taxid": 37769,
+   "species_name": "Cryptococcus gattii",
+   "isolates": 298,
+   "runs": 375,
+   "studies": 25,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/37769.json",
+   "bytes": 55034
+  },
+  {
+   "species_taxid": 181124,
+   "species_name": "Marasmius oreades",
+   "isolates": 293,
+   "runs": 293,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/181124.json",
+   "bytes": 57145
+  },
+  {
+   "species_taxid": 4934,
+   "species_name": "Lachancea kluyveri",
+   "isolates": 285,
+   "runs": 285,
+   "studies": 7,
+   "panel_available": 47,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4934.json",
+   "bytes": 26491
+  },
+  {
+   "species_taxid": 5384,
+   "species_name": "Suillus luteus",
+   "isolates": 276,
+   "runs": 349,
+   "studies": 270,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5384.json",
+   "bytes": 55732
+  },
+  {
+   "species_taxid": 5970,
+   "species_name": "Exophiala dermatitidis",
+   "isolates": 271,
+   "runs": 282,
+   "studies": 95,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5970.json",
+   "bytes": 55914
+  },
+  {
+   "species_taxid": 5334,
+   "species_name": "Schizophyllum commune",
+   "isolates": 270,
+   "runs": 277,
+   "studies": 30,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5334.json",
+   "bytes": 55531
+  },
+  {
+   "species_taxid": 199306,
+   "species_name": "Coccidioides posadasii",
+   "isolates": 268,
+   "runs": 273,
+   "studies": 15,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/199306.json",
+   "bytes": 55778
+  },
+  {
+   "species_taxid": 203908,
+   "species_name": "Melampsora laricis-populina",
+   "isolates": 257,
+   "runs": 267,
+   "studies": 176,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/203908.json",
+   "bytes": 55408
+  },
+  {
+   "species_taxid": 5454,
+   "species_name": "Ascochyta rabiei",
+   "isolates": 252,
+   "runs": 252,
+   "studies": 3,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5454.json",
+   "bytes": 57249
+  },
+  {
+   "species_taxid": 1914972,
+   "species_name": "Leucocoprinus sp.",
+   "isolates": 239,
+   "runs": 239,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1914972.json",
+   "bytes": 57869
+  },
+  {
+   "species_taxid": 101028,
+   "species_name": "Fusarium pseudograminearum",
+   "isolates": 238,
+   "runs": 276,
+   "studies": 11,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/101028.json",
+   "bytes": 56375
+  },
+  {
+   "species_taxid": 72228,
+   "species_name": "Ophiocordyceps sinensis",
+   "isolates": 237,
+   "runs": 238,
+   "studies": 2,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/72228.json",
+   "bytes": 56720
+  },
+  {
+   "species_taxid": 5061,
+   "species_name": "Aspergillus niger",
+   "isolates": 234,
+   "runs": 235,
+   "studies": 74,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5061.json",
+   "bytes": 55775
+  },
+  {
+   "species_taxid": 1859096,
+   "species_name": "Cryptococcus deuterogattii",
+   "isolates": 234,
+   "runs": 294,
+   "studies": 23,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1859096.json",
+   "bytes": 55024
+  },
+  {
+   "species_taxid": 2902605,
+   "species_name": "Histoplasma ohiense",
+   "isolates": 233,
+   "runs": 233,
+   "studies": 11,
+   "panel_available": 38,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2902605.json",
+   "bytes": 22484
+  },
+  {
+   "species_taxid": 36056,
+   "species_name": "Boletus edulis",
+   "isolates": 223,
+   "runs": 355,
+   "studies": 7,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/36056.json",
+   "bytes": 55004
+  },
+  {
+   "species_taxid": 2587412,
+   "species_name": "Podospora anserina",
+   "isolates": 217,
+   "runs": 217,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2587412.json",
+   "bytes": 55778
+  },
+  {
+   "species_taxid": 456999,
+   "species_name": "Rhizoctonia solani",
+   "isolates": 211,
+   "runs": 220,
+   "studies": 20,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/456999.json",
+   "bytes": 55205
+  },
+  {
+   "species_taxid": 76351,
+   "species_name": "Ceratobasidium cereale",
+   "isolates": 206,
+   "runs": 210,
+   "studies": 3,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/76351.json",
+   "bytes": 54499
+  },
+  {
+   "species_taxid": 64495,
+   "species_name": "Rhizopus arrhizus",
+   "isolates": 205,
+   "runs": 219,
+   "studies": 126,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/64495.json",
+   "bytes": 55641
+  },
+  {
+   "species_taxid": 162425,
+   "species_name": "Aspergillus nidulans",
+   "isolates": 200,
+   "runs": 290,
+   "studies": 115,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/162425.json",
+   "bytes": 55979
+  },
+  {
+   "species_taxid": 5025,
+   "species_name": "Venturia inaequalis",
+   "isolates": 200,
+   "runs": 216,
+   "studies": 5,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5025.json",
+   "bytes": 55184
+  },
+  {
+   "species_taxid": 2792576,
+   "species_name": "Rhynchosporium graminicola",
+   "isolates": 196,
+   "runs": 196,
+   "studies": 2,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2792576.json",
+   "bytes": 55094
+  },
+  {
+   "species_taxid": 5286,
+   "species_name": "Rhodotorula toruloides",
+   "isolates": 194,
+   "runs": 211,
+   "studies": 124,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5286.json",
+   "bytes": 56881
+  },
+  {
+   "species_taxid": 552467,
+   "species_name": "Cryptococcus bacillisporus",
+   "isolates": 183,
+   "runs": 231,
+   "studies": 10,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/552467.json",
+   "bytes": 54372
+  },
+  {
+   "species_taxid": 5037,
+   "species_name": "Histoplasma capsulatum",
+   "isolates": 183,
+   "runs": 183,
+   "studies": 16,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5037.json",
+   "bytes": 55886
+  },
+  {
+   "species_taxid": 5537,
+   "species_name": "Rhodotorula mucilaginosa",
+   "isolates": 169,
+   "runs": 171,
+   "studies": 18,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5537.json",
+   "bytes": 57579
+  },
+  {
+   "species_taxid": 5039,
+   "species_name": "Blastomyces dermatitidis",
+   "isolates": 168,
+   "runs": 171,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5039.json",
+   "bytes": 56655
+  },
+  {
+   "species_taxid": 2689400,
+   "species_name": "Xylaria necrophora",
+   "isolates": 166,
+   "runs": 166,
+   "studies": 1,
+   "panel_available": 0,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2689400.json",
+   "bytes": 2128
+  },
+  {
+   "species_taxid": 39291,
+   "species_name": "Agroathelia rolfsii",
+   "isolates": 164,
+   "runs": 164,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/39291.json",
+   "bytes": 55830
+  },
+  {
+   "species_taxid": 381046,
+   "species_name": "Lachancea thermotolerans",
+   "isolates": 163,
+   "runs": 164,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/381046.json",
+   "bytes": 54343
+  },
+  {
+   "species_taxid": 45357,
+   "species_name": "Candidozyma haemuli",
+   "isolates": 160,
+   "runs": 160,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/45357.json",
+   "bytes": 55684
+  },
+  {
+   "species_taxid": 5128,
+   "species_name": "Fusarium sambucinum",
+   "isolates": 159,
+   "runs": 159,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5128.json",
+   "bytes": 56848
+  },
+  {
+   "species_taxid": 55169,
+   "species_name": "Botryosphaeria dothidea",
+   "isolates": 159,
+   "runs": 159,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/55169.json",
+   "bytes": 56017
+  },
+  {
+   "species_taxid": 1307805,
+   "species_name": "Acarospora socialis",
+   "isolates": 159,
+   "runs": 189,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1307805.json",
+   "bytes": 54670
+  },
+  {
+   "species_taxid": 155674,
+   "species_name": "Leptographium pseudotsugae",
+   "isolates": 155,
+   "runs": 155,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/155674.json",
+   "bytes": 54370
+  },
+  {
+   "species_taxid": 1859121,
+   "species_name": "Cryptococcus tetragattii",
+   "isolates": 149,
+   "runs": 155,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1859121.json",
+   "bytes": 55208
+  },
+  {
+   "species_taxid": 29856,
+   "species_name": "Clonostachys rosea",
+   "isolates": 141,
+   "runs": 142,
+   "studies": 10,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/29856.json",
+   "bytes": 54663
+  },
+  {
+   "species_taxid": 85929,
+   "species_name": "Sphaerulina musiva",
+   "isolates": 139,
+   "runs": 140,
+   "studies": 3,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/85929.json",
+   "bytes": 55358
+  },
+  {
+   "species_taxid": 39966,
+   "species_name": "Hypsizygus marmoreus",
+   "isolates": 139,
+   "runs": 187,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/39966.json",
+   "bytes": 56707
+  },
+  {
+   "species_taxid": 36080,
+   "species_name": "Mucor circinelloides",
+   "isolates": 138,
+   "runs": 152,
+   "studies": 31,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/36080.json",
+   "bytes": 55013
+  },
+  {
+   "species_taxid": 706553,
+   "species_name": "Cercospora janseana",
+   "isolates": 137,
+   "runs": 137,
+   "studies": 2,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/706553.json",
+   "bytes": 57220
+  },
+  {
+   "species_taxid": 36911,
+   "species_name": "Clavispora lusitaniae",
+   "isolates": 128,
+   "runs": 128,
+   "studies": 18,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/36911.json",
+   "bytes": 56561
+  },
+  {
+   "species_taxid": 1684324,
+   "species_name": "Saccharomyces cerevisiae x Saccharomyces eubayanus",
+   "isolates": 126,
+   "runs": 232,
+   "studies": 8,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1684324.json",
+   "bytes": 55454
+  },
+  {
+   "species_taxid": 2447956,
+   "species_name": "Antrodiella citrinella",
+   "isolates": 124,
+   "runs": 124,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2447956.json",
+   "bytes": 57472
+  },
+  {
+   "species_taxid": 2016321,
+   "species_name": "Phyllosticta paracitricarpa",
+   "isolates": 121,
+   "runs": 121,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2016321.json",
+   "bytes": 55323
+  },
+  {
+   "species_taxid": 5062,
+   "species_name": "Aspergillus oryzae",
+   "isolates": 116,
+   "runs": 165,
+   "studies": 12,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5062.json",
+   "bytes": 53897
+  },
+  {
+   "species_taxid": 58291,
+   "species_name": "Rhizopus microsporus",
+   "isolates": 114,
+   "runs": 129,
+   "studies": 49,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/58291.json",
+   "bytes": 55534
+  },
+  {
+   "species_taxid": 5501,
+   "species_name": "Coccidioides immitis",
+   "isolates": 112,
+   "runs": 112,
+   "studies": 10,
+   "panel_available": 95,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5501.json",
+   "bytes": 53134
+  },
+  {
+   "species_taxid": 948311,
+   "species_name": "Fusarium proliferatum",
+   "isolates": 111,
+   "runs": 114,
+   "studies": 17,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/948311.json",
+   "bytes": 55760
+  },
+  {
+   "species_taxid": 45513,
+   "species_name": "Lizanozyma spartinae",
+   "isolates": 110,
+   "runs": 110,
+   "studies": 3,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/45513.json",
+   "bytes": 56615
+  },
+  {
+   "species_taxid": 2494676,
+   "species_name": "Ustilago bromivora x Ustilago hordei",
+   "isolates": 109,
+   "runs": 109,
+   "studies": 1,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/2494676.json",
+   "bytes": 54358
+  },
+  {
+   "species_taxid": 36035,
+   "species_name": "Saccharomycodes ludwigii",
+   "isolates": 109,
+   "runs": 114,
+   "studies": 5,
+   "panel_available": 8,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/36035.json",
+   "bytes": 6764
+  },
+  {
+   "species_taxid": 5082,
+   "species_name": "Penicillium roqueforti",
+   "isolates": 108,
+   "runs": 109,
+   "studies": 7,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5082.json",
+   "bytes": 54541
+  },
+  {
+   "species_taxid": 27292,
+   "species_name": "Saccharomyces pastorianus",
+   "isolates": 107,
+   "runs": 143,
+   "studies": 27,
+   "panel_available": 98,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/27292.json",
+   "bytes": 53989
+  },
+  {
+   "species_taxid": 5272,
+   "species_name": "Microbotryum violaceum",
+   "isolates": 107,
+   "runs": 107,
+   "studies": 3,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5272.json",
+   "bytes": 55026
+  },
+  {
+   "species_taxid": 5516,
+   "species_name": "Fusarium culmorum",
+   "isolates": 106,
+   "runs": 106,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5516.json",
+   "bytes": 56316
+  },
+  {
+   "species_taxid": 175648,
+   "species_name": "Coniferiporia sulphurascens",
+   "isolates": 104,
+   "runs": 104,
+   "studies": 2,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/175648.json",
+   "bytes": 55344
+  },
+  {
+   "species_taxid": 523103,
+   "species_name": "Trichophyton mentagrophytes",
+   "isolates": 103,
+   "runs": 107,
+   "studies": 12,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/523103.json",
+   "bytes": 55236
+  },
+  {
+   "species_taxid": 5127,
+   "species_name": "Fusarium fujikuroi",
+   "isolates": 102,
+   "runs": 102,
+   "studies": 6,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5127.json",
+   "bytes": 55050
+  },
+  {
+   "species_taxid": 4944,
+   "species_name": "Saccharomycopsis fibuligera",
+   "isolates": 100,
+   "runs": 101,
+   "studies": 4,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4944.json",
+   "bytes": 55994
+  },
+  {
+   "species_taxid": 1173061,
+   "species_name": "Geotrichum candidum",
+   "isolates": 100,
+   "runs": 139,
+   "studies": 12,
+   "panel_available": 100,
+   "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1173061.json",
+   "bytes": 57121
+  }
+ ]
+}

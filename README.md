@@ -17,24 +17,56 @@ projects in this lab already did.
 Read `catalog/index.json` first. It names every table, its grain, its key, its
 columns, its SHA-256, and the caveats that apply. Nothing else needs reading.
 
-Then ask it questions. No network, no database, no credentials:
+Then ask it questions, four ways. One implementation behind all of them, so
+they cannot drift apart. No network, no database, no credentials.
+
+**Shell**
 
 ```bash
-# what is worth profiling at all
-uv run python scripts/popseq_query.py species --min-isolates 100 --format tsv
+uv run popseq species --min-isolates 100 --format tsv
 
 # 100 Aspergillus fumigatus strains at 30x or better, spread across studies,
 # as an nf-core sample sheet
-uv run python scripts/popseq_query.py panel --taxid 746128 \
-    --n 100 --min-depth 30 --format samples > samples.csv
+uv run popseq panel --taxid 746128 --n 100 --min-depth 30 --format samples > samples.csv
 
-# everything known about one species, including its clonality, as JSON
-uv run python scripts/popseq_query.py describe --taxid 1047171
+uv run popseq describe --taxid 1047171
 ```
 
 Exit 0 on success, 2 when the species is not found or the name is ambiguous,
-3 when the filters leave nothing. Verb names, flag names, JSON keys and exit
-codes are the contract; table paths and columns are not. See
+3 when the filters leave nothing, so a caller branches without parsing.
+
+**Python**
+
+```python
+import popseq
+popseq.species(min_isolates=100)
+popseq.panel(taxid=746128, n=100, min_depth=30)      # dict, JSON-ready
+popseq.to_sample_sheet(popseq.panel(taxid=746128, n=100))
+popseq.preload(taxids)      # asking about many species? read the table once
+```
+
+**As an agent tool (MCP)**
+
+```bash
+claude mcp add popseq -- uv --directory /bigdata/stajichlab/shared/projects/Fungi/PopSeq \
+    run --extra mcp python -m popseq.mcp_server
+```
+
+Five tools: `popseq_index`, `popseq_species`, `popseq_describe`, `popseq_panel`,
+`popseq_runs`.
+
+**Over HTTP, with no clone**
+
+```
+https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/index.json
+https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/746128.json
+```
+
+One file per species with 100+ isolates: the full description plus a
+pre-selected 100-strain panel.
+
+Verb names, flag names, function names, JSON keys and exit codes are the
+contract; table paths and columns are not. See
 `specifications/007-query-interface.md`.
 
 Three caveats the interface will not hide from you: every count is a floor

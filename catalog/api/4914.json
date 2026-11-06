@@ -1,0 +1,125 @@
+{
+ "popseq_schema": "1.0.0",
+ "species_taxid": 4914,
+ "species_name": "Lachancea waltii",
+ "summary": {
+  "species_taxid": "4914",
+  "species_name": "Lachancea waltii",
+  "runs": "793",
+  "isolates": "792",
+  "studies": "3",
+  "total_gbase": "84.4",
+  "est_download_tb": "0.0241",
+  "paired_runs": "792",
+  "single_runs": "1",
+  "first_year": "2011",
+  "last_year": "2024"
+ },
+ "clonality": {
+  "species_taxid": "4914",
+  "species_name": "Lachancea waltii",
+  "studies": "3",
+  "isolates": "792",
+  "isolates_per_study": "264.0",
+  "largest_study": "789"
+ },
+ "coverage": {
+  "species_taxid": "4914",
+  "species_name": "Lachancea waltii",
+  "runs_with_estimate": "793",
+  "median_cov": "7.8",
+  "p10_cov": "5.6",
+  "p90_cov": "11.9",
+  "runs_ge_15x": "17",
+  "runs_ge_30x": "11"
+ },
+ "runs_by_exclusion_label": {
+  "cross": 789,
+  "none": 4
+ },
+ "ncbi_status": {
+  "in_ncbi": 793,
+  "ena_only": 0,
+  "not_checked": 0
+ },
+ "caveats": [
+  "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",
+  "A run count is not a strain count. 52 of the 113 largest species take half or more of their isolates from a single study.",
+  "est_depth_x is base_count over a reference assembly size: metadata, not a measurement on the reads.",
+  "Only the 113 species with 100 or more isolates were reconciled against NCBI. Elsewhere ncbi_status is not_checked, which is not the same as absent."
+ ],
+ "default_panel": {
+  "filters": {
+   "platform": "ILLUMINA",
+   "layout": "PAIRED",
+   "strategy": "WGS",
+   "include_excluded": false,
+   "require_fastq": true,
+   "n": 100
+  },
+  "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
+  "selected": 3,
+  "isolates_available": 3,
+  "studies_in_panel": 2,
+  "runs": [
+   {
+    "run_accession": "SRR346503",
+    "sample_accession": "SAMN00723033",
+    "study_accession": "PRJNA73481",
+    "strain": "",
+    "read_count": "44925046",
+    "base_count": "6828606992",
+    "est_depth_x": "668.2",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2012-05-06",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR346/SRR346503/SRR346503_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR346/SRR346503/SRR346503_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR16974516",
+    "sample_accession": "SAMN20342010",
+    "study_accession": "PRJNA736342",
+    "strain": "NRRL Y-8285",
+    "read_count": "874820",
+    "base_count": "437011914",
+    "est_depth_x": "42.8",
+    "country": "USA: Madison, Wisconsin",
+    "collection_date": "2016",
+    "first_public": "2023-07-29",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/016/SRR16974516/SRR16974516_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/016/SRR16974516/SRR16974516_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR346504",
+    "sample_accession": "SAMN00723032",
+    "study_accession": "PRJNA73481",
+    "strain": "",
+    "read_count": "24569364",
+    "base_count": "3734543328",
+    "est_depth_x": "365.4",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2012-05-06",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR346/SRR346504/SRR346504_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR346/SRR346504/SRR346504_2.fastq.gz"
+   }
+  ],
+  "run_fields": [
+   "run_accession",
+   "sample_accession",
+   "study_accession",
+   "strain",
+   "read_count",
+   "base_count",
+   "est_depth_x",
+   "country",
+   "collection_date",
+   "first_public",
+   "ncbi_status",
+   "fastq_ftp"
+  ],
+  "note": "A pre-rendered answer to the common request. For any other filter use the CLI, the popseq package or the MCP server. fastq_ftp has no scheme: prepend https://. The Aspera path is the same path against fasp.sra.ebi.ac.uk."
+ },
+ "self": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4914.json"
+}
