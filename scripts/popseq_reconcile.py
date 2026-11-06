@@ -33,6 +33,7 @@ import csv
 import gzip
 import io
 import os
+import re
 import sys
 import time
 import urllib.parse
@@ -46,7 +47,7 @@ PAGE = 500
 NCBI_TERM = 'txid{taxid}[Organism:exp] AND "wgs"[Strategy] AND "genomic"[Source] AND "illumina"[Platform]'
 
 
-def get(url, params, tries=4):
+def get(url, params, tries=6):
     key = os.environ.get("NCBI_API_KEY")
     if key:
         params = dict(params, api_key=key)
@@ -59,8 +60,16 @@ def get(url, params, tries=4):
                 return fh.read().decode("utf-8", errors="replace")
         except Exception as exc:  # noqa: BLE001
             last = exc
-            time.sleep(3 * (attempt + 1))
-    raise RuntimeError(f"eutils failed after {tries} tries: {full}\n{last}")
+            # NCBI returns 500 under load often enough that a short retry ladder is
+            # not enough. Back off further on a server error than on a timeout.
+            time.sleep(min(60, 5 * (attempt + 1) ** 2))
+    # AGENTS.md section 11: the API key is never printed. urlencode puts it in the
+    # URL, so the URL must be redacted before it reaches a log or a traceback.
+    raise RuntimeError(f"eutils failed after {tries} tries: {redact(full)}\n{last}")
+
+
+def redact(text):
+    return re.sub(r"api_key=[^&\s]+", "api_key=REDACTED", str(text))
 
 
 ENA_TAXNAME = "https://www.ebi.ac.uk/ena/taxonomy/rest/scientific-name/"
@@ -189,6 +198,7 @@ def main():
     start = time.time()
     if args.species_list:
         print(f"{len(spp)} species at or above {args.min_isolates} isolates", file=sys.stderr)
+        failed = []
         for n, r in enumerate(spp, 1):
             name = r["species"]
             label = name.replace(" ", "_").replace("/", "_")
@@ -200,7 +210,15 @@ def main():
                 print(f"[{n}/{len(spp)}] {name}: no taxid, skipped", file=sys.stderr)
                 open(marker, "w").write("no taxid\n")
                 continue
-            got = fetch_window(tx, "", label, args.shard_dir, args.page, args.max_depth)
+            try:
+                got = fetch_window(tx, "", label, args.shard_dir, args.page, args.max_depth)
+            except Exception as exc:  # noqa: BLE001
+                # No DONE marker, so a rerun retries this species. Pages already
+                # written are kept and skipped. One bad species must not end the run.
+                print(f"[{n}/{len(spp)}] {name}: FAILED, will retry on a rerun: "
+                      f"{redact(exc)}", file=sys.stderr)
+                failed.append(name)
+                continue
             open(marker, "w").write(f"taxid {tx}, about {got} runs\n")
             print(f"[{n}/{len(spp)}] {name} (txid {tx}): ~{got} runs, "
                   f"{time.time() - start:.0f}s elapsed", file=sys.stderr)
@@ -276,6 +294,9 @@ def main():
     print(f"\nENA only : {len(ena_only)} runs ({pct:.2f}% of ENA) -> unavailable_at_ncbi candidates")
     print(f"NCBI only: {len(ncbi_only)} runs")
     print(f"In both  : {len(set(ena) & set(ncbi))}")
+    if args.species_list and failed:
+        print(f"\n{len(failed)} species failed and have no DONE marker; "
+              f"rerun to retry them: {failed[:8]}", file=sys.stderr)
     print(f"\nWrote both lists to {args.out_dir}")
     return 0
 

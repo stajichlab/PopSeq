@@ -29,7 +29,11 @@ The spec proposes comparing read counts for `archived_local`, and strain name pl
 
 Spec 006 names GmG's tooling as the way to produce `target_taxon_fraction`. Part of the machinery exists: the index screen can name a second taxon and give its fraction. But popsketch's QC is cohort-relative and assumes one isolate per run. On metagenomes it would flag nearly every sample as mixed or unrelated. Using it there needs new design, not a different input. Separately, the statement that GmG "already pages by `first_public` year" is not something this session did; it may refer to earlier GmG work I have not read.
 
-## 5. Agreement with the MATPredict feedback on 002
+## 5. Correction to the size of a sketch (quoted in spec 004 question 6)
+
+My handoff said a sketch is 0.1-0.4 MB. That was wrong. Measured on the 300 *C. neoformans* sketches: 2.7 GB in 1,201 files, about 8 MB per sample: the whole sketch about 3 MB (3.4 MB for DRR829879) and each of the two split halves about 2 MB. The "sketch during fetch" option in spec 004 is still cheap compared with the reads, but at about 8 MB per sample, 2,000 runs is about 16 GB, not about 0.5 GB. Only the whole sketch and the halves of the 20 samples the noise floor uses are needed for an analysis, which is about 3 MB per sample.
+
+## 6. Agreement with the MATPredict feedback on 002
 
 `stride` and `windows` both transfer the whole run. My pipeline downloads the full run through `parallel-fastq-dump` and keeps about 1 Gb of bases. Only the stored sketch is small. Spec 002 already says this for `stride`.
 

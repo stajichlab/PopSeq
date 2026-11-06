@@ -70,6 +70,10 @@ uv add <package>             # add a dependency; updates pyproject.toml and uv.l
   writing to `/`.
 - Copy anything that must survive to `/bigdata` before the job ends.
 - Never hardcode a `/scratch/$USER/...` path.
+- **Use `$SCRATCH` for temporary files, never `/tmp`.** This holds for interactive and
+  login-node work too, not only batch jobs. `/tmp` on a compute node is small and shared
+  with every other user of that node, so filling it breaks other people's jobs; `$SCRATCH`
+  is per-job, node-local, faster, and cleaned up automatically.
 - **Downloads go to `/bigdata`, never to `/scratch`.** A node-local download is lost.
 - Size a scatter-gather unit toward **1 to 1.5 hours** of real runtime. Job count has its own
   cost in scheduling overhead and queue contention. If a completed run shows tasks finishing

@@ -7,7 +7,7 @@ popsketch audits a set of read files from FracMinHash sketches (k=21, scaled 200
 
 - Filters: paired Illumina, coverage >= 15x, one run per biosample, spread across studies, mutant/evolved/cross/knockout titles removed. C. auris and S. cerevisiae skipped (too large).
 - Seven species, up to 300 runs each, 2,023 selected: Z. tritici, C. neoformans, C. beticola, P. nodorum, B. cinerea, N. discreta (223, all that pass), P. oryzae (= Magnaporthe oryzae).
-- Fetch: `parallel-fastq-dump` to scratch, every Nth read pair kept (about 1 Gb; old SRA files are position-sorted), sketched with `popsketch sketch`, reads deleted. Only about 0.1-0.4 MB per sample is kept.
+- Fetch: `parallel-fastq-dump` to scratch, every Nth read pair kept (about 1 Gb; old SRA files are position-sorted), sketched with `popsketch sketch`, reads deleted. Only the sketch is kept: about 8 MB per sample (corrected 2026-11-06; an earlier version said 0.1-0.4 MB, which was wrong): the whole sketch about 3 MB plus two split halves of about 2 MB each. 300 C. neoformans samples take 2.7 GB. A sketch is still far smaller than the reads it came from.
 - Analysis: `popsketch run --from-sketches <slug>/sketches`.
 
 ## Where it is
