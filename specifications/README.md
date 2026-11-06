@@ -7,6 +7,7 @@ One file per topic. These are the interface contracts other projects code agains
 | `001-catalog-schema.md` | species YAML, run CSV, biosample CSV field definitions | draft |
 | `002-download-strategy.md` | routes, depth tiers, verification, sidecars | draft, blocked on benchmark 7.1 |
 | `003-sample-sheets.md` | `samples.csv` and `metadata.csv` contract | draft |
+| `004-response-to-handoffs.md` | what was adopted from the handoffs, and what is still needed from each project | open |
 
 ## Handoffs
 
