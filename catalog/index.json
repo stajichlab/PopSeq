@@ -1,6 +1,6 @@
 {
   "popseq_schema": "1.0.0",
-  "generated": "2026-11-06",
+  "generated": "2026-11-07",
   "archive_snapshot": "2026-11-06",
   "scope": "public whole-genome Illumina sequencing runs of fungal isolates, as ENA and NCBI describe them",
   "repository": "https://github.com/stajichlab/PopSeq",
@@ -64,10 +64,17 @@
         "species_name",
         "exclusion",
         "est_depth_x",
-        "ncbi_status"
+        "ncbi_status",
+        "country_iso",
+        "country_name",
+        "country_status",
+        "host",
+        "host_taxid",
+        "host_name",
+        "host_status"
       ],
-      "bytes": 14125005,
-      "sha256": "e5b2a91f19991732425d556072461115a0d4085e403c4bfcf0848dfe6f22a37c"
+      "bytes": 14495515,
+      "sha256": "a165d5f796df03dd7fe9d3bf0f707a38679a43920eabb91b089b2457a7cc7283"
     },
     "species_summary": {
       "path": "catalog/kingdom/fungi_species_summary.csv.gz",
@@ -993,6 +1000,52 @@
       "bytes": 114485,
       "sha256": "e060628f62cc82a5234e90621c9870a68861e4ddd7ad4a44b63e44f82c8659f6"
     },
+    "vocab_country_aliases": {
+      "path": "catalog/vocab/country_aliases.csv",
+      "grain": "one row per curated country spelling",
+      "key": "alias",
+      "built_by": "curated by hand",
+      "columns": [
+        "alias",
+        "iso2",
+        "name",
+        "status",
+        "note"
+      ],
+      "bytes": 2489,
+      "sha256": "e06c2039d38faf5e71a4e923f8d74aefad9006d60caa767ab5537854301ee0c4"
+    },
+    "vocab_host_taxa": {
+      "path": "catalog/vocab/host_taxa.csv.gz",
+      "grain": "one row per distinct normalised host string",
+      "key": "host_key",
+      "built_by": "scripts/popseq_vocab.py hosts",
+      "columns": [
+        "host_key",
+        "host_taxid",
+        "host_name",
+        "host_status",
+        "method",
+        "n_samples",
+        "example_raw"
+      ],
+      "bytes": 38980,
+      "sha256": "8ce2929916849f52f037ea21f6b0367a9bdbd70b65e844de37ea2c6b889d4116"
+    },
+    "vocab_host_overrides": {
+      "path": "catalog/vocab/host_overrides.csv",
+      "grain": "one row per curated host string",
+      "key": "host_key",
+      "built_by": "curated by hand",
+      "columns": [
+        "host_key",
+        "host_status",
+        "resolve_as",
+        "note"
+      ],
+      "bytes": 1166,
+      "sha256": "b51b7b0661d347ee854c644e9139724ff17b40a3da0793d190424a7e94f9c169"
+    },
     "ena_only_runs": {
       "path": "catalog/kingdom/fungi_byspecies.ena_only_runs.csv.gz",
       "grain": "runs present at ENA and absent from the filtered NCBI query",
@@ -1042,6 +1095,12 @@
     "ncbi_status": "in_ncbi, ena_only, or not_checked. Only the 113 species with 100 or more isolates were reconciled against NCBI.",
     "fastq_ftp": "';'-joined ENA FTP paths, no scheme. Prepend https://.",
     "fastq_aspera": "';'-joined Aspera paths for the ENA fasp endpoint.",
+    "country": "Exactly as the submitter wrote it. Free text. Use country_iso to group.",
+    "country_iso": "ISO 3166-1 alpha-2 (XK for Kosovo). Blank unless country_status is ok. Parsed from country by popseq/normalise.py (issue #23).",
+    "country_status": "ok, absent (field empty), missing (an explicit INSDC missing term such as 'not collected'), region (ocean, continent), historical (e.g. Yugoslavia), conflicting (multi-sample run whose samples disagree), unresolved (add it to catalog/vocab/country_aliases.csv).",
+    "host": "Raw host from the BioSample: first non-empty of host, host_plant, specific hosts, host_common_name.",
+    "host_taxid": "NCBI taxid of host. Blank unless host_status is ok or same_as_organism. Resolved via catalog/vocab/host_taxa.csv.gz.",
+    "host_status": "ok, absent, missing, not_a_host (a lab or environment term such as 'soil' or 'culture'), same_as_organism (the host field names the sequenced organism itself), ambiguous, conflicting, unresolved.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes ';'-joined for multi-sample runs (issue #3)."
   },
   "caveats": [

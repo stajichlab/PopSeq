@@ -93,7 +93,7 @@ def popseq_describe(taxid: Optional[int] = None,
 def popseq_panel(taxid: Optional[int] = None, species_name: Optional[str] = None,
                  n: int = 100, min_depth: Optional[float] = None,
                  layout: str = "PAIRED", country: Optional[str] = None,
-                 since: Optional[str] = None, include_excluded: bool = False,
+                 host: Optional[str] = None, since: Optional[str] = None, include_excluded: bool = False,
                  only_exclusion: Optional[str] = None,
                  max_per_study: Optional[int] = None, seed: int = 0) -> str:
     """Select n strains of one species to profile: one run per isolate (deepest
@@ -105,6 +105,8 @@ def popseq_panel(taxid: Optional[int] = None, species_name: Optional[str] = None
 
     min_depth filters on an estimate computed from base_count and a reference
     assembly size, not from the reads; runs with no estimate are dropped by it.
+    country takes an ISO code ("CH"), a name ("Switzerland") or the raw string.
+    host takes an NCBI taxid ("4565") or a name ("Triticum aestivum").
     only_exclusion ("mutant", "evolution", "cross", "not_wgs") selects *only*
     that material, for a project that wants the mutant panels rather than
     avoiding them.
@@ -115,7 +117,7 @@ def popseq_panel(taxid: Optional[int] = None, species_name: Optional[str] = None
         return _json(q.panel(taxid=taxid, name=species_name, n=n,
                              max_per_study=max_per_study, seed=seed,
                              min_depth=min_depth, layout=layout, country=country,
-                             since=since, include_excluded=include_excluded,
+                             host=host, since=since, include_excluded=include_excluded,
                              only_exclusion=only_exclusion))
     except q.CatalogError as exc:
         return f"error: {exc}"
@@ -125,7 +127,7 @@ def popseq_panel(taxid: Optional[int] = None, species_name: Optional[str] = None
 def popseq_runs(taxid: Optional[int] = None, species_name: Optional[str] = None,
                 limit: int = 500, min_depth: Optional[float] = None,
                 layout: str = "PAIRED", country: Optional[str] = None,
-                since: Optional[str] = None, include_excluded: bool = False,
+                host: Optional[str] = None, since: Optional[str] = None, include_excluded: bool = False,
                 only_exclusion: Optional[str] = None) -> str:
     """Every run of one species that passes the filters, up to limit.
 
@@ -135,7 +137,7 @@ def popseq_runs(taxid: Optional[int] = None, species_name: Optional[str] = None,
     try:
         return _json(q.runs(taxid=taxid, name=species_name, limit=limit,
                             min_depth=min_depth, layout=layout, country=country,
-                            since=since, include_excluded=include_excluded,
+                            host=host, since=since, include_excluded=include_excluded,
                             only_exclusion=only_exclusion))
     except q.CatalogError as exc:
         return f"error: {exc}"

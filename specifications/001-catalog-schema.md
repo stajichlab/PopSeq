@@ -155,6 +155,51 @@ runs; a mutant panel has one isolate per run. **Collapse on `sample_accession` b
 reporting a strain count.** When one run per isolate is needed, take the smallest run that
 still passes the coverage filter, so the download is as small as the question allows.
 
+### Normalised country and host (issue #23)
+
+`country` and the BioSample host are free text. *Zymoseptoria tritici* alone has 316
+distinct country strings. A consumer must not re-parse them, so the kingdom run table
+(`catalog/runs/fungi_all_runs.csv.gz`) carries normalised columns next to the raw ones.
+**The raw `country` column is never changed.** It is the `country_raw` the issue asked for,
+kept under its original name so no consumer breaks.
+
+| Column | Notes |
+|---|---|
+| `country_iso` | ISO 3166-1 alpha-2 (`XK` for Kosovo). Blank unless `country_status` is `ok` |
+| `country_name` | the ISO short name of `country_iso` |
+| `country_status` | `ok`, `absent`, `missing`, `region`, `historical`, `conflicting`, `unresolved` |
+| `host` | raw host: first non-empty of the BioSample `host`, `host_plant`, `specific hosts`, `host_common_name`. Not `lab_host` |
+| `host_taxid`, `host_name` | NCBI taxid and its scientific name |
+| `host_status` | `ok`, `absent`, `missing`, `not_a_host`, `same_as_organism`, `ambiguous`, `conflicting`, `unresolved` |
+
+The statuses are what make "no value" explicit. `absent` means the field is empty: the
+submitter wrote nothing. `missing` means the submitter wrote an INSDC missing term such as
+`not collected`. That is a statement, not a gap, and it is kept separate. `not_a_host`
+covers a lab or environment term written in the host field (`laboratory environment`,
+`culture`, `soil`). `same_as_organism` covers a host field that names the sequenced
+organism itself, which is usually a lab strain.
+
+The rules live in `popseq/normalise.py`. Every curated decision is a reviewable row:
+
+| File | Edited by | Holds |
+|---|---|---|
+| `catalog/vocab/country_aliases.csv` | hand | spellings pycountry does not know, with a status and a note |
+| `catalog/vocab/host_overrides.csv` | hand | `not_a_host` terms, and common names mapped to a taxon *by name* (the builder resolves the taxid) |
+| `catalog/vocab/host_taxa.csv.gz` | `scripts/popseq_vocab.py hosts` | every distinct host string, its taxid, and the method that resolved it |
+| `catalog/vocab/country_unresolved.csv` | `scripts/popseq_vocab.py countries` | the curator's work list |
+
+Coverage on the 2026-11-06 snapshot (245,822 runs; source: the `popseq_runs_table.py` log):
+
+| | ok | absent | missing | other |
+|---|---|---|---|---|
+| country | 128,824 | 101,951 | 15,003 | region 32, historical 6, unresolved 5, conflicting 1 |
+| host | 62,410 | 179,753 | 32 | not_a_host 1,665, unresolved 1,590, same_as_organism 215, ambiguous 138, conflicting 19 |
+
+The 5 unresolved country runs say only `Korea`. They are left unresolved on purpose, because
+the string does not say which Korea. Host resolution is exact-name only (scientific name
+first, then synonyms and common names, then the binomial prefix or `<Genus> sp.`). It does
+no fuzzy matching, so a misspelt host stays `unresolved` rather than becoming a wrong taxon.
+
 ## `catalog/biosamples/<taxid>.<name>.biosample.csv.gz`
 
 One line per **BioSample**. Harvested from NCBI Entrez, which carries far richer sample
@@ -198,3 +243,5 @@ A drop almost always means the query changed, not the archive.
 - 2026-11-06: added the study-level exclusion categories and the note on clonal sets, after
   reading `MATpredict_spec_handoff.md` and `GmG_spec_handoff.md`. Both projects had
   independently written the same four exclusion categories.
+- 2026-11-07: added the normalised country and host columns and their vocabularies
+  (issue #23).

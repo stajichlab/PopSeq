@@ -66,6 +66,15 @@ TABLES = {
                                 grain="species x field x value",
                                 key="species_taxid,field,value",
                                 built_by="scripts/popseq_summarize.py"),
+    "vocab_country_aliases": dict(path="catalog/vocab/country_aliases.csv",
+                                  grain="one row per curated country spelling",
+                                  key="alias", built_by="curated by hand"),
+    "vocab_host_taxa": dict(path="catalog/vocab/host_taxa.csv.gz",
+                            grain="one row per distinct normalised host string",
+                            key="host_key", built_by="scripts/popseq_vocab.py hosts"),
+    "vocab_host_overrides": dict(path="catalog/vocab/host_overrides.csv",
+                                 grain="one row per curated host string",
+                                 key="host_key", built_by="curated by hand"),
     "ena_only_runs": dict(path="catalog/kingdom/fungi_byspecies.ena_only_runs.csv.gz",
                           grain="runs present at ENA and absent from the filtered "
                                 "NCBI query", key="run_accession",
@@ -92,6 +101,22 @@ COLUMNS = {
                    "100 or more isolates were reconciled against NCBI.",
     "fastq_ftp": "';'-joined ENA FTP paths, no scheme. Prepend https://.",
     "fastq_aspera": "';'-joined Aspera paths for the ENA fasp endpoint.",
+    "country": "Exactly as the submitter wrote it. Free text. Use country_iso to group.",
+    "country_iso": "ISO 3166-1 alpha-2 (XK for Kosovo). Blank unless country_status "
+                   "is ok. Parsed from country by popseq/normalise.py (issue #23).",
+    "country_status": "ok, absent (field empty), missing (an explicit INSDC missing "
+                      "term such as 'not collected'), region (ocean, continent), "
+                      "historical (e.g. Yugoslavia), conflicting (multi-sample run "
+                      "whose samples disagree), unresolved (add it to "
+                      "catalog/vocab/country_aliases.csv).",
+    "host": "Raw host from the BioSample: first non-empty of host, host_plant, "
+            "specific hosts, host_common_name.",
+    "host_taxid": "NCBI taxid of host. Blank unless host_status is ok or "
+                  "same_as_organism. Resolved via catalog/vocab/host_taxa.csv.gz.",
+    "host_status": "ok, absent, missing, not_a_host (a lab or environment term such "
+                   "as 'soil' or 'culture'), same_as_organism (the host field names "
+                   "the sequenced organism itself), ambiguous, conflicting, "
+                   "unresolved.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes "
                         "';'-joined for multi-sample runs (issue #3).",
 }

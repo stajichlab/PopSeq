@@ -141,3 +141,21 @@ def test_script_shim_still_works():
                        capture_output=True, text=True)
     assert r.returncode == 0
     assert r.stdout.startswith("species_taxid\t")
+
+
+def test_country_filter_accepts_iso_code_name_and_raw():
+    """Issue #23: "CH", "Switzerland" and the raw string select the same runs."""
+    by_iso = popseq.runs(taxid=ZT, country="CH", include_excluded=True)["runs"]
+    by_name = popseq.runs(taxid=ZT, country="switzerland", include_excluded=True)["runs"]
+    assert by_iso and {r["run_accession"] for r in by_iso} == \
+        {r["run_accession"] for r in by_name}
+    assert all(r["country_iso"] == "CH" for r in by_iso)
+    # The raw values behind them differ, which is the point of the field.
+    assert len({r["country"] for r in by_iso}) > 1
+
+
+def test_host_filter_by_taxid_and_name():
+    a = popseq.runs(taxid=ZT, host="4565", include_excluded=True)["runs"]
+    b = popseq.runs(taxid=ZT, host="Triticum aestivum", include_excluded=True)["runs"]
+    assert a and {r["run_accession"] for r in a} <= {r["run_accession"] for r in b}
+    assert all(r["host_taxid"] == "4565" for r in a)

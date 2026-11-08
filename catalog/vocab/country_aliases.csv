@@ -1,0 +1,82 @@
+alias,iso2,name,status,note
+USA,US,,ok,
+United States,US,,ok,
+U.S.A.,US,,ok,
+US,US,,ok,
+America,US,,ok,
+Hawaii,US,,ok,state of the USA
+UK,GB,,ok,
+U.K.,GB,,ok,
+Great Britain,GB,,ok,
+England,GB,,ok,constituent country of the UK
+Scotland,GB,,ok,constituent country of the UK
+Wales,GB,,ok,constituent country of the UK
+Northern Ireland,GB,,ok,constituent country of the UK
+Russia,RU,,ok,
+South Korea,KR,,ok,
+Republic of Korea,KR,,ok,
+North Korea,KP,,ok,
+Vietnam,VN,,ok,
+Laos,LA,,ok,
+Syria,SY,,ok,
+Turkey,TR,,ok,
+Turkiye,TR,,ok,
+Democratic Republic of the Congo,CD,,ok,
+DR Congo,CD,,ok,
+Zaire,CD,,ok,former name; single successor
+Republic of the Congo,CG,,ok,
+Ivory Coast,CI,,ok,
+Cape Verde,CV,,ok,
+Brunei,BN,,ok,
+East Timor,TL,,ok,
+Swaziland,SZ,,ok,former name; single successor
+Burma,MM,,ok,former name; single successor
+Macedonia,MK,,ok,former name; single successor
+Malaya,MY,,ok,former name; mainland Malaysia
+Holland,NL,,ok,
+The Netherlands,NL,,ok,
+Kosovo,XK,Kosovo,ok,XK is a user-assigned code; not in ISO 3166-1
+Phillipines,PH,,ok,misspelling seen in the catalog
+Austrailia,AU,,ok,misspelling seen in the catalog
+Urugay,UY,,ok,misspelling seen in the catalog
+Yugoslavia,,,historical,no single successor
+USSR,,,historical,no single successor
+Soviet Union,,,historical,no single successor
+Czechoslovakia,,,historical,no single successor
+Serbia and Montenegro,,,historical,no single successor
+Africa,,,region,
+West Africa,,,region,
+East Africa,,,region,
+Southern Africa,,,region,
+Europe,,,region,
+Asia,,,region,
+Southeast Asia,,,region,
+South America,,,region,
+North America,,,region,
+Central America,,,region,
+Oceania,,,region,
+Caribbean,,,region,
+Borneo,,,region,island shared by three countries
+Indian Ocean,,,region,
+Pacific Ocean,,,region,
+Atlantic Ocean,,,region,
+Arctic Ocean,,,region,
+Southern Ocean,,,region,
+Mediterranean Sea,,,region,
+Baltic Sea,,,region,
+North Sea,,,region,
+Caribbean Sea,,,region,
+Red Sea,,,region,
+Black Sea,,,region,
+W. Africa,,,region,
+State of Palestine,PS,,ok,
+Korea: Seoul,KR,,ok,locality is in South Korea
+Korea: Daegu,KR,,ok,locality is in South Korea
+Korea: Cheonan,KR,,ok,locality is in South Korea
+Korea: Icheon-si,KR,,ok,locality is in South Korea
+Korea: Suwon-si,KR,,ok,locality is in South Korea
+Korea: Cheongju,KR,,ok,locality is in South Korea
+Korea: Suwon,KR,,ok,locality is in South Korea
+Korea: Jeju island,KR,,ok,locality is in South Korea
+Korea: Masan-si,KR,,ok,locality is in South Korea
+Korea: Jeonju,KR,,ok,locality is in South Korea
