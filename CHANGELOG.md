@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-08
+
+Per-run quality flags (specification 008, draft).
+
+- `specifications/008-run-qc-flags.md`: a registry of per-run findings (contamination for now) from any project. The catalog records the finding; the consumer decides. A source replaces only its own rows; `curated_*` columns survive every import.
+- `catalog/qc/sources.csv` and `catalog/qc/<species_taxid>.<Genus>_<species>.qc.csv.gz`: first source `matpredict_reads_screen_2026-11-08`, 423 flagged runs (236 mixed, 143 borderline, 44 genus_mismatch) in 39 species files; 423 of 423 runs resolved through `cache/fungi_runs_ena_2026-11-06.tsv.gz` and `catalog/taxonomy_species_map.csv.gz`.
+- `scripts/popseq_qc_import.py` and `tests/test_qc_import.py`.
+
 ## 2026-11-07
 
 Added columns only. No path moved, no column renamed or removed.
