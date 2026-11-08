@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-07
+
+Added columns only. No path moved, no column renamed or removed.
+
+- **Issue #23.** `catalog/runs/fungi_all_runs.csv.gz` gains `country_iso`, `country_name`,
+  `country_status`, `host`, `host_taxid`, `host_name`, `host_status`. The 27 existing
+  columns of all 245,822 rows are byte-identical to the previous build (compared with
+  pandas after a rebuild from `cache/fungi_runs_ena_2026-11-06.tsv.gz`). New directory
+  `catalog/vocab/` holds the curated and generated vocabularies. `popseq runs` and
+  `popseq panel` take `--country CH` or `--country Switzerland`, and a new `--host` takes a
+  taxid or a name. The MCP tools take the same arguments. See spec 001.
+- **Issue #14.** `popseq/downloads.py` appends one validated row per fetch attempt to
+  `benchmarks/downloads.csv`, failures included. It is safe for concurrent writers on GPFS.
+  It refuses an `ok` row that was not verified.
+- **Issue #12.** `scripts/popseq_bench_routes.py` and `scripts/bench_routes.slurm` run
+  benchmark 7.1. Its results are in `benchmarks/2026-11-07_route_comparison.csv` and
+  `benchmarks/downloads.csv`. The run plan is in `benchmarks/2026-11-07_d1_runs.csv`.
+- **Spec 002 verification rule changed** (adopted by the owner): verify against the archive
+  that served the bytes. Use NCBI `spots_with_mates` for SRA downloads, and ENA's per-file MD5
+  plus equal mate counts for ENA downloads. ENA `read_count` counts reads, not pairs, for 172
+  of 200 sampled ERR runs (`benchmarks/2026-11-07_read_count_convention.csv`).
+- ENA Aspera and `prefetch -t fasp` both fail on the cluster. See spec 002, route 2.
+- New dependency: `pycountry`.
+
 ## 2026-11-06
 
 First commit. Repository skeleton, plan, rules, and three draft specifications.

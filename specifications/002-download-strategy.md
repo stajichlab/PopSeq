@@ -77,6 +77,13 @@ storage but not transfer.
    with `ERR3401300` (1.6 GB, 16,860,539 pairs): `prefetch` about 80 s, conversion about 3 min.
 
 2. **ENA Aspera (`ascp`)**, when the ENA record carries a `fastq_aspera` field.
+   **Not usable on this cluster as of 2026-11-07.** `ascp` fails authentication against
+   `era-fasp@fasp.sra.ebi.ac.uk` with all four keys installed under `aspera/*`
+   (`asperaweb_id_dsa.openssh` from 4.1.3.93 and 4.2.4.265, `aspera_id_rsa.openssh`,
+   `aspera.openssh`, `aspera_tokenauth_id_rsa`, `NCBI.aspera.openssh`), with `ascp` 4.2.4 and
+   4.2.13. The NCBI equivalent is gone too: `prefetch -t fasp SRR36290343` answers "cannot
+   download using requested transport". Benchmark 7.1 records 13 Aspera attempts, all
+   `transfer_failed` in about 1.4 s.
    `module load aspera/4.2.13.820`. **UNMEASURED on this cluster.** Aspera is often faster
    than FTP over long distances because it does not use TCP congestion control. That is a
    general claim about the protocol, not a measurement here, and must not be quoted as one.
@@ -124,6 +131,49 @@ There is no checksum for a converted FASTQ. The count check is the only protecti
    ```
 3. A mismatch **fails the task**. It does not warn.
 4. Delete the `.sra` only after the check passes.
+
+### ENA `read_count` is not a pair count for most ERR runs (measured 2026-11-07)
+
+Step 2 above assumes ENA `read_count` counts read pairs. **For most ERR runs it counts
+reads.** Benchmark 7.1 found this first. A random sample then measured it: 200 paired
+Illumina runs per accession prefix from `catalog/runs/fungi_all_runs.csv.gz`, comparing ENA
+`read_count` with NCBI runinfo `spots`. Source:
+`benchmarks/2026-11-07_read_count_convention.csv`, from `popseq_bench_routes.py countcheck`.
+
+| Prefix | n | ENA = NCBI spots | ENA = 2 x NCBI spots | other | absent at NCBI |
+|---|---|---|---|---|---|
+| DRR | 200 | 200 | 0 | 0 | 0 |
+| SRR | 200 | 199 | 0 | 0 | 1 |
+| ERR | 200 | 22 | 172 | 4 | 2 |
+
+Of the 172 ERR runs at 2x, 108 were submitted by the Wellcome Sanger Institute. In
+benchmark 7.1, ENA's own FASTQ for `ERR17038970` held 9,139,801 pairs per mate against an
+ENA `read_count` of 18,279,602, and its MD5s matched ENA's. So the halving is in the
+metadata, not in the files.
+
+Two further facts from the same sample bear on the route order:
+
+- **27 of the 200 ERR runs (13.5%) are stored unpaired at NCBI** (`spots_with_mates = 0`),
+  although ENA records them as `PAIRED`. An SRA-derived download of such a run cannot give
+  properly split mates. For these runs ENA is the only source of pairs. 3 of 200 SRR runs
+  show the same thing.
+- **The archives can hold different reads for the same run.** For `ERR9802648` (submitted as
+  CRAM), NCBI serves 5,946,824 pairs and ENA's FASTQ holds 5,933,626, with ENA MD5s
+  matching. This is a further reason that both mates must come from one source.
+
+**Rule, adopted 2026-11-07 by the owner:** verify against the archive that served the bytes.
+This replaces steps 1 and 2 above for the choice of target; steps 3 and 4 stand.
+
+| Route | Expected count | Integrity check |
+|---|---|---|
+| `aws_odp`, `ncbi_prefetch` | NCBI `spots_with_mates`, stored at plan time | each mate equals it; `spots_with_mates == spots`, or the run is not paired at NCBI and must come from ENA |
+| `ena_https`, `ena_aspera` | none from metadata | ENA `fastq_md5` per file (exact), and mate 1 count equals mate 2 count |
+
+`benchmarks/downloads.csv` is an append-only log, so rows written before the rule was
+adopted keep the outcome they were given then. Some of those `verify_failed` rows for ERR runs
+are intact downloads. `popseq_bench_routes.py summary --plan` judges every row of the detail
+CSV again under the adopted rule, from the stored mate counts and MD5 results. A run NCBI
+holds unpaired is recorded as `unavailable_at_ncbi`, with the reason in `error`.
 
 This rule exists because it has already caught a real corruption. On 2026-10-24 a leftover
 ENA loop resumed a download onto an SRA-derived file and corrupted mate 1. Nothing else
@@ -248,3 +298,7 @@ works 100 percent of the time look identical in a table of successes.
 - 2026-11-06: added MATPredict's measured AWS Open Data transfer rate (10.3 MB/s median over
   4,211 runs), their corrected `unavailable_at_ncbi` rate of 0.55 percent, and the finding
   that a `prefetch` fallback after an AWS 404 rescued 0 of 26 runs.
+- 2026-11-07: measured that ENA `read_count` counts reads, not pairs, for 172 of 200 sampled
+  ERR runs, and that 27 of those 200 are unpaired at NCBI. Adopted the rule "verify against
+  the archive that served the bytes". ENA Aspera could not be measured: every key on the
+  cluster fails authentication.

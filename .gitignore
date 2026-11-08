@@ -22,3 +22,6 @@ __pycache__/
 # tables in catalog/kingdom/ are what gets committed.
 cache/_biosample_shards/
 cache/_runinfo_shards/
+
+# One-off benchmark work directories (AGENTS.md; purgeable). Results go to benchmarks/.
+bench/
