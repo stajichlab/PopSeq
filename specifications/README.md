@@ -10,6 +10,7 @@ One file per topic. These are the interface contracts other projects code agains
 | `004-response-to-handoffs.md` | what was adopted from the handoffs, and what is still needed from each project | open |
 | `005-local-and-unarchived-data.md` | local read data with no accession; provenance classes; reading the Population_Genomics convention | draft |
 | `006-beyond-fungal-isolates.md` | other organism groups, metagenomes, MAGs, uncultured taxa | draft |
+| `008-run-qc-flags.md` | per-run quality flags (contamination, mixtures, wrong organism) from any project: `catalog/qc/` registry and per-species files | draft |
 
 ## Handoffs
 
