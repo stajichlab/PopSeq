@@ -1,0 +1,27 @@
+host_key,host_status,resolve_as,note
+laboratory environment,not_a_host,,lab condition
+laboratory,not_a_host,,lab condition
+laboratory strain,not_a_host,,lab condition
+culture,not_a_host,,lab condition
+liquid culture,not_a_host,,lab condition
+f1 progeny,not_a_host,,a cross; not a host
+independent organism,not_a_host,,free-living
+free-living,not_a_host,,free-living
+free living,not_a_host,,free-living
+environmental,not_a_host,,environment
+environment,not_a_host,,environment
+soil,not_a_host,,substrate
+on wood,not_a_host,,substrate
+wood,not_a_host,,substrate
+medication vial,not_a_host,,object
+maize,ok,Zea mays,common name; NCBI also lists it for Zea mays subsp. mays
+corn,ok,Zea mays,common name
+winter wheat,ok,Triticum aestivum,crop type
+winegrape,ok,Vitis vinifera,common name
+grape,ok,Vitis,common name; several Vitis species are grown as grape
+sugarbeet,ok,Beta vulgaris subsp. vulgaris,common name
+seabeet,ok,Beta vulgaris subsp. maritima,common name
+banana,ok,Musa,common name; cultivated bananas are hybrids within Musa
+plant,ok,Viridiplantae,
+tree,ok,Viridiplantae,a tree is a plant; no finer rank is known
+xtriticosecale (triticale),ok,x Triticosecale,

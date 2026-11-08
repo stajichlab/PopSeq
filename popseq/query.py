@@ -37,7 +37,8 @@ SPECIES_FIELDS = ["species_taxid", "species_name", "runs", "isolates", "studies"
 RUN_FIELDS = ["run_accession", "sample_accession", "study_accession",
               "species_taxid", "species_name", "strain", "library_layout",
               "read_count", "base_count", "est_depth_x", "country",
-              "collection_date", "first_public", "exclusion", "ncbi_status",
+              "country_iso", "country_status", "host", "host_taxid", "host_name",
+              "host_status", "collection_date", "first_public", "exclusion", "ncbi_status",
               "fastq_ftp", "fastq_aspera"]
 
 CAVEATS = [
@@ -173,9 +174,31 @@ def _depth(r: dict) -> float:
         return -1.0
 
 
+def _country_matches(r: dict, want: str) -> bool:
+    """An ISO code, a country name, or the raw string, case-insensitive (issue #23).
+
+    Matches the normalised fields first, so "CH", "Switzerland" and
+    "Switzerland: Eschikon" all select the same runs.
+    """
+    w = want.strip().lower()
+    if r.get("country_status") == "ok" and w in (
+            (r.get("country_iso") or "").lower(), (r.get("country_name") or "").lower()):
+        return True
+    return (r.get("country") or "").strip().lower() == w
+
+
+def _host_matches(r: dict, want) -> bool:
+    """A host taxid (exact) or a host name (case-insensitive, resolved or raw)."""
+    w = str(want).strip().lower()
+    if w.isdigit():
+        return r.get("host_taxid") == w and r.get("host_status") == "ok"
+    return (r.get("host_status") == "ok" and (r.get("host_name") or "").lower() == w) \
+        or (r.get("host") or "").strip().lower() == w
+
+
 def _filter(rows: Iterable[dict], *, platform="ILLUMINA", layout="PAIRED",
             strategy="WGS", min_depth=None, min_gbases=None, country=None,
-            since=None, include_excluded=False, only_exclusion=None,
+            host=None, since=None, include_excluded=False, only_exclusion=None,
             require_fastq=True) -> list[dict]:
     out = []
     for r in rows:
@@ -199,7 +222,9 @@ def _filter(rows: Iterable[dict], *, platform="ILLUMINA", layout="PAIRED",
                     continue
             except ValueError:
                 continue
-        if country and (r["country"] or "").lower() != country.lower():
+        if country and not _country_matches(r, country):
+            continue
+        if host and not _host_matches(r, host):
             continue
         if since and (r["first_public"] or "") < since:
             continue

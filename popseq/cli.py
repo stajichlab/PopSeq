@@ -59,6 +59,7 @@ def _target(a):
 def _filters(a):
     return dict(platform=a.platform, layout=a.layout, strategy=a.strategy,
                 min_depth=a.min_depth, min_gbases=a.min_gbases, country=a.country,
+                host=a.host,
                 since=a.since, include_excluded=a.include_excluded,
                 only_exclusion=a.only_exclusion, require_fastq=a.require_fastq)
 
@@ -87,7 +88,8 @@ def main(argv=None) -> int:
         sp.add_argument("--min-depth", type=float,
                         help="estimated x; a run with no estimate is dropped")
         sp.add_argument("--min-gbases", type=float)
-        sp.add_argument("--country")
+        sp.add_argument("--country", help="ISO code (CH), name, or raw string")
+        sp.add_argument("--host", help="host taxid (4565) or name (Triticum aestivum)")
         sp.add_argument("--since", help="first_public on or after, YYYY-MM-DD")
         sp.add_argument("--include-excluded", action="store_true",
                         help="keep mutant/evolved/cross/non-WGS rows")

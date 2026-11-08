@@ -1,6 +1,6 @@
 {
  "popseq_schema": "1.0.0",
- "generated": "2026-11-06",
+ "generated": "2026-11-07",
  "what": "One static JSON file per fungal species with 100 or more isolates. Each holds the full description of the species and a pre-selected panel of up to 100 strains to profile.",
  "scope": "public whole-genome Illumina sequencing runs of fungal isolates, as ENA and NCBI describe them",
  "archive_snapshot": "2026-11-06",
