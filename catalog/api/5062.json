@@ -58,23 +58,9 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 116,
-  "studies_in_panel": 12,
+  "isolates_available": 113,
+  "studies_in_panel": 11,
   "runs": [
-   {
-    "run_accession": "SRR495766",
-    "sample_accession": "SAMN00991868",
-    "study_accession": "PRJNA164603",
-    "strain": "",
-    "read_count": "16175416",
-    "base_count": "2652768224",
-    "est_depth_x": "70.0",
-    "country": "",
-    "collection_date": "",
-    "first_public": "2012-10-19",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495766/SRR495766_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495766/SRR495766_2.fastq.gz"
-   },
    {
     "run_accession": "SRR9306672",
     "sample_accession": "SAMN12069837",
@@ -88,34 +74,6 @@
     "first_public": "2019-06-17",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR930/002/SRR9306672/SRR9306672_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR930/002/SRR9306672/SRR9306672_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR30858638",
-    "sample_accession": "SAMN43910165",
-    "study_accession": "PRJNA1164934",
-    "strain": "ATCC 16868",
-    "read_count": "10194765",
-    "base_count": "3078819030",
-    "est_depth_x": "81.3",
-    "country": "China",
-    "collection_date": "1975-12",
-    "first_public": "2024-10-18",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR308/038/SRR30858638/SRR30858638_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR308/038/SRR30858638/SRR30858638_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR38519602",
-    "sample_accession": "SAMN59736832",
-    "study_accession": "PRJNA1465193",
-    "strain": "CBS570.65",
-    "read_count": "31661375",
-    "base_count": "6395597750",
-    "est_depth_x": "168.8",
-    "country": "Not collected",
-    "collection_date": "Not collected",
-    "first_public": "2026-06-28",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/002/SRR38519602/SRR38519602_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/002/SRR38519602/SRR38519602_2.fastq.gz"
    },
    {
     "run_accession": "SRR7615261",
@@ -132,6 +90,20 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR761/001/SRR7615261/SRR7615261_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR761/001/SRR7615261/SRR7615261_2.fastq.gz"
    },
    {
+    "run_accession": "SRR495766",
+    "sample_accession": "SAMN00991868",
+    "study_accession": "PRJNA164603",
+    "strain": "",
+    "read_count": "16175416",
+    "base_count": "2652768224",
+    "est_depth_x": "70.0",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2012-10-19",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495766/SRR495766_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495766/SRR495766_2.fastq.gz"
+   },
+   {
     "run_accession": "SRR25035184",
     "sample_accession": "SAMN35994572",
     "study_accession": "PRJNA987873",
@@ -144,6 +116,20 @@
     "first_public": "2023-06-29",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/084/SRR25035184/SRR25035184_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/084/SRR25035184/SRR25035184_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR38519602",
+    "sample_accession": "SAMN59736832",
+    "study_accession": "PRJNA1465193",
+    "strain": "CBS570.65",
+    "read_count": "31661375",
+    "base_count": "6395597750",
+    "est_depth_x": "168.8",
+    "country": "Not collected",
+    "collection_date": "Not collected",
+    "first_public": "2026-06-28",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/002/SRR38519602/SRR38519602_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/002/SRR38519602/SRR38519602_2.fastq.gz"
    },
    {
     "run_accession": "DRR1095486",
@@ -160,18 +146,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR109/006/DRR1095486/DRR1095486_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR109/006/DRR1095486/DRR1095486_2.fastq.gz"
    },
    {
-    "run_accession": "DRR710002",
-    "sample_accession": "SAMD01605729",
-    "study_accession": "PRJDB35837",
-    "strain": "RIB40-based",
-    "read_count": "4453176",
-    "base_count": "1344859152",
-    "est_depth_x": "35.5",
-    "country": "Japan",
-    "collection_date": "2022-01-10",
-    "first_public": "2025-08-29",
+    "run_accession": "SRR30858638",
+    "sample_accession": "SAMN43910165",
+    "study_accession": "PRJNA1164934",
+    "strain": "ATCC 16868",
+    "read_count": "10194765",
+    "base_count": "3078819030",
+    "est_depth_x": "81.3",
+    "country": "China",
+    "collection_date": "1975-12",
+    "first_public": "2024-10-18",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR710/DRR710002/DRR710002_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR710/DRR710002/DRR710002_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR308/038/SRR30858638/SRR30858638_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR308/038/SRR30858638/SRR30858638_2.fastq.gz"
    },
    {
     "run_accession": "SRR25759133",
@@ -216,18 +202,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR141/060/SRR14158760/SRR14158760_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR141/060/SRR14158760/SRR14158760_2.fastq.gz"
    },
    {
-    "run_accession": "SRR17762389",
-    "sample_accession": "SAMN25271729",
-    "study_accession": "PRJNA800656",
-    "strain": "3.042",
-    "read_count": "15",
-    "base_count": "37176367",
-    "est_depth_x": "1.0",
-    "country": "China",
-    "collection_date": "missing",
-    "first_public": "2022-12-10",
+    "run_accession": "DRR710002",
+    "sample_accession": "SAMD01605729",
+    "study_accession": "PRJDB35837",
+    "strain": "RIB40-based",
+    "read_count": "4453176",
+    "base_count": "1344859152",
+    "est_depth_x": "35.5",
+    "country": "Japan",
+    "collection_date": "2022-01-10",
+    "first_public": "2025-08-29",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR177/089/SRR17762389/SRR17762389.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR710/DRR710002/DRR710002_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR710/DRR710002/DRR710002_2.fastq.gz"
    },
    {
     "run_accession": "SRR495763",
@@ -244,20 +230,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495763/SRR495763_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495763/SRR495763_2.fastq.gz"
    },
    {
-    "run_accession": "SRR38519603",
-    "sample_accession": "SAMN59736831",
-    "study_accession": "PRJNA1465193",
-    "strain": "CBS110.27",
-    "read_count": "27583893",
-    "base_count": "5571946386",
-    "est_depth_x": "147.1",
-    "country": "Not collected",
-    "collection_date": "Not collected",
-    "first_public": "2026-06-28",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/003/SRR38519603/SRR38519603_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/003/SRR38519603/SRR38519603_2.fastq.gz"
-   },
-   {
     "run_accession": "SRR25035185",
     "sample_accession": "SAMN35994571",
     "study_accession": "PRJNA987873",
@@ -270,6 +242,20 @@
     "first_public": "2023-06-29",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/085/SRR25035185/SRR25035185_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/085/SRR25035185/SRR25035185_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR38519603",
+    "sample_accession": "SAMN59736831",
+    "study_accession": "PRJNA1465193",
+    "strain": "CBS110.27",
+    "read_count": "27583893",
+    "base_count": "5571946386",
+    "est_depth_x": "147.1",
+    "country": "Not collected",
+    "collection_date": "Not collected",
+    "first_public": "2026-06-28",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/003/SRR38519603/SRR38519603_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/003/SRR38519603/SRR38519603_2.fastq.gz"
    },
    {
     "run_accession": "DRR1095663",
@@ -314,20 +300,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163555/DRR163555_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163555/DRR163555_2.fastq.gz"
    },
    {
-    "run_accession": "SRR17762390",
-    "sample_accession": "SAMN25271728",
-    "study_accession": "PRJNA800656",
-    "strain": "LBM 30008",
-    "read_count": "25",
-    "base_count": "39048948",
-    "est_depth_x": "1.0",
-    "country": "Japan",
-    "collection_date": "missing",
-    "first_public": "2022-12-10",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR177/090/SRR17762390/SRR17762390.fastq.gz"
-   },
-   {
     "run_accession": "SRR495765",
     "sample_accession": "SAMN00991867",
     "study_accession": "PRJNA164603",
@@ -342,20 +314,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495765/SRR495765_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR495/SRR495765/SRR495765_2.fastq.gz"
    },
    {
-    "run_accession": "SRR38519601",
-    "sample_accession": "SAMN59736833",
-    "study_accession": "PRJNA1465193",
-    "strain": "CBS817.72",
-    "read_count": "26171009",
-    "base_count": "5286543818",
-    "est_depth_x": "139.6",
-    "country": "Not collected",
-    "collection_date": "Not collected",
-    "first_public": "2026-06-28",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/001/SRR38519601/SRR38519601_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/001/SRR38519601/SRR38519601_2.fastq.gz"
-   },
-   {
     "run_accession": "SRR25035187",
     "sample_accession": "SAMN35994569",
     "study_accession": "PRJNA987873",
@@ -368,6 +326,20 @@
     "first_public": "2023-06-29",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/087/SRR25035187/SRR25035187_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR250/087/SRR25035187/SRR25035187_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR38519601",
+    "sample_accession": "SAMN59736833",
+    "study_accession": "PRJNA1465193",
+    "strain": "CBS817.72",
+    "read_count": "26171009",
+    "base_count": "5286543818",
+    "est_depth_x": "139.6",
+    "country": "Not collected",
+    "collection_date": "Not collected",
+    "first_public": "2026-06-28",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/001/SRR38519601/SRR38519601_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR385/001/SRR38519601/SRR38519601_2.fastq.gz"
    },
    {
     "run_accession": "DRR1095937",
@@ -410,20 +382,6 @@
     "first_public": "2019-11-15",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163581/DRR163581_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163581/DRR163581_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR17762391",
-    "sample_accession": "SAMN25271727",
-    "study_accession": "PRJNA800656",
-    "strain": "LBM 30007",
-    "read_count": "18",
-    "base_count": "38099469",
-    "est_depth_x": "1.0",
-    "country": "Japan",
-    "collection_date": "missing",
-    "first_public": "2022-12-10",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR177/091/SRR17762391/SRR17762391.fastq.gz"
    },
    {
     "run_accession": "SRR495610",
@@ -1460,6 +1418,48 @@
     "first_public": "2019-11-15",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163603/DRR163603_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163603/DRR163603_2.fastq.gz"
+   },
+   {
+    "run_accession": "DRR163611",
+    "sample_accession": "SAMD00154491",
+    "study_accession": "PRJDB7763",
+    "strain": "TK-72",
+    "read_count": "3044702",
+    "base_count": "1522351000",
+    "est_depth_x": "40.2",
+    "country": "missing",
+    "collection_date": "missing",
+    "first_public": "2019-11-15",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163611/DRR163611_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163611/DRR163611_2.fastq.gz"
+   },
+   {
+    "run_accession": "DRR163623",
+    "sample_accession": "SAMD00154497",
+    "study_accession": "PRJDB7763",
+    "strain": "TK-78",
+    "read_count": "2963301",
+    "base_count": "1481650500",
+    "est_depth_x": "39.1",
+    "country": "missing",
+    "collection_date": "missing",
+    "first_public": "2019-11-15",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163623/DRR163623_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163623/DRR163623_2.fastq.gz"
+   },
+   {
+    "run_accession": "DRR163607",
+    "sample_accession": "SAMD00154489",
+    "study_accession": "PRJDB7763",
+    "strain": "TK-70",
+    "read_count": "2950357",
+    "base_count": "1475178500",
+    "est_depth_x": "38.9",
+    "country": "missing",
+    "collection_date": "missing",
+    "first_public": "2019-11-15",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163607/DRR163607_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/DRR163/DRR163607/DRR163607_2.fastq.gz"
    }
   ],
   "run_fields": [

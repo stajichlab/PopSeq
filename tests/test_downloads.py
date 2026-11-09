@@ -112,3 +112,10 @@ def test_shell_entry_point(tmp_path):
         capture_output=True, text=True)
     assert bad.returncode == 2
     assert len(_rows(f)) == 1
+
+
+def test_unpaired_is_an_outcome(tmp_path):
+    f = tmp_path / "downloads.csv"
+    dl.record(f, run="ERR2286963", route="ena_https", outcome="unpaired",
+              error="--require-pairs: no _1/_2 at ENA, spots_with_mates 0 at NCBI")
+    assert "unpaired" in f.read_text()

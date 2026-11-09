@@ -62,7 +62,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 2873,
+  "isolates_available": 2866,
   "studies_in_panel": 100,
   "runs": [
    {

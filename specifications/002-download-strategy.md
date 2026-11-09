@@ -203,6 +203,26 @@ This replaces steps 1 and 2 above for the choice of target; steps 3 and 4 stand.
 | `aws_odp`, `ncbi_prefetch` | NCBI `spots_with_mates`, stored at plan time | each mate equals it; `spots_with_mates == spots`, or the run is not paired at NCBI and must come from ENA |
 | `ena_https`, `ena_aspera` | none from metadata | ENA `fastq_md5` per file (exact), and mate 1 count equals mate 2 count |
 
+#### Pairing and single-end runs (owner decision 2026-11-08)
+
+Pairing is what the serving archive holds, not the `library_layout` label. ENA serves pairs
+when its file list has `_1` and `_2` (catalog column `ena_layout`). NCBI serves pairs when
+`spots_with_mates > 0`.
+
+| Route | Paired run | Single-end run |
+|---|---|---|
+| `aws_odp`, `ncbi_prefetch` | each mate = NCBI `spots_with_mates` | read count = NCBI `spots`; `spots_with_mates = 0` |
+| `ena_https`, `ena_aspera` | ENA MD5 per file, mate 1 count = mate 2 count | ENA MD5 of the one file |
+
+- **`--require-pairs`.** When NCBI holds a run unpaired, the fetcher skips the SRA routes
+  and fetches from ENA. If ENA does not serve `_1` and `_2` either, the run ends with the
+  `unpaired` outcome. It is not retried.
+- **Without `--require-pairs`**, a run NCBI holds unpaired may be fetched from an SRA route
+  as single-end. It is verified as single-end and recorded with the layout obtained.
+- A run labelled `PAIRED` that both archives serve as one file is single-end. Do not try to
+  split it.
+- Record the layout obtained in the `<RUN>.json` sidecar.
+
 `benchmarks/downloads.csv` is an append-only log, so rows written before the rule was
 adopted keep the outcome they were given then. Some of those `verify_failed` rows for ERR runs
 are intact downloads. `popseq_bench_routes.py summary --plan` judges every row of the detail
@@ -290,10 +310,11 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 
 | State | Meaning |
 |---|---|
-| `ok` | downloaded and the read count matched |
-| `verify_failed` | downloaded, read count did not match ENA. The file is deleted. |
+| `ok` | downloaded and verified against the serving archive |
+| `verify_failed` | downloaded, and the check against the serving archive failed. The file is deleted. |
 | `transfer_failed` | the transfer did not complete on any route |
 | `unavailable_at_ncbi` | the run exists at ENA but neither AWS Open Data nor `prefetch` has it |
+| `unpaired` | pairs were required (`--require-pairs`) and neither archive serves them. Not retried. |
 
 `unavailable_at_ncbi` is a real and separate state, not a failure. Two projects measured it
 independently:
@@ -340,3 +361,5 @@ works 100 percent of the time look identical in a table of successes.
 - 2026-11-08: status moved from blocked to stable. Added the benchmark 7.1 results, labelled
   as measured under load. The login-node arm and the concurrency cap moved to issue #27 and
   stay UNMEASURED.
+- 2026-11-08: added the pairing rule (the archives decide, not the label), single-end
+  verification, and `--require-pairs`.

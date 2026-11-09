@@ -58,7 +58,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 600,
+  "isolates_available": 599,
   "studies_in_panel": 14,
   "runs": [
    {
@@ -118,18 +118,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR320/092/SRR32042092/SRR32042092_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR320/092/SRR32042092/SRR32042092_2.fastq.gz"
    },
    {
-    "run_accession": "SRR26858051",
+    "run_accession": "SRR26405630",
     "sample_accession": "SAMN37855147",
     "study_accession": "PRJNA1028951",
     "strain": "725",
-    "read_count": "5364724",
-    "base_count": "1609417200",
-    "est_depth_x": "72.3",
+    "read_count": "5839867",
+    "base_count": "1751960100",
+    "est_depth_x": "78.7",
     "country": "Singapore",
     "collection_date": "2023-06",
     "first_public": "2024-01-18",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR268/051/SRR26858051/SRR26858051_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR268/051/SRR26858051/SRR26858051_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR264/030/SRR26405630/SRR26405630_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR264/030/SRR26405630/SRR26405630_2.fastq.gz"
    },
    {
     "run_accession": "SRR31013385",
@@ -1378,18 +1378,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR139/067/ERR13913767/ERR13913767_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR139/067/ERR13913767/ERR13913767_2.fastq.gz"
    },
    {
-    "run_accession": "SRR32042112",
-    "sample_accession": "SAMN46240043",
+    "run_accession": "SRR32042082",
+    "sample_accession": "SAMN46240050",
     "study_accession": "PRJNA1210132",
-    "strain": "Ti087",
-    "read_count": "9514909",
-    "base_count": "1427236350",
-    "est_depth_x": "64.1",
+    "strain": "Ti138",
+    "read_count": "4691892",
+    "base_count": "1407567600",
+    "est_depth_x": "63.3",
     "country": "Singapore",
-    "collection_date": "2024-04-11",
+    "collection_date": "2024-06-14",
     "first_public": "2025-01-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR320/012/SRR32042112/SRR32042112.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR320/082/SRR32042082/SRR32042082_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR320/082/SRR32042082/SRR32042082_2.fastq.gz"
    },
    {
     "run_accession": "SRR36030454",

@@ -58,7 +58,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 455,
+  "isolates_available": 457,
   "studies_in_panel": 11,
   "runs": [
    {
@@ -118,32 +118,32 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/046/SRR21941446/SRR21941446_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/046/SRR21941446/SRR21941446_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21527395",
-    "sample_accession": "SAMN30800932",
-    "study_accession": "PRJNA878667",
-    "strain": "",
-    "read_count": "5056729",
-    "base_count": "1517018700",
-    "est_depth_x": "36.1",
-    "country": "Iran:Mazandaran",
-    "collection_date": "2018",
-    "first_public": "2022-09-13",
+    "run_accession": "SRR21289087",
+    "sample_accession": "SAMN30502340",
+    "study_accession": "PRJNA873863",
+    "strain": "20BL103",
+    "read_count": "49012553",
+    "base_count": "14358739308",
+    "est_depth_x": "341.5",
+    "country": "Australia",
+    "collection_date": "2020",
+    "first_public": "2023-09-02",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/095/SRR21527395/SRR21527395_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/095/SRR21527395/SRR21527395_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/087/SRR21289087/SRR21289087_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/087/SRR21289087/SRR21289087_2.fastq.gz"
    },
    {
-    "run_accession": "SRR7275359",
-    "sample_accession": "SAMN09378374",
-    "study_accession": "PRJNA474976",
-    "strain": "LOP-C",
-    "read_count": "18254720",
-    "base_count": "3650944000",
-    "est_depth_x": "86.8",
-    "country": "",
-    "collection_date": "2000-01-01",
-    "first_public": "2019-07-04",
+    "run_accession": "SRR21511347",
+    "sample_accession": "SAMN30747262",
+    "study_accession": "PRJNA878667",
+    "strain": "Pk4",
+    "read_count": "5118460",
+    "base_count": "1535538000",
+    "est_depth_x": "36.5",
+    "country": "Iran:Mazandaran",
+    "collection_date": "2018",
+    "first_public": "2022-09-12",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/009/SRR7275359/SRR7275359_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/009/SRR7275359/SRR7275359_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/047/SRR21511347/SRR21511347_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/047/SRR21511347/SRR21511347_2.fastq.gz"
    },
    {
     "run_accession": "ERR2259173",
@@ -160,18 +160,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR225/003/ERR2259173/ERR2259173_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR225/003/ERR2259173/ERR2259173_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21289087",
-    "sample_accession": "SAMN30502340",
-    "study_accession": "PRJNA873863",
-    "strain": "20BL103",
-    "read_count": "49012553",
-    "base_count": "14358739308",
-    "est_depth_x": "341.5",
-    "country": "Australia",
-    "collection_date": "2020",
-    "first_public": "2023-09-02",
+    "run_accession": "SRR7275359",
+    "sample_accession": "SAMN09378374",
+    "study_accession": "PRJNA474976",
+    "strain": "LOP-C",
+    "read_count": "18254720",
+    "base_count": "3650944000",
+    "est_depth_x": "86.8",
+    "country": "",
+    "collection_date": "2000-01-01",
+    "first_public": "2019-07-04",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/087/SRR21289087/SRR21289087_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/087/SRR21289087/SRR21289087_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/009/SRR7275359/SRR7275359_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/009/SRR7275359/SRR7275359_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541931",
@@ -230,46 +230,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/021/SRR24874221/SRR24874221_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/021/SRR24874221/SRR24874221_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21941345",
-    "sample_accession": "SAMN31327875",
+    "run_accession": "SRR21939235",
+    "sample_accession": "SAMN31327784",
     "study_accession": "PRJNA636281",
-    "strain": "AU847",
-    "read_count": "8719984",
-    "base_count": "2179996000",
+    "strain": "AU195",
+    "read_count": "8731160",
+    "base_count": "2182790000",
     "est_depth_x": "51.9",
     "country": "Australia: Melbourne",
     "collection_date": "2018",
     "first_public": "2022-10-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/045/SRR21941345/SRR21941345_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/045/SRR21941345/SRR21941345_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR21527777",
-    "sample_accession": "SAMN30800934",
-    "study_accession": "PRJNA878667",
-    "strain": "",
-    "read_count": "4059351",
-    "base_count": "1217805300",
-    "est_depth_x": "29.0",
-    "country": "Iran: Mazandaran",
-    "collection_date": "2018",
-    "first_public": "2022-09-13",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/077/SRR21527777/SRR21527777_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/077/SRR21527777/SRR21527777_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR7275360",
-    "sample_accession": "SAMN09378375",
-    "study_accession": "PRJNA474976",
-    "strain": "LOP-P",
-    "read_count": "17919375",
-    "base_count": "3583875000",
-    "est_depth_x": "85.2",
-    "country": "",
-    "collection_date": "2000-01-01",
-    "first_public": "2019-07-04",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/000/SRR7275360/SRR7275360_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/000/SRR7275360/SRR7275360_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/035/SRR21939235/SRR21939235_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/035/SRR21939235/SRR21939235_2.fastq.gz"
    },
    {
     "run_accession": "SRR21289086",
@@ -284,6 +256,34 @@
     "first_public": "2023-09-02",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/086/SRR21289086/SRR21289086_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR212/086/SRR21289086/SRR21289086_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR21527395",
+    "sample_accession": "SAMN30800932",
+    "study_accession": "PRJNA878667",
+    "strain": "",
+    "read_count": "5056729",
+    "base_count": "1517018700",
+    "est_depth_x": "36.1",
+    "country": "Iran:Mazandaran",
+    "collection_date": "2018",
+    "first_public": "2022-09-13",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/095/SRR21527395/SRR21527395_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/095/SRR21527395/SRR21527395_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR7275360",
+    "sample_accession": "SAMN09378375",
+    "study_accession": "PRJNA474976",
+    "strain": "LOP-P",
+    "read_count": "17919375",
+    "base_count": "3583875000",
+    "est_depth_x": "85.2",
+    "country": "",
+    "collection_date": "2000-01-01",
+    "first_public": "2019-07-04",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/000/SRR7275360/SRR7275360_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR727/000/SRR7275360/SRR7275360_2.fastq.gz"
    },
    {
     "run_accession": "SRR31542004",
@@ -314,18 +314,32 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/041/SRR24874141/SRR24874141_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/041/SRR24874141/SRR24874141_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21939647",
-    "sample_accession": "SAMN31327870",
+    "run_accession": "SRR21941345",
+    "sample_accession": "SAMN31327875",
     "study_accession": "PRJNA636281",
-    "strain": "AU605",
-    "read_count": "8703015",
-    "base_count": "2175753750",
-    "est_depth_x": "51.8",
+    "strain": "AU847",
+    "read_count": "8719984",
+    "base_count": "2179996000",
+    "est_depth_x": "51.9",
     "country": "Australia: Melbourne",
     "collection_date": "2018",
     "first_public": "2022-10-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/047/SRR21939647/SRR21939647_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/047/SRR21939647/SRR21939647_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/045/SRR21941345/SRR21941345_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/045/SRR21941345/SRR21941345_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR21527777",
+    "sample_accession": "SAMN30800934",
+    "study_accession": "PRJNA878667",
+    "strain": "",
+    "read_count": "4059351",
+    "base_count": "1217805300",
+    "est_depth_x": "29.0",
+    "country": "Iran: Mazandaran",
+    "collection_date": "2018",
+    "first_public": "2022-09-13",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/077/SRR21527777/SRR21527777_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR215/077/SRR21527777/SRR21527777_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541942",
@@ -356,18 +370,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/020/SRR24874220/SRR24874220_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/020/SRR24874220/SRR24874220_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21939254",
-    "sample_accession": "SAMN31327785",
+    "run_accession": "SRR21939647",
+    "sample_accession": "SAMN31327870",
     "study_accession": "PRJNA636281",
-    "strain": "AU437",
-    "read_count": "8691973",
-    "base_count": "2172993250",
-    "est_depth_x": "51.7",
+    "strain": "AU605",
+    "read_count": "8703015",
+    "base_count": "2175753750",
+    "est_depth_x": "51.8",
     "country": "Australia: Melbourne",
     "collection_date": "2018",
     "first_public": "2022-10-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/054/SRR21939254/SRR21939254_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/054/SRR21939254/SRR21939254_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/047/SRR21939647/SRR21939647_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/047/SRR21939647/SRR21939647_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541919",
@@ -398,18 +412,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/022/SRR24874222/SRR24874222_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/022/SRR24874222/SRR24874222_2.fastq.gz"
    },
    {
-    "run_accession": "SRR21939440",
-    "sample_accession": "SAMN31327891",
+    "run_accession": "SRR21939254",
+    "sample_accession": "SAMN31327785",
     "study_accession": "PRJNA636281",
-    "strain": "AU885",
-    "read_count": "8563781",
-    "base_count": "2140945250",
-    "est_depth_x": "50.9",
+    "strain": "AU437",
+    "read_count": "8691973",
+    "base_count": "2172993250",
+    "est_depth_x": "51.7",
     "country": "Australia: Melbourne",
     "collection_date": "2018",
     "first_public": "2022-10-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/040/SRR21939440/SRR21939440_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/040/SRR21939440/SRR21939440_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/054/SRR21939254/SRR21939254_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/054/SRR21939254/SRR21939254_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541898",
@@ -440,18 +454,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/039/SRR24874139/SRR24874139_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/039/SRR24874139/SRR24874139_2.fastq.gz"
    },
    {
-    "run_accession": "SRR11906224",
-    "sample_accession": "SAMN15070175",
+    "run_accession": "SRR21939440",
+    "sample_accession": "SAMN31327891",
     "study_accession": "PRJNA636281",
-    "strain": "UM314",
-    "read_count": "3686897",
-    "base_count": "1054182165",
-    "est_depth_x": "25.1",
+    "strain": "AU885",
+    "read_count": "8563781",
+    "base_count": "2140945250",
+    "est_depth_x": "50.9",
     "country": "Australia: Melbourne",
-    "collection_date": "2006",
-    "first_public": "2021-03-01",
+    "collection_date": "2018",
+    "first_public": "2022-10-19",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/024/SRR11906224/SRR11906224_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/024/SRR11906224/SRR11906224_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/040/SRR21939440/SRR21939440_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR219/040/SRR21939440/SRR21939440_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541864",
@@ -482,18 +496,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/044/SRR24874144/SRR24874144_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/044/SRR24874144/SRR24874144_2.fastq.gz"
    },
    {
-    "run_accession": "SRR11906225",
-    "sample_accession": "SAMN15070174",
+    "run_accession": "SRR11906224",
+    "sample_accession": "SAMN15070175",
     "study_accession": "PRJNA636281",
-    "strain": "UM176",
-    "read_count": "2181009",
-    "base_count": "635907037",
-    "est_depth_x": "15.1",
+    "strain": "UM314",
+    "read_count": "3686897",
+    "base_count": "1054182165",
+    "est_depth_x": "25.1",
     "country": "Australia: Melbourne",
     "collection_date": "2006",
     "first_public": "2021-03-01",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/025/SRR11906225/SRR11906225_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/025/SRR11906225/SRR11906225_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/024/SRR11906224/SRR11906224_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/024/SRR11906224/SRR11906224_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541939",
@@ -524,18 +538,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/027/SRR24874227/SRR24874227_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/027/SRR24874227/SRR24874227_2.fastq.gz"
    },
    {
-    "run_accession": "SRR11906222",
-    "sample_accession": "SAMN15070177",
+    "run_accession": "SRR11906225",
+    "sample_accession": "SAMN15070174",
     "study_accession": "PRJNA636281",
-    "strain": "UM317",
-    "read_count": "1684439",
-    "base_count": "499150046",
-    "est_depth_x": "11.9",
+    "strain": "UM176",
+    "read_count": "2181009",
+    "base_count": "635907037",
+    "est_depth_x": "15.1",
     "country": "Australia: Melbourne",
     "collection_date": "2006",
     "first_public": "2021-03-01",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/022/SRR11906222/SRR11906222_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/022/SRR11906222/SRR11906222_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/025/SRR11906225/SRR11906225_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/025/SRR11906225/SRR11906225_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541904",
@@ -566,18 +580,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/045/SRR24874145/SRR24874145_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/045/SRR24874145/SRR24874145_2.fastq.gz"
    },
    {
-    "run_accession": "SRR11906223",
-    "sample_accession": "SAMN15070176",
+    "run_accession": "SRR11906222",
+    "sample_accession": "SAMN15070177",
     "study_accession": "PRJNA636281",
-    "strain": "UM316",
-    "read_count": "990887",
-    "base_count": "292141809",
-    "est_depth_x": "6.9",
+    "strain": "UM317",
+    "read_count": "1684439",
+    "base_count": "499150046",
+    "est_depth_x": "11.9",
     "country": "Australia: Melbourne",
     "collection_date": "2006",
     "first_public": "2021-03-01",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/023/SRR11906223/SRR11906223_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/023/SRR11906223/SRR11906223_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/022/SRR11906222/SRR11906222_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/022/SRR11906222/SRR11906222_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541886",
@@ -606,6 +620,20 @@
     "first_public": "2023-06-24",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/018/SRR24874218/SRR24874218_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/018/SRR24874218/SRR24874218_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR11906223",
+    "sample_accession": "SAMN15070176",
+    "study_accession": "PRJNA636281",
+    "strain": "UM316",
+    "read_count": "990887",
+    "base_count": "292141809",
+    "est_depth_x": "6.9",
+    "country": "Australia: Melbourne",
+    "collection_date": "2006",
+    "first_public": "2021-03-01",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/023/SRR11906223/SRR11906223_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR119/023/SRR11906223/SRR11906223_2.fastq.gz"
    },
    {
     "run_accession": "SRR31541960",
@@ -1432,34 +1460,6 @@
     "first_public": "2025-03-23",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR315/057/SRR31541857/SRR31541857_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR315/057/SRR31541857/SRR31541857_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR24874306",
-    "sample_accession": "SAMN35674031",
-    "study_accession": "PRJNA902499",
-    "strain": "IBCN288/K 7467-02",
-    "read_count": "10676918",
-    "base_count": "3203075400",
-    "est_depth_x": "76.2",
-    "country": "Germany: Lower Saxony",
-    "collection_date": "2018",
-    "first_public": "2023-06-24",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/006/SRR24874306/SRR24874306_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR248/006/SRR24874306/SRR24874306_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR31541830",
-    "sample_accession": "SAMN45092600",
-    "study_accession": "PRJNA1191806",
-    "strain": "",
-    "read_count": "10316695",
-    "base_count": "3095008500",
-    "est_depth_x": "73.6",
-    "country": "South Africa:Hopefield",
-    "collection_date": "2022",
-    "first_public": "2025-03-23",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR315/030/SRR31541830/SRR31541830_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR315/030/SRR31541830/SRR31541830_2.fastq.gz"
    }
   ],
   "run_fields": [

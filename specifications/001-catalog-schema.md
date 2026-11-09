@@ -81,10 +81,11 @@ API is obvious.
 | `tax_id` | ENA | may differ from the catalog taxid for a subspecies |
 | `instrument_platform` | ENA | `ILLUMINA`, `OXFORD_NANOPORE`, `PACBIO_SMRT` |
 | `instrument_model` | ENA | |
-| `library_layout` | ENA | `PAIRED` or `SINGLE` |
+| `library_layout` | ENA | `PAIRED` or `SINGLE`: the submitter's label. **Metadata only**; it does not decide pairing (see `ena_layout`) |
+| `ena_layout` | derived | `PAIRED` when ENA serves files named `_1` and `_2`, `SINGLE` when it serves one file, empty when it serves none. **This decides pairing** |
 | `library_strategy` | ENA | `WGS`, `RNA-Seq`, `AMPLICON`, … |
 | `library_source` | ENA | `GENOMIC`, `TRANSCRIPTOMIC`, … |
-| `read_count` | ENA | read **pairs** for paired runs. The verification target. |
+| `read_count` | ENA | read pairs for SRR and DRR runs, but **reads** for most ERR runs (spec 002). **Not** a verification target |
 | `base_count` | ENA | drives the size and coverage estimates |
 | `fastq_ftp` | ENA | semicolon-separated |
 | `fastq_aspera` | ENA | empty when Aspera is not offered |
@@ -107,10 +108,9 @@ different answers.
 library_strategy == "WGS"
 library_source   == "GENOMIC"
 instrument_platform == "ILLUMINA"
-library_layout   == "PAIRED"
+ena_layout       == "PAIRED"     # what ENA serves, not the label
 read_count       >= 600000
 est_coverage     >= 15
-two fastq files present
 ```
 
 **Study level.** A run can pass every test above and still be wrong for a population
@@ -137,6 +137,21 @@ who wants them.
 
 Defaults, overridable per call. The thresholds are recorded in `panel.yaml` for any panel
 built from them, because a panel built under a different threshold is a different panel.
+
+### Pairing is what the archives serve (owner decision 2026-11-08)
+
+`library_layout` is a label the submitter typed. In the catalog it disagrees with the files
+ENA serves for 2,274 runs: 806 labelled `PAIRED` serve one file, and 1,468 labelled
+`SINGLE` serve `_1` and `_2` (`scripts/popseq_runs_table.py`, build of 2026-11-08). In
+BGISEQ/DNBSEQ data, not yet in the catalog, about 2,400 WGS runs labelled `PAIRED` serve
+one file.
+
+- `ena_layout` decides pairing in the catalog and in every `--layout` filter.
+- NCBI can disagree with ENA. 27 of 200 sampled ERR runs are paired at ENA and unpaired at
+  NCBI (`spots_with_mates = 0`). The catalog does not hold `spots_with_mates`. The fetcher
+  reads it at plan time and, with `--require-pairs`, takes such a run from ENA (spec 002).
+- A run with three files (`_1`, `_2` and an unpaired `<RUN>.fastq.gz`) is `PAIRED`. The
+  unpaired file is kept in `fastq_ftp` and left out of sample sheets.
 
 ### Clonal sets are not populations
 
@@ -245,3 +260,6 @@ A drop almost always means the query changed, not the archive.
   independently written the same four exclusion categories.
 - 2026-11-07: added the normalised country and host columns and their vocabularies
   (issue #23).
+- 2026-11-08: added `ena_layout`, which decides pairing. `library_layout` is now metadata
+  only. `read_count` is no longer described as a verification target. The eligibility
+  filter uses `ena_layout == "PAIRED"` in place of the label and the two-file test.

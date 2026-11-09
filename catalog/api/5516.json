@@ -58,7 +58,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 106,
+  "isolates_available": 105,
   "studies_in_panel": 4,
   "runs": [
    {
@@ -1392,20 +1392,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/074/SRR15255574/SRR15255574_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/074/SRR15255574/SRR15255574_2.fastq.gz"
    },
    {
-    "run_accession": "SRR15255609",
-    "sample_accession": "SAMN20425554",
-    "study_accession": "PRJNA749912",
-    "strain": "missing",
-    "read_count": "8369786",
-    "base_count": "1255467900",
-    "est_depth_x": "33.5",
-    "country": "Syria: Coastal mountains",
-    "collection_date": "2006",
-    "first_public": "2021-08-25",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/009/SRR15255609/SRR15255609.fastq.gz"
-   },
-   {
     "run_accession": "SRR15255631",
     "sample_accession": "SAMN20425479",
     "study_accession": "PRJNA749912",
@@ -1460,6 +1446,20 @@
     "first_public": "2021-08-25",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/012/SRR15255612/SRR15255612_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/012/SRR15255612/SRR15255612_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR15255579",
+    "sample_accession": "SAMN20425532",
+    "study_accession": "PRJNA749912",
+    "strain": "missing",
+    "read_count": "4076648",
+    "base_count": "1222994400",
+    "est_depth_x": "32.6",
+    "country": "Russia: Novgorod",
+    "collection_date": "1994",
+    "first_public": "2021-08-25",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/079/SRR15255579/SRR15255579_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR152/079/SRR15255579/SRR15255579_2.fastq.gz"
    }
   ],
   "run_fields": [

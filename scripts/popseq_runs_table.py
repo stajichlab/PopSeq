@@ -20,6 +20,9 @@ Columns added on top of the ENA fields:
                                   host_plant, specific hosts, host_common_name)
     host_taxid, host_name,        `host` resolved through catalog/vocab/host_taxa.csv.gz,
     host_status                   built by scripts/popseq_vocab.py
+    ena_layout                    PAIRED, SINGLE or "" from the files ENA serves
+                                  (popseq.query.ena_layout); library_layout is the
+                                  submitter's label and is kept as metadata only
 
     uv run python scripts/popseq_runs_table.py --ena cache/fungi_runs_ena_2026-11-06.tsv.gz
 """
@@ -39,6 +42,7 @@ from popseq_vocab import biosample_hosts  # noqa: E402
 
 sys.path.insert(0, HERE)
 from popseq import normalise  # noqa: E402
+from popseq.query import ena_layout  # noqa: E402
 
 ENA_FIELDS = [
     "run_accession", "study_accession", "sample_accession", "scientific_name",
@@ -50,7 +54,8 @@ ENA_FIELDS = [
 OUT_FIELDS = ENA_FIELDS + ["species_taxid", "species_name", "exclusion",
                            "est_depth_x", "ncbi_status",
                            "country_iso", "country_name", "country_status",
-                           "host", "host_taxid", "host_name", "host_status"]
+                           "host", "host_taxid", "host_name", "host_status",
+                           "ena_layout"]
 
 
 def opener(path, mode="rt"):
@@ -121,7 +126,7 @@ def main():
 
     n = 0
     counts = {"in_ncbi": 0, "ena_only": 0, "not_checked": 0}
-    cstat, hstat = {}, {}
+    cstat, hstat, lstat = {}, {}, {}
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     tmp = args.out + ".tmp.gz"
     with opener(args.ena) as src, gzip.open(tmp, "wt", newline="") as dst:
@@ -156,6 +161,9 @@ def main():
                          for s in (r.get("sample_accession") or "").split(";")]
             r["host"] = ";".join(raw_hosts) if any(raw_hosts) else ""
             r.update(normalise.host(r["host"], organism_taxids=(raw, sp)))
+            r["ena_layout"] = ena_layout(r.get("fastq_ftp") or "")
+            k = (r.get("library_layout") or "", r["ena_layout"])
+            lstat[k] = lstat.get(k, 0) + 1
             cstat[r["country_status"]] = cstat.get(r["country_status"], 0) + 1
             hstat[r["host_status"]] = hstat.get(r["host_status"], 0) + 1
             w.writerow(r)
@@ -164,6 +172,9 @@ def main():
     print(f"wrote {args.out}: {n} runs", file=sys.stderr)
     for k, v in counts.items():
         print(f"  {k}: {v}", file=sys.stderr)
+    print("library_layout (label) x ena_layout (served): " + ", ".join(
+        f"{a or '(empty)'}->{b or '(none)'} {v}" for (a, b), v in sorted(lstat.items())),
+        file=sys.stderr)
     for label_, d in (("country_status", cstat), ("host_status", hstat)):
         print(f"{label_}: " + ", ".join(f"{k} {v}" for k, v in
                                         sorted(d.items(), key=lambda x: -x[1])),

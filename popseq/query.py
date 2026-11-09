@@ -36,7 +36,7 @@ INDEX_FILE = os.path.join(ROOT, "catalog", "index.json")
 SPECIES_FIELDS = ["species_taxid", "species_name", "runs", "isolates", "studies",
                   "est_download_tb", "first_year", "last_year"]
 RUN_FIELDS = ["run_accession", "sample_accession", "study_accession",
-              "species_taxid", "species_name", "strain", "library_layout",
+              "species_taxid", "species_name", "strain", "library_layout", "ena_layout",
               "read_count", "base_count", "est_depth_x", "country",
               "country_iso", "country_status", "host", "host_taxid", "host_name",
               "host_status", "collection_date", "first_public", "exclusion", "ncbi_status",
@@ -205,7 +205,8 @@ def _filter(rows: Iterable[dict], *, platform="ILLUMINA", layout="PAIRED",
     for r in rows:
         if platform and (r["instrument_platform"] or "").upper() != platform.upper():
             continue
-        if layout and (r["library_layout"] or "").upper() != layout.upper():
+        # Pairing is what ENA serves, not the submitter's label (spec 001, ena_layout).
+        if layout and (r.get("ena_layout") or "").upper() != layout.upper():
             continue
         if strategy and (r["library_strategy"] or "").upper() != strategy.upper():
             continue
@@ -365,6 +366,22 @@ def fastq_mates(fastq_ftp: str) -> tuple[str, str, list[str]]:
     if len(files) == 1:
         return files[0], "", []
     return "", "", files
+
+
+def ena_layout(fastq_ftp: str) -> str:
+    """What ENA actually serves for a run: PAIRED, SINGLE, or "" (no FASTQ).
+
+    PAIRED means files named `_1` and `_2` exist. SINGLE means exactly one file. This, not
+    the submitter's `library_layout`, decides pairing (owner decision 2026-11-08): the
+    label is wrong for 806 catalog runs labelled PAIRED that serve one file and 1,468
+    labelled SINGLE that serve `_1` and `_2`.
+    """
+    m1, m2, _ = fastq_mates(fastq_ftp)
+    if m1 and m2:
+        return "PAIRED"
+    if m1:
+        return "SINGLE"
+    return ""
 
 
 def to_sample_sheet(result: dict) -> list[dict]:
