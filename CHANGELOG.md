@@ -2,6 +2,12 @@
 
 ## 2026-11-08
 
+Repository rules.
+
+- `AGENTS.md` section 7 (owner-approved): `catalog/runs/fungi_all_runs.csv.gz` is the
+  canonical run table. The rule against a combined file is replaced by a rule that every
+  derived table in `catalog/` must be reproducible by a named script. No file moved.
+
 Sample sheet and catalog scope.
 
 - `popseq runs --format samples` and `popseq.to_sample_sheet` now choose mates by file name

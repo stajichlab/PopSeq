@@ -114,17 +114,26 @@ broken:
 ### Catalog
 
 ```
+catalog/runs/fungi_all_runs.csv.gz            canonical run table, one row per run
 catalog/species/<taxid>.<Genus>_<species>.yaml
-catalog/runs/<taxid>.<Genus>_<species>.runs.csv.gz
 catalog/biosamples/<taxid>.<Genus>_<species>.biosample.csv.gz
+catalog/<name>.csv.gz                         derived summaries (for example species_layout)
 ```
 
-- **The taxid comes first** and is the real key. Names change; taxids are stable. A species
-  renamed at NCBI keeps its file and gets a `synonyms:` entry.
-- Genus capitalised, species lower case, joined by `_`, matching the NCBI scientific name
-  with spaces replaced. No strain, no subspecies in the filename.
-- One file per species. Do not create a combined "all species" file in the catalog; it is a
-  derived product and belongs in `popseq.duckdb`, which is not tracked.
+- **The combined run table is the canonical file.** Consumers read it today through the CLI,
+  the package, the MCP server and `catalog/api/`. It is regenerated from a dated ENA snapshot
+  in `cache/`. A correction goes in a `curated_*` column, never in a hand edit of a harvested
+  column.
+- **The taxid is the real key.** Names change; taxids are stable. A per-species file name
+  puts the taxid first: genus capitalised, species lower case, joined by `_`, matching the
+  NCBI scientific name. No strain, no subspecies. A species renamed at NCBI keeps its file
+  and gets a `synonyms:` entry.
+- **A derived table is allowed in `catalog/` only if a script in `scripts/` regenerates it
+  from the canonical files**, the script is named in `catalog/index.json`, and regenerating
+  it reproduces the committed file. A derived value that no script can reproduce is a bug.
+- Per-species run files are optional views, generated from the run table. They are never
+  edited by hand.
+- `popseq.duckdb` stays an untracked index (section 9).
 
 ### Panels
 
