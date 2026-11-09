@@ -5,7 +5,7 @@
 Sample sheet and catalog scope.
 
 - `popseq runs --format samples` and `popseq.to_sample_sheet` now choose mates by file name
-  (`_1`, `_2`), not by position. Before this, 15,035 runs that ENA lists with three files
+  (`_1`, `_2`), not by position. Before this, 15,105 runs that ENA lists with three files
   (an unpaired `<RUN>.fastq.gz` plus `_1` and `_2`) could get the unpaired file as
   `fastq_1`. The unpaired file is left out of the sheet. It stays in `fastq_ftp`, and the
   CLI prints a stderr caveat with the number of runs affected. New:
