@@ -5,41 +5,41 @@
  "summary": {
   "species_taxid": "5341",
   "species_name": "Agaricus bisporus",
-  "runs": "338",
-  "isolates": "318",
-  "studies": "6",
-  "total_gbase": "569.4",
-  "est_download_tb": "0.1627",
-  "paired_runs": "338",
+  "runs": "813",
+  "isolates": "793",
+  "studies": "7",
+  "total_gbase": "2331.7",
+  "est_download_tb": "0.6662",
+  "paired_runs": "813",
   "single_runs": "0",
   "first_year": "2010",
-  "last_year": "2025"
+  "last_year": "2026"
  },
  "clonality": {
   "species_taxid": "5341",
   "species_name": "Agaricus bisporus",
-  "studies": "6",
-  "isolates": "318",
-  "isolates_per_study": "53.0",
-  "largest_study": "213"
+  "studies": "7",
+  "isolates": "793",
+  "isolates_per_study": "113.29",
+  "largest_study": "475"
  },
  "coverage": {
   "species_taxid": "5341",
   "species_name": "Agaricus bisporus",
-  "runs_with_estimate": "338",
-  "median_cov": "48.6",
-  "p10_cov": "35.3",
-  "p90_cov": "74.1",
-  "runs_ge_15x": "338",
-  "runs_ge_30x": "334"
+  "runs_with_estimate": "807",
+  "median_cov": "107.2",
+  "p10_cov": "38.4",
+  "p90_cov": "142.9",
+  "runs_ge_15x": "807",
+  "runs_ge_30x": "803"
  },
  "runs_by_exclusion_label": {
-  "none": 338
+  "none": 813
  },
  "ncbi_status": {
   "in_ncbi": 338,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 475
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

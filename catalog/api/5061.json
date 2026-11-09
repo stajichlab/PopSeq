@@ -5,42 +5,42 @@
  "summary": {
   "species_taxid": "5061",
   "species_name": "Aspergillus niger",
-  "runs": "235",
-  "isolates": "234",
-  "studies": "74",
-  "total_gbase": "947.2",
-  "est_download_tb": "0.2706",
+  "runs": "236",
+  "isolates": "235",
+  "studies": "75",
+  "total_gbase": "947.8",
+  "est_download_tb": "0.2708",
   "paired_runs": "229",
-  "single_runs": "6",
+  "single_runs": "7",
   "first_year": "2010",
   "last_year": "2026"
  },
  "clonality": {
   "species_taxid": "5061",
   "species_name": "Aspergillus niger",
-  "studies": "74",
-  "isolates": "233",
-  "isolates_per_study": "3.15",
+  "studies": "75",
+  "isolates": "234",
+  "isolates_per_study": "3.12",
   "largest_study": "65"
  },
  "coverage": {
   "species_taxid": "5061",
   "species_name": "Aspergillus niger",
-  "runs_with_estimate": "235",
-  "median_cov": "76.7",
-  "p10_cov": "56.4",
+  "runs_with_estimate": "236",
+  "median_cov": "76.5",
+  "p10_cov": "56.3",
   "p90_cov": "211.3",
-  "runs_ge_15x": "234",
+  "runs_ge_15x": "235",
   "runs_ge_30x": "231"
  },
  "runs_by_exclusion_label": {
-  "none": 148,
+  "none": 149,
   "mutant": 87
  },
  "ncbi_status": {
   "in_ncbi": 235,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 1
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-11-09
+
+BGISEQ and DNBSEQ runs (owner decision 2026-11-08). Rows added only: no path moved, no
+column added, renamed or removed.
+
+- **10,267 runs added** to `catalog/runs/fungi_all_runs.csv.gz` (4,210 BGISEQ, 6,057
+  DNBSEQ), from a supplementary snapshot, `cache/fungi_runs_ena_bgi_2026-11-09.tsv.gz`, made
+  by the new `scripts/popseq_snapshot.py`. The table now has 256,089 rows. The 245,822
+  existing rows are identical in every column but one: 78 `est_depth_x` cells for
+  *Kluyveromyces marxianus* were blank and now have a value, because that species reached
+  100 isolates and got a genome size.
+- **134 new species**, 6,620 in the species summary. 10,094 new BioSamples harvested
+  (`fungi_biosamples.csv.gz`); `host_taxa.csv.gz` rebuilt for their hosts. Genome sizes
+  added for *K. marxianus* and *Laburnicola rhizohalophila*, the two species that now reach
+  100 isolates, and `catalog/api/` gains their files.
+- **New runs are `not_checked` against NCBI.** `popseq_runs_table.py` now takes the
+  reconciled set from the snapshot the reconciliation used (`--reconciled-ena`), not from
+  the species summary.
+- **The default `--platform` filter stays ILLUMINA.** Panels and `catalog/api/` panels do not
+  include BGISEQ or DNBSEQ unless asked. `index.json` lists both snapshots in
+  `archive_snapshots`.
+- **New derived table `catalog/species_layout.csv.gz`** (`scripts/popseq_species_layout.py`):
+  paired versus single-end-only isolates per species, by `ena_layout`. 69 species have only
+  single-end isolates (182 isolates). 161 species gain isolates from single-end-only data.
+  4,776 of the 6,480 single-only isolates are estimated at 10x or more.
+- **`scripts/popseq_species_summary.py`** builds `fungi_species_summary.csv.gz`, which had no
+  script before. Run on the 2026-11-06 snapshot, it reproduces the committed file byte for
+  byte.
+- **Spot check:** 4 BGISEQ/DNBSEQ runs over AWS and ENA HTTPS
+  (`benchmarks/2026-11-09_bgi_spotcheck.csv`). Results matched the served-layout prediction:
+  labelled PAIRED, both routes `ok`; labelled SINGLE but served as `_1`/`_2`, NCBI holds them
+  unpaired (`unavailable_at_ncbi`) and ENA delivered verified pairs.
+
 ## 2026-11-08
 
 Pairing is what ENA serves (owner decision 2026-11-08). One column added; nothing moved.

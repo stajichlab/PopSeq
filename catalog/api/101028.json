@@ -5,43 +5,43 @@
  "summary": {
   "species_taxid": "101028",
   "species_name": "Fusarium pseudograminearum",
-  "runs": "276",
-  "isolates": "238",
-  "studies": "11",
-  "total_gbase": "240.8",
-  "est_download_tb": "0.0688",
-  "paired_runs": "276",
+  "runs": "277",
+  "isolates": "239",
+  "studies": "12",
+  "total_gbase": "245.1",
+  "est_download_tb": "0.07",
+  "paired_runs": "277",
   "single_runs": "0",
   "first_year": "2015",
-  "last_year": "2022"
+  "last_year": "2024"
  },
  "clonality": {
   "species_taxid": "101028",
   "species_name": "Fusarium pseudograminearum",
-  "studies": "11",
-  "isolates": "238",
-  "isolates_per_study": "21.64",
+  "studies": "12",
+  "isolates": "239",
+  "isolates_per_study": "19.92",
   "largest_study": "208"
  },
  "coverage": {
   "species_taxid": "101028",
   "species_name": "Fusarium pseudograminearum",
-  "runs_with_estimate": "276",
+  "runs_with_estimate": "277",
   "median_cov": "7.9",
   "p10_cov": "4.6",
-  "p90_cov": "78.9",
-  "runs_ge_15x": "74",
-  "runs_ge_30x": "57"
+  "p90_cov": "80.3",
+  "runs_ge_15x": "75",
+  "runs_ge_30x": "58"
  },
  "runs_by_exclusion_label": {
-  "none": 264,
+  "none": 265,
   "mutant": 7,
   "cross": 5
  },
  "ncbi_status": {
   "in_ncbi": 276,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 1
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

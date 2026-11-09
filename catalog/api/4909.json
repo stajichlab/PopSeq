@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "4909",
   "species_name": "Pichia kudriavzevii",
-  "runs": "606",
-  "isolates": "514",
-  "studies": "389",
-  "total_gbase": "1613.6",
-  "est_download_tb": "0.461",
-  "paired_runs": "573",
+  "runs": "692",
+  "isolates": "600",
+  "studies": "390",
+  "total_gbase": "1922.9",
+  "est_download_tb": "0.5494",
+  "paired_runs": "659",
   "single_runs": "33",
   "first_year": "2016",
   "last_year": "2026"
@@ -18,28 +18,28 @@
  "clonality": {
   "species_taxid": "4909",
   "species_name": "Pichia kudriavzevii",
-  "studies": "389",
-  "isolates": "514",
-  "isolates_per_study": "1.32",
-  "largest_study": "32"
+  "studies": "390",
+  "isolates": "600",
+  "isolates_per_study": "1.54",
+  "largest_study": "86"
  },
  "coverage": {
   "species_taxid": "4909",
   "species_name": "Pichia kudriavzevii",
-  "runs_with_estimate": "605",
-  "median_cov": "165.5",
-  "p10_cov": "27.0",
-  "p90_cov": "642.1",
-  "runs_ge_15x": "564",
-  "runs_ge_30x": "538"
+  "runs_with_estimate": "691",
+  "median_cov": "201.3",
+  "p10_cov": "32.7",
+  "p90_cov": "614.1",
+  "runs_ge_15x": "650",
+  "runs_ge_30x": "624"
  },
  "runs_by_exclusion_label": {
-  "none": 606
+  "none": 692
  },
  "ncbi_status": {
   "in_ncbi": 606,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 86
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

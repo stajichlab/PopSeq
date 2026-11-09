@@ -2,7 +2,27 @@
   "popseq_schema": "1.0.0",
   "generated": "2026-11-08",
   "archive_snapshot": "2026-11-06",
-  "scope": "public whole-genome Illumina sequencing runs of fungal isolates, as ENA and NCBI describe them",
+  "archive_snapshots": [
+    {
+      "date": "2026-11-06",
+      "file": "cache/fungi_runs_ena_2026-11-06.tsv.gz",
+      "platforms": [
+        "ILLUMINA"
+      ],
+      "kind": "full"
+    },
+    {
+      "date": "2026-11-09",
+      "file": "cache/fungi_runs_ena_bgi_2026-11-09.tsv.gz",
+      "platforms": [
+        "BGISEQ",
+        "DNBSEQ"
+      ],
+      "kind": "supplement",
+      "made_by": "scripts/popseq_snapshot.py"
+    }
+  ],
+  "scope": "public whole-genome Illumina, BGISEQ and DNBSEQ sequencing runs of fungal isolates, as ENA and NCBI describe them",
   "repository": "https://github.com/stajichlab/PopSeq",
   "shared_filesystem_path": "/bigdata/stajichlab/shared/projects/Fungi/PopSeq",
   "query_interface": {
@@ -25,11 +45,11 @@
     "stable": "Verb names, flag names and the JSON key names are the contract. Table paths and columns may change underneath."
   },
   "totals": {
-    "runs": 245076,
-    "isolates": 217911,
-    "species_taxids": 6486,
-    "species_with_100_isolates": 113,
-    "estimated_tb_one_run_per_isolate": 135.6
+    "runs": 255167,
+    "isolates": 227829,
+    "species_taxids": 6620,
+    "species_with_100_isolates": 115,
+    "estimated_tb_one_run_per_isolate": 145.3
   },
   "tables": {
     "runs": {
@@ -74,14 +94,14 @@
         "host_status",
         "ena_layout"
       ],
-      "bytes": 14513743,
-      "sha256": "d1f119638e88627cfab5b05eebe73543ace3012002d18658d9a2403b58e3fcc8"
+      "bytes": 15100068,
+      "sha256": "e5e65ab11fe0f5c3b14df5e631a8af8f00a57054eed201de1b8ff41663fc68a9"
     },
     "species_summary": {
       "path": "catalog/kingdom/fungi_species_summary.csv.gz",
       "grain": "one row per species taxid",
       "key": "species_taxid",
-      "built_by": "scripts/popseq_summarize.py",
+      "built_by": "scripts/popseq_species_summary.py",
       "columns": [
         "species_taxid",
         "species_name",
@@ -95,8 +115,27 @@
         "first_year",
         "last_year"
       ],
-      "bytes": 124560,
-      "sha256": "a7bbb41d1abb4b561470ec0f58d644e8c7cf4352bcc4bd7f251a85dccbeb792e"
+      "bytes": 127069,
+      "sha256": "ee98de17eb70ed09b9a729a8d9b2949ee6ee3af74e4e003be32b4db2d0611e05"
+    },
+    "species_layout": {
+      "path": "catalog/species_layout.csv.gz",
+      "grain": "one row per species: paired versus single-end-only isolates",
+      "key": "species_taxid",
+      "built_by": "scripts/popseq_species_layout.py",
+      "columns": [
+        "species_taxid",
+        "species_name",
+        "isolates",
+        "isolates_paired",
+        "isolates_single_only",
+        "isolates_no_fastq",
+        "single_only_median_depth_x",
+        "single_only_ge_10x",
+        "runs_label_mismatch"
+      ],
+      "bytes": 85368,
+      "sha256": "28e47fe0b2ab21d9303c7b7e762b98d5d22ff12fb7a20e4645217921905ac5e7"
     },
     "biosamples": {
       "path": "catalog/kingdom/fungi_biosamples.csv.gz",
@@ -147,6 +186,7 @@
         "Clone_Number",
         "Collected from cultivar",
         "Collection ID",
+        "Collector",
         "Condition_Barcode",
         "Culture media",
         "Culture method",
@@ -230,6 +270,7 @@
         "Isolation Type",
         "Isolation type",
         "Isolation_type",
+        "LEI YANG",
         "Latitude",
         "Leiyu",
         "Library",
@@ -329,7 +370,10 @@
         "Vegetative Compatibility Group (VCG)",
         "Voucher Location",
         "WGS",
+        "YONG LIU",
         "abs_air_humidity",
+        "adapter library",
+        "adaptor",
         "additional_description",
         "ade-?",
         "adjacent_environment",
@@ -362,6 +406,7 @@
         "assay",
         "assembly",
         "associated institution",
+        "association_duration",
         "average_genome_coverage",
         "backcross_direction",
         "backcross_parent",
@@ -538,6 +583,8 @@
         "host_age",
         "host_body_habitat",
         "host_body_product",
+        "host_cellular_loc",
+        "host_color",
         "host_common_name",
         "host_cultivar",
         "host_dependence",
@@ -595,6 +642,7 @@
         "isolate_label",
         "isolate_name_alais",
         "isolate_name_alias",
+        "isolation",
         "isolation source host associated",
         "isolation source host-associated",
         "isolation source non-host-associated",
@@ -604,6 +652,7 @@
         "isolation_source",
         "isolation_type",
         "itraconazole resistance",
+        "karyotype",
         "kobic_project_id",
         "kobic_registration_date",
         "kobic_release_date",
@@ -656,6 +705,7 @@
         "mineral_nutr_regm",
         "minutes after releast",
         "misc_param",
+        "mode_transmission",
         "morphotype",
         "mushroom_observer_id",
         "mutagen",
@@ -761,6 +811,7 @@
         "samp_stor_media",
         "samp_store_dur",
         "samp_store_loc",
+        "samp_store_sol",
         "samp_store_temp",
         "samp_vol_we_dna_ext",
         "sample ID",
@@ -795,6 +846,7 @@
         "sequence_type",
         "sequenced_by",
         "sequenced_molecule",
+        "sequencing",
         "sequencing library",
         "sequencing method",
         "sequencing_approach",
@@ -830,6 +882,7 @@
         "spore",
         "spore_name",
         "state",
+        "stimulus",
         "store_cond",
         "strain",
         "strain_alias",
@@ -854,6 +907,7 @@
         "technology",
         "teleomorph",
         "temp",
+        "tep",
         "tetrad",
         "time of collection",
         "time sample",
@@ -888,8 +942,8 @@
         "water environmental package",
         "well"
       ],
-      "bytes": 4325581,
-      "sha256": "9ee32ca7aef3b5bec40ce2dceb27236789ba8ec0733748122c15cd520c0213da"
+      "bytes": 4512117,
+      "sha256": "7842fbc694fa0d6bc2605f5e35e4789d26fa96888b15e509b532829dc0e35528"
     },
     "taxonomy_species_map": {
       "path": "catalog/taxonomy_species_map.csv.gz",
@@ -920,8 +974,8 @@
         "assembly_level",
         "note"
       ],
-      "bytes": 7262,
-      "sha256": "00d3edb59baafe0ee0d7df86ab9895dbc414867b4b954f24def03d32d0be58b6"
+      "bytes": 7402,
+      "sha256": "8a25309cb4336b13320ba623ededa479217cc96dc09020c5fee9053d43b7a19b"
     },
     "summary_by_year": {
       "path": "catalog/summary/by_year.csv.gz",
@@ -935,8 +989,8 @@
         "runs",
         "isolates"
       ],
-      "bytes": 99066,
-      "sha256": "2e894e819c9dbdd8fcd5d72c424a7ea9badc823ed1106e75eb26cc55c8afe089"
+      "bytes": 101183,
+      "sha256": "96911ccc6233f76f9c200bf105ce1425349629bea02406707adad641aa9bc46c"
     },
     "summary_clonality": {
       "path": "catalog/summary/clonality.csv.gz",
@@ -951,8 +1005,8 @@
         "isolates_per_study",
         "largest_study"
       ],
-      "bytes": 90600,
-      "sha256": "348c06248f4ce6fc5f13f46cf600d34f5042035c42911ee035fb6235cb0f53d5"
+      "bytes": 92427,
+      "sha256": "4bfabc1dea52ef17354b79c141b3763374f93c3059ca20bf0b87b3f96a7891a7"
     },
     "summary_coverage": {
       "path": "catalog/summary/coverage.csv.gz",
@@ -969,8 +1023,8 @@
         "runs_ge_15x",
         "runs_ge_30x"
       ],
-      "bytes": 3404,
-      "sha256": "9dc0f32acbf53a670e231ca3aee186c2e5177925a65a0625e515e4f5135ef5b7"
+      "bytes": 3500,
+      "sha256": "eb69779a9dbd9cf91f1a909b5cd0f3ae482d201977218b893af54f784e9c4670"
     },
     "summary_geography": {
       "path": "catalog/summary/geography.csv.gz",
@@ -983,8 +1037,8 @@
         "country",
         "isolates"
       ],
-      "bytes": 87147,
-      "sha256": "1cc400af58de7621b4ac57ab2c7d3e94f7aa5b19879c3c708e6a7ff2cd5395d6"
+      "bytes": 89665,
+      "sha256": "b792d687312e36b4f1b4947c62cae6be1ffd96ec08ebf00eebaefb6bf697dcca"
     },
     "summary_host_source": {
       "path": "catalog/summary/host_source.csv.gz",
@@ -998,8 +1052,8 @@
         "value",
         "isolates"
       ],
-      "bytes": 114485,
-      "sha256": "e060628f62cc82a5234e90621c9870a68861e4ddd7ad4a44b63e44f82c8659f6"
+      "bytes": 118437,
+      "sha256": "9929d8a35e46288ae85c4e20b005cb9442dec8894f2d6230ecf5e5f0d952e735"
     },
     "vocab_country_aliases": {
       "path": "catalog/vocab/country_aliases.csv",
@@ -1030,8 +1084,8 @@
         "n_samples",
         "example_raw"
       ],
-      "bytes": 38980,
-      "sha256": "8ce2929916849f52f037ea21f6b0367a9bdbd70b65e844de37ea2c6b889d4116"
+      "bytes": 40337,
+      "sha256": "d605e175844347a92cba62d8b38b2d930fd4492f2bdbc294b5923f78d00d6ff7"
     },
     "vocab_host_overrides": {
       "path": "catalog/vocab/host_overrides.csv",
@@ -1113,6 +1167,6 @@
     "est_depth_x comes from metadata, not from the reads.",
     "Only 113 species were reconciled against NCBI. For every other species ncbi_status is not_checked, which is not the same as absent.",
     "Nothing here has been downloaded or verified. These are archive records.",
-    "Scope: the run table holds only ENA runs with library_strategy=WGS, library_source=GENOMIC and instrument_platform=ILLUMINA (scripts/popseq_survey.py, QUERY_RUNS). A --strategy or --platform filter for anything else returns nothing because those runs were never harvested, not because none exist (issue #24)."
+    "Scope: the run table holds only ENA runs with library_strategy=WGS and library_source=GENOMIC, on instrument_platform ILLUMINA (snapshot 2026-11-06) or BGISEQ/DNBSEQ (supplement 2026-11-09; scripts/popseq_snapshot.py). A --strategy filter for anything else returns nothing because those runs were never harvested, not because none exist (issue #24). The --platform filter defaults to ILLUMINA; pass BGISEQ, DNBSEQ or '' to see the others."
   ]
 }

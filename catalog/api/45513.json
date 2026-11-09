@@ -5,41 +5,41 @@
  "summary": {
   "species_taxid": "45513",
   "species_name": "Lizanozyma spartinae",
-  "runs": "110",
-  "isolates": "110",
-  "studies": "3",
-  "total_gbase": "207.4",
-  "est_download_tb": "0.0593",
-  "paired_runs": "110",
-  "single_runs": "0",
+  "runs": "168",
+  "isolates": "168",
+  "studies": "5",
+  "total_gbase": "224.1",
+  "est_download_tb": "0.064",
+  "paired_runs": "111",
+  "single_runs": "57",
   "first_year": "2021",
-  "last_year": "2024"
+  "last_year": "2025"
  },
  "clonality": {
   "species_taxid": "45513",
   "species_name": "Lizanozyma spartinae",
-  "studies": "3",
-  "isolates": "110",
-  "isolates_per_study": "36.67",
+  "studies": "5",
+  "isolates": "168",
+  "isolates_per_study": "33.6",
   "largest_study": "108"
  },
  "coverage": {
   "species_taxid": "45513",
   "species_name": "Lizanozyma spartinae",
-  "runs_with_estimate": "110",
-  "median_cov": "135.5",
+  "runs_with_estimate": "117",
+  "median_cov": "148.3",
   "p10_cov": "58.8",
-  "p90_cov": "291.2",
-  "runs_ge_15x": "110",
-  "runs_ge_30x": "109"
+  "p90_cov": "281.9",
+  "runs_ge_15x": "117",
+  "runs_ge_30x": "116"
  },
  "runs_by_exclusion_label": {
-  "none": 110
+  "none": 168
  },
  "ncbi_status": {
   "in_ncbi": 110,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 58
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

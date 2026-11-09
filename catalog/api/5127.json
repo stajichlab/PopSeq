@@ -5,41 +5,41 @@
  "summary": {
   "species_taxid": "5127",
   "species_name": "Fusarium fujikuroi",
-  "runs": "102",
-  "isolates": "102",
-  "studies": "6",
-  "total_gbase": "389.1",
-  "est_download_tb": "0.1112",
-  "paired_runs": "100",
+  "runs": "104",
+  "isolates": "104",
+  "studies": "7",
+  "total_gbase": "395.4",
+  "est_download_tb": "0.113",
+  "paired_runs": "102",
   "single_runs": "2",
-  "first_year": "2021",
+  "first_year": "2019",
   "last_year": "2026"
  },
  "clonality": {
   "species_taxid": "5127",
   "species_name": "Fusarium fujikuroi",
-  "studies": "6",
-  "isolates": "102",
-  "isolates_per_study": "17.0",
+  "studies": "7",
+  "isolates": "104",
+  "isolates_per_study": "14.86",
   "largest_study": "90"
  },
  "coverage": {
   "species_taxid": "5127",
   "species_name": "Fusarium fujikuroi",
-  "runs_with_estimate": "102",
-  "median_cov": "74.4",
+  "runs_with_estimate": "104",
+  "median_cov": "74.3",
   "p10_cov": "46.5",
   "p90_cov": "140.4",
-  "runs_ge_15x": "101",
-  "runs_ge_30x": "100"
+  "runs_ge_15x": "103",
+  "runs_ge_30x": "102"
  },
  "runs_by_exclusion_label": {
-  "none": 102
+  "none": 104
  },
  "ncbi_status": {
   "in_ncbi": 102,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 2
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

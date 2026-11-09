@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "40559",
   "species_name": "Botrytis cinerea",
-  "runs": "449",
-  "isolates": "353",
-  "studies": "17",
-  "total_gbase": "2043.9",
-  "est_download_tb": "0.584",
-  "paired_runs": "443",
+  "runs": "450",
+  "isolates": "354",
+  "studies": "18",
+  "total_gbase": "2046.4",
+  "est_download_tb": "0.5847",
+  "paired_runs": "444",
   "single_runs": "6",
   "first_year": "2013",
   "last_year": "2026"
@@ -18,29 +18,29 @@
  "clonality": {
   "species_taxid": "40559",
   "species_name": "Botrytis cinerea",
-  "studies": "17",
-  "isolates": "353",
-  "isolates_per_study": "20.76",
+  "studies": "18",
+  "isolates": "354",
+  "isolates_per_study": "19.67",
   "largest_study": "276"
  },
  "coverage": {
   "species_taxid": "40559",
   "species_name": "Botrytis cinerea",
-  "runs_with_estimate": "449",
+  "runs_with_estimate": "450",
   "median_cov": "69.6",
-  "p10_cov": "34.5",
+  "p10_cov": "34.8",
   "p90_cov": "300.0",
-  "runs_ge_15x": "446",
-  "runs_ge_30x": "429"
+  "runs_ge_15x": "447",
+  "runs_ge_30x": "430"
  },
  "runs_by_exclusion_label": {
-  "none": 440,
+  "none": 441,
   "mutant": 9
  },
  "ncbi_status": {
   "in_ncbi": 449,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 1
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

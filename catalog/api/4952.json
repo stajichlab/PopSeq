@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "4952",
   "species_name": "Yarrowia lipolytica",
-  "runs": "468",
-  "isolates": "454",
-  "studies": "205",
-  "total_gbase": "1894.1",
-  "est_download_tb": "0.5412",
-  "paired_runs": "467",
+  "runs": "802",
+  "isolates": "788",
+  "studies": "209",
+  "total_gbase": "2816.7",
+  "est_download_tb": "0.8048",
+  "paired_runs": "801",
   "single_runs": "1",
   "first_year": "2015",
   "last_year": "2026"
@@ -18,29 +18,30 @@
  "clonality": {
   "species_taxid": "4952",
   "species_name": "Yarrowia lipolytica",
-  "studies": "205",
-  "isolates": "454",
-  "isolates_per_study": "2.21",
-  "largest_study": "68"
+  "studies": "209",
+  "isolates": "788",
+  "isolates_per_study": "3.77",
+  "largest_study": "150"
  },
  "coverage": {
   "species_taxid": "4952",
   "species_name": "Yarrowia lipolytica",
-  "runs_with_estimate": "462",
-  "median_cov": "100.2",
-  "p10_cov": "45.0",
-  "p90_cov": "313.1",
-  "runs_ge_15x": "458",
-  "runs_ge_30x": "446"
+  "runs_with_estimate": "796",
+  "median_cov": "120.5",
+  "p10_cov": "49.5",
+  "p90_cov": "238.2",
+  "runs_ge_15x": "792",
+  "runs_ge_30x": "780"
  },
  "runs_by_exclusion_label": {
-  "none": 458,
-  "mutant": 10
+  "none": 712,
+  "mutant": 10,
+  "evolution": 80
  },
  "ncbi_status": {
   "in_ncbi": 468,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 334
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

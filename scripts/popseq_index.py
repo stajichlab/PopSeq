@@ -19,7 +19,14 @@ from datetime import date
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "catalog", "index.json")
 SCHEMA_VERSION = "1.0.0"
-SNAPSHOT = "2026-11-06"
+SNAPSHOT = "2026-11-06"  # the full snapshot; kept a single date for existing readers
+SNAPSHOTS = [
+    {"date": "2026-11-06", "file": "cache/fungi_runs_ena_2026-11-06.tsv.gz",
+     "platforms": ["ILLUMINA"], "kind": "full"},
+    {"date": "2026-11-09", "file": "cache/fungi_runs_ena_bgi_2026-11-09.tsv.gz",
+     "platforms": ["BGISEQ", "DNBSEQ"], "kind": "supplement",
+     "made_by": "scripts/popseq_snapshot.py"},
+]
 REPO = "https://github.com/stajichlab/PopSeq"
 SHARED_PATH = "/bigdata/stajichlab/shared/projects/Fungi/PopSeq"
 
@@ -33,7 +40,12 @@ TABLES = {
         path="catalog/kingdom/fungi_species_summary.csv.gz",
         grain="one row per species taxid",
         key="species_taxid",
-        built_by="scripts/popseq_summarize.py"),
+        built_by="scripts/popseq_species_summary.py"),
+    "species_layout": dict(
+        path="catalog/species_layout.csv.gz",
+        grain="one row per species: paired versus single-end-only isolates",
+        key="species_taxid",
+        built_by="scripts/popseq_species_layout.py"),
     "biosamples": dict(
         path="catalog/kingdom/fungi_biosamples.csv.gz",
         grain="one row per BioSample, 783 sparse attribute columns",
@@ -140,11 +152,12 @@ CAVEATS = [
     "Only 113 species were reconciled against NCBI. For every other species "
     "ncbi_status is not_checked, which is not the same as absent.",
     "Nothing here has been downloaded or verified. These are archive records.",
-    "Scope: the run table holds only ENA runs with library_strategy=WGS, "
-    "library_source=GENOMIC and instrument_platform=ILLUMINA "
-    "(scripts/popseq_survey.py, QUERY_RUNS). A --strategy or --platform filter for "
-    "anything else returns nothing because those runs were never harvested, not because "
-    "none exist (issue #24).",
+    "Scope: the run table holds only ENA runs with library_strategy=WGS and "
+    "library_source=GENOMIC, on instrument_platform ILLUMINA (snapshot 2026-11-06) or "
+    "BGISEQ/DNBSEQ (supplement 2026-11-09; scripts/popseq_snapshot.py). A --strategy "
+    "filter for anything else returns nothing because those runs were never harvested, "
+    "not because none exist (issue #24). The --platform filter defaults to ILLUMINA; "
+    "pass BGISEQ, DNBSEQ or '' to see the others.",
 ]
 
 
@@ -182,8 +195,9 @@ def main():
         "popseq_schema": SCHEMA_VERSION,
         "generated": date.today().isoformat(),
         "archive_snapshot": SNAPSHOT,
-        "scope": "public whole-genome Illumina sequencing runs of fungal isolates, "
-                 "as ENA and NCBI describe them",
+        "archive_snapshots": SNAPSHOTS,
+        "scope": "public whole-genome Illumina, BGISEQ and DNBSEQ sequencing runs of "
+                 "fungal isolates, as ENA and NCBI describe them",
         "repository": REPO,
         "shared_filesystem_path": SHARED_PATH,
         "query_interface": {

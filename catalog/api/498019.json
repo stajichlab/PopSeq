@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "498019",
   "species_name": "Candidozyma auris",
-  "runs": "28023",
-  "isolates": "27900",
-  "studies": "155",
-  "total_gbase": "47537.1",
-  "est_download_tb": "13.582",
-  "paired_runs": "28002",
+  "runs": "28622",
+  "isolates": "28499",
+  "studies": "175",
+  "total_gbase": "48922.0",
+  "est_download_tb": "13.9777",
+  "paired_runs": "28601",
   "single_runs": "21",
   "first_year": "2015",
   "last_year": "2026"
@@ -18,30 +18,30 @@
  "clonality": {
   "species_taxid": "498019",
   "species_name": "Candidozyma auris",
-  "studies": "155",
-  "isolates": "27900",
-  "isolates_per_study": "180.0",
+  "studies": "175",
+  "isolates": "28499",
+  "isolates_per_study": "162.85",
   "largest_study": "5475"
  },
  "coverage": {
   "species_taxid": "498019",
   "species_name": "Candidozyma auris",
-  "runs_with_estimate": "27847",
-  "median_cov": "90.6",
-  "p10_cov": "38.3",
-  "p90_cov": "303.5",
-  "runs_ge_15x": "27836",
-  "runs_ge_30x": "26886"
+  "runs_with_estimate": "28446",
+  "median_cov": "92.4",
+  "p10_cov": "38.5",
+  "p90_cov": "301.2",
+  "runs_ge_15x": "28435",
+  "runs_ge_30x": "27483"
  },
  "runs_by_exclusion_label": {
-  "none": 27911,
+  "none": 28502,
   "evolution": 108,
-  "mutant": 4
+  "mutant": 12
  },
  "ncbi_status": {
   "in_ncbi": 28021,
   "ena_only": 2,
-  "not_checked": 0
+  "not_checked": 599
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

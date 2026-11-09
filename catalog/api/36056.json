@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "36056",
   "species_name": "Boletus edulis",
-  "runs": "355",
-  "isolates": "223",
-  "studies": "7",
-  "total_gbase": "3641.0",
-  "est_download_tb": "1.0403",
-  "paired_runs": "355",
+  "runs": "359",
+  "isolates": "227",
+  "studies": "8",
+  "total_gbase": "3650.2",
+  "est_download_tb": "1.0429",
+  "paired_runs": "359",
   "single_runs": "0",
   "first_year": "2013",
   "last_year": "2025"
@@ -18,28 +18,28 @@
  "clonality": {
   "species_taxid": "36056",
   "species_name": "Boletus edulis",
-  "studies": "7",
-  "isolates": "223",
-  "isolates_per_study": "31.86",
+  "studies": "8",
+  "isolates": "227",
+  "isolates_per_study": "28.38",
   "largest_study": "146"
  },
  "coverage": {
   "species_taxid": "36056",
   "species_name": "Boletus edulis",
-  "runs_with_estimate": "355",
-  "median_cov": "86.1",
+  "runs_with_estimate": "359",
+  "median_cov": "85.6",
   "p10_cov": "15.8",
   "p90_cov": "594.5",
-  "runs_ge_15x": "320",
-  "runs_ge_30x": "297"
+  "runs_ge_15x": "324",
+  "runs_ge_30x": "301"
  },
  "runs_by_exclusion_label": {
-  "none": 355
+  "none": 359
  },
  "ncbi_status": {
   "in_ncbi": 355,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 4
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

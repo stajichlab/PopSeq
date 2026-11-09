@@ -46,7 +46,8 @@ QUERY_RUNS = (
     'tax_tree({taxid})'
     ' AND library_strategy="WGS"'
     ' AND library_source="GENOMIC"'
-    ' AND instrument_platform="ILLUMINA"'
+    ' AND (instrument_platform="ILLUMINA" OR instrument_platform="BGISEQ"'
+    ' OR instrument_platform="DNBSEQ")'
 )
 
 RUN_FIELDS = [
