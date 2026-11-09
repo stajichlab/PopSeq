@@ -18,6 +18,7 @@ import gzip
 import json
 import os
 import random
+import re
 from collections import defaultdict
 from typing import Any, Iterable, Iterator, Optional
 
@@ -342,18 +343,51 @@ def describe(taxid: Optional[int] = None, name: Optional[str] = None) -> dict:
     }
 
 
+_MATE = re.compile(r"_([12])\.f(?:ast)?q\.gz$")
+
+
+def fastq_mates(fastq_ftp: str) -> tuple[str, str, list[str]]:
+    """Split an ENA `fastq_ftp` value into (mate 1, mate 2, other files).
+
+    Mates are chosen by file name (`_1` / `_2`), never by position. ENA lists some paired
+    runs as three files, an unpaired `<RUN>.fastq.gz` plus `_1` and `_2`, and the unpaired
+    file is not always last. A run with one file is single-end: it is returned as mate 1,
+    with mate 2 empty. Any file that is neither mate is returned in the third element.
+    """
+    files = [f for f in (fastq_ftp or "").split(";") if f]
+    mates = {}
+    for f in files:
+        m = _MATE.search(f)
+        if m and m.group(1) not in mates:
+            mates[m.group(1)] = f
+    if "1" in mates and "2" in mates:
+        return mates["1"], mates["2"], [f for f in files if f not in mates.values()]
+    if len(files) == 1:
+        return files[0], "", []
+    return "", "", files
+
+
 def to_sample_sheet(result: dict) -> list[dict]:
     """nf-core sample,fastq_1,fastq_2 rows from a runs() or panel() result.
 
     The FASTQ columns are ENA URLs. A run that has not been fetched has no local
     path, and inventing one would be a lie. Rewrite them after fetching.
+
+    Mates come from `fastq_mates`. A file that is neither mate (the unpaired file of a
+    three-file run) is left out of the sheet. It is still in the run's `fastq_ftp`, and
+    `sample_sheet_dropped` counts the runs affected.
     """
     out = []
     for r in result["runs"]:
-        parts = (r.get("fastq_ftp") or "").split(";")
+        m1, m2, _ = fastq_mates(r.get("fastq_ftp") or "")
         out.append({
             "sample": r.get("sample_accession") or r["run_accession"],
-            "fastq_1": "https://" + parts[0] if parts and parts[0] else "",
-            "fastq_2": "https://" + parts[1] if len(parts) > 1 else "",
+            "fastq_1": "https://" + m1 if m1 else "",
+            "fastq_2": "https://" + m2 if m2 else "",
         })
     return out
+
+
+def sample_sheet_dropped(result: dict) -> int:
+    """How many runs in `result` have a FASTQ file that `to_sample_sheet` leaves out."""
+    return sum(1 for r in result["runs"] if fastq_mates(r.get("fastq_ftp") or "")[2])

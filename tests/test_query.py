@@ -105,6 +105,34 @@ def test_sample_sheet_is_nf_core_shaped_with_real_urls():
         assert row["fastq_1"].startswith("https://")
 
 
+def test_fastq_mates_picks_by_name_not_position():
+    base = "ftp.sra.ebi.ac.uk/vol1/fastq/ERR123/ERR123456/ERR123456"
+    # Three files with the unpaired one first: positions 0 and 1 would pair it with _1.
+    m1, m2, other = popseq.query.fastq_mates(
+        f"{base}.fastq.gz;{base}_1.fastq.gz;{base}_2.fastq.gz")
+    assert (m1, m2, other) == (f"{base}_1.fastq.gz", f"{base}_2.fastq.gz", [f"{base}.fastq.gz"])
+    # Unpaired file last.
+    m1, m2, other = popseq.query.fastq_mates(
+        f"{base}_1.fastq.gz;{base}_2.fastq.gz;{base}.fastq.gz")
+    assert (m1, m2, other) == (f"{base}_1.fastq.gz", f"{base}_2.fastq.gz", [f"{base}.fastq.gz"])
+    assert popseq.query.fastq_mates(f"{base}.fastq.gz") == (f"{base}.fastq.gz", "", [])
+    assert popseq.query.fastq_mates("") == ("", "", [])
+
+
+def test_sample_sheet_drops_and_counts_the_unpaired_file():
+    base = "ftp.sra.ebi.ac.uk/vol1/fastq/ERR123/ERR123456/ERR123456"
+    result = {"runs": [
+        {"run_accession": "ERR123456", "sample_accession": "SAMEA1",
+         "fastq_ftp": f"{base}.fastq.gz;{base}_1.fastq.gz;{base}_2.fastq.gz"},
+        {"run_accession": "ERR123457", "sample_accession": "SAMEA2",
+         "fastq_ftp": f"{base}7_1.fastq.gz;{base}7_2.fastq.gz"},
+    ]}
+    sheet = popseq.to_sample_sheet(result)
+    assert sheet[0]["fastq_1"] == f"https://{base}_1.fastq.gz"
+    assert sheet[0]["fastq_2"] == f"https://{base}_2.fastq.gz"
+    assert popseq.query.sample_sheet_dropped(result) == 1
+
+
 def test_preload_does_not_change_the_answer():
     before = popseq.panel(taxid=ZT, n=15, seed=3)
     popseq.preload([ZT])
