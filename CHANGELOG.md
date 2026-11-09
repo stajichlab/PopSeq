@@ -8,6 +8,16 @@ Per-run quality flags (specification 008, draft).
 - `catalog/qc/sources.csv` and `catalog/qc/<species_taxid>.<Genus>_<species>.qc.csv.gz`: first source `matpredict_reads_screen_2026-11-08`, 423 flagged runs (236 mixed, 143 borderline, 44 genus_mismatch) in 39 species files; 423 of 423 runs resolved through `cache/fungi_runs_ena_2026-11-06.tsv.gz` and `catalog/taxonomy_species_map.csv.gz`.
 - `scripts/popseq_qc_import.py` and `tests/test_qc_import.py`.
 
+Benchmark 7.1 and the verification rule.
+
+- **Issue #12 finished on compute nodes.** Spec 002 moves from blocked to stable. The route
+  order for `full` is AWS Open Data, then `prefetch`, then ENA HTTPS. The rates were
+  measured while other lab download arrays were running, and spec 002 says so. The
+  login-node arm and the concurrency cap stay UNMEASURED (issue #27).
+- `AGENTS.md` section 6 and `PLAN.md` section 6.3 now state the verification rule adopted on
+  2026-11-07 (verify against the archive that served the bytes) instead of the ENA
+  `read_count` check.
+
 ## 2026-11-07
 
 Added columns only. No path moved, no column renamed or removed.

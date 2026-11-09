@@ -90,10 +90,12 @@ uv add <package>             # add a dependency; updates pyproject.toml and uv.l
 The full strategy is `PLAN.md` section 6 and `specifications/`. The rules that must never be
 broken:
 
-- **Verify every download.** Compare the read count of each mate against the ENA
-  `read_count` from the portal API. Fail the job on a mismatch. There is no checksum for a
-  converted FASTQ, so this check is the only protection, and it has already caught a real
-  corruption.
+- **Verify every download against the archive that served it.** For an SRA-derived FASTQ,
+  each mate's read count must equal NCBI `spots_with_mates`, stored at plan time. For an ENA
+  FASTQ, each file must match ENA's MD5 and the two mates must hold equal counts. Fail the
+  job on a mismatch. Do not use ENA `read_count` as the target: for most ERR runs it counts
+  reads, not pairs (spec 002). There is no checksum for a converted FASTQ, so the count check
+  is its only protection, and it has already caught a real corruption.
 - Delete the `.sra` only **after** verification passes.
 - **Take both mates of a run from one source.** Never mix an ENA file and an SRA-derived file
   for the same run.

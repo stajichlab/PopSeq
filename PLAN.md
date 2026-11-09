@@ -235,7 +235,9 @@ connection early, which is a different access pattern from streaming a whole run
 **nobody has measured them against each other**, and a shared fetcher cannot pick a default
 until someone does.
 
-Proposed order, to be confirmed by benchmark 7.1:
+Proposed order, to be confirmed by benchmark 7.1. **Superseded 2026-11-08:** benchmark 7.1
+set the order for `full` to AWS Open Data, then `prefetch`, then ENA HTTPS, and found ENA
+Aspera unusable here. Spec 002 holds the results.
 
 1. **NCBI `prefetch` + `parallel-fastq-dump`** for `full`. This is the measured-fastest
    route for whole runs on this cluster.
@@ -250,7 +252,9 @@ Proposed order, to be confirmed by benchmark 7.1:
 ### 6.3 Verification is mandatory
 
 There is no checksum for a converted FASTQ. Every download records the read count of both
-mates and compares it with the ENA `read_count`. A mismatch fails the job. This rule exists
+mates and compares it with the archive that served it: NCBI `spots_with_mates` for an
+SRA-derived file, ENA's MD5 plus equal mate counts for an ENA file (spec 002; adopted
+2026-11-07, replacing a check against ENA `read_count`). A mismatch fails the job. This rule exists
 because it has already caught a real corruption: on 2026-10-24 a leftover ENA loop resumed
 onto an SRA-derived file and corrupted mate 1, and only the count check found it.
 
@@ -379,8 +383,9 @@ as is. Both are correct.
 
 ## 10. Open questions
 
-1. **Route order** (section 6.2). Blocks the fetcher default. Benchmark 7.1.
-2. **Is Aspera actually faster here?** Untested. Benchmark 7.1.
+1. **Route order** (section 6.2). Answered by benchmark 7.1, 2026-11-08 (spec 002).
+2. **Is Aspera actually faster here?** It cannot be measured: every installed key fails
+   authentication (spec 002, route 2).
 3. **How much cross-project reuse is there?** Benchmark 7.3. If it is near zero, the cache
    in section 3 is over-designed and should shrink.
 4. **Who owns a correction?** When NCBI says a strain is *Fusarium oxysporum* and we believe
@@ -397,8 +402,8 @@ as is. Both are correct.
    reads do. This looks right, but it couples PopSeq to a `popsketch` binary, so it is a
    decision, not an obvious yes.
 8. **What is the real concurrency limit?** Failures appeared at about 35 concurrent
-   `parallel-fastq-dump` downloads. The safe ceiling is unmeasured. Benchmark 7.1 should
-   find it, because every array job in every project needs the number.
+   `parallel-fastq-dump` downloads. The safe ceiling is UNMEASURED. Benchmark 7.1 did not
+   measure it; issue #27 tracks it, because every array job in every project needs the number.
 9. **Canonical taxonomy.** All three projects hit species synonyms (*Magnaporthe* /
    *Pyricularia*, *Candida glabrata* / *Nakaseomyces glabratus*, *Candida* / *Candidozyma
    auris*). The taxid-first naming in spec 001 handles storage, but nothing yet decides which

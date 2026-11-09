@@ -45,3 +45,7 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 2026-11-08T03:41:19Z,ERR2188722,,full,aws_odp,compute,,0.28,,,unavailable_at_ncbi,AWS HTTP 404
 2026-11-08T03:41:31Z,ERR2188722,,full,ncbi_prefetch,compute,,1.40,,,unavailable_at_ncbi,2026-11-08T03:41:30 prefetch.3.2.0: 1) Resolving 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0: Current preference is set to retrieve SRA Normalized Format files with full base quality scores 2026-11-08T03:41:31 prefetch.3.2.0: 1) Failed to resolve 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0 err: name not found while resolving query within virtual file system module - failed to resolve accession 'ERR2188722' - no data ( 404 ); ncbi_phid='946417FAAEFEE7110000000000180018.m_1'
 2026-11-08T04:51:35Z,ERR2188722,,full,ena_https,compute,3976655321,4421.91,0.899,false,verify_failed,"expected 29467106 pairs, mate1 29461216, mate2 29461216, md5_ok true"
+2026-11-08T05:08:09Z,SRR23214362,1913371,full,ena_https,compute,7210061986,7772.07,0.928,true,ok,
+2026-11-08T05:15:38Z,SRR16988686,51922,full,ena_https,compute,963093154,1068.77,0.901,true,ok,
+2026-11-08T05:31:43Z,SRR25902591,286115,full,ena_https,compute,1885972685,2011.45,0.938,true,ok,
+2026-11-08T06:00:19Z,ERR2286963,286115,full,ena_https,compute,10009091215,9882.07,1.013,true,ok,

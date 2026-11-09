@@ -1,8 +1,8 @@
 # Spec 002: download strategy
 
-Status: **blocked.** The route order below is a proposal. It cannot become stable until
-benchmark 7.1 in `PLAN.md` is run, because two projects in this lab hold measurements that
-appear to disagree. See "The unresolved conflict".
+Status: **stable** (2026-11-08). Benchmark 7.1 settled the route order for tier `full` on
+compute nodes. See "Benchmark 7.1 results". Two measurements are still UNMEASURED and are
+tracked in issue #27: the login-node arm and the concurrency cap.
 
 ## Depth tiers
 
@@ -39,7 +39,7 @@ or `stride`. The cost difference is small; the bias is not.
 `stride`, and `stride` requires reading the whole run to produce its output, so it saves
 storage but not transfer.
 
-## Route order (proposed, not settled)
+## Route order
 
 ### Tier `full`
 
@@ -114,6 +114,40 @@ a proposal carried over from one project, not a finding.
 
 Benchmark 7.1: 10 runs spanning 0.5 to 10 GB, each fetched by all three routes, on a compute
 node and on the login node. Record MB/s, wall time, and failures.
+
+### Benchmark 7.1 results (2026-11-07 to 2026-11-08)
+
+10 runs from 0.5 to 10 GB (`benchmarks/2026-11-07_d1_runs.csv`), plus the control run
+`ERR2188722`. Each was fetched by all four routes on compute nodes. Outcomes are judged under
+the adopted verification rule below (`popseq_bench_routes.py summary --plan`). Source:
+`benchmarks/2026-11-07_route_comparison.csv`.
+
+| Route | Attempts | ok | verify_failed | transfer_failed | unavailable_at_ncbi | Transfer MB/s median (p10 to p90) |
+|---|---|---|---|---|---|---|
+| `aws_odp` | 12 | 10 | 0 | 0 | 2 | 10.3 (5.0 to 21.5) |
+| `ncbi_prefetch` | 12 | 10 | 0 | 0 | 2 | 9.5 (6.1 to 16.2) |
+| `ena_https` | 13 | 11 | 2 | 0 | 0 | 0.90 (0.84 to 0.94) |
+| `ena_aspera` | 13 | 0 | 0 | 13 | 0 | none: authentication fails |
+
+**Measured under load.** Every attempt overlapped about 10,000 MATPredict download jobs and
+the sketch-store download arrays. Read these rates as the rates under normal lab load, not as
+a baseline. They will be measured again if later rows in `benchmarks/downloads.csv` show they
+vary. The attempt counts include one duplicate run (`ERR9802648`) from a cancelled first
+array.
+
+- The two `unavailable_at_ncbi` per SRA route are `ERR2188722` (absent at NCBI) and
+  `ERR2286963` (held unpaired at NCBI). ENA served both as verified pairs.
+- The two ENA `verify_failed` attempts (`SRR16988686`, `SRR25902591`) arrived at exactly
+  ENA's byte size but failed MD5 and gunzip. Both ran on node i32. Both were verified `ok`
+  when fetched again on node i29. The cause is unknown.
+- The two SRA routes are equal within the spread. AWS stays first because it is a plain
+  resumable HTTPS GET and MATPredict's 4,211-run record agrees (10.3 MB/s median).
+- ENA HTTPS is about 10 times slower for whole runs. It stays the route for partial tiers and
+  the source of pairs for runs NCBI holds unpaired.
+
+This settles the order for tier `full`: AWS Open Data, then `prefetch`, then ENA HTTPS.
+The TE_fungi_copy login-node figure for `prefetch` (20-23 MB/s, one run) was not reproduced
+on compute nodes, and the login-node arm is UNMEASURED (#27).
 
 ## Verification is mandatory
 
@@ -195,8 +229,9 @@ detected it.
   2,023 runs on the first pass, while running about 35 concurrently. **Concurrency was not
   shown to be the cause.** GmG corrected this on 2026-11-06: 7 of the 28 were transient and
   all 7 succeeded on rerun at a cap of 3, which is consistent with a cap helping but does not
-  demonstrate it. A cap is cheap insurance, not a proven fix. The safe value is unmeasured;
-  20 is a starting point and benchmark 7.1 should find the real one.
+  demonstrate it. A cap is cheap insurance, not a proven fix. The safe value is UNMEASURED;
+  20 is a starting point. Benchmark 7.1 did not measure it, because it needs a quiet cluster
+  (issue #27).
 - **Retry before reporting a failure**, but distinguish the two causes. Of those 28 runs,
   21 were **permanent**: `sra-stat` returns 404 for every one, they are all `ERR` accessions
   from four ENA studies, and they exist at ENA but not at NCBI. That is
@@ -302,3 +337,6 @@ works 100 percent of the time look identical in a table of successes.
   ERR runs, and that 27 of those 200 are unpaired at NCBI. Adopted the rule "verify against
   the archive that served the bytes". ENA Aspera could not be measured: every key on the
   cluster fails authentication.
+- 2026-11-08: status moved from blocked to stable. Added the benchmark 7.1 results, labelled
+  as measured under load. The login-node arm and the concurrency cap moved to issue #27 and
+  stay UNMEASURED.
