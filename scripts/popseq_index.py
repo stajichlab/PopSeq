@@ -132,6 +132,11 @@ CAVEATS = [
     "Only 113 species were reconciled against NCBI. For every other species "
     "ncbi_status is not_checked, which is not the same as absent.",
     "Nothing here has been downloaded or verified. These are archive records.",
+    "Scope: the run table holds only ENA runs with library_strategy=WGS, "
+    "library_source=GENOMIC and instrument_platform=ILLUMINA "
+    "(scripts/popseq_survey.py, QUERY_RUNS). A --strategy or --platform filter for "
+    "anything else returns nothing because those runs were never harvested, not because "
+    "none exist (issue #24).",
 ]
 
 

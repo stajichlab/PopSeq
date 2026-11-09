@@ -48,6 +48,11 @@ def _emit_runs(result, fmt):
             print(r["run_accession"])
     elif fmt == "samples":
         _write_rows(q.to_sample_sheet(result), ["sample", "fastq_1", "fastq_2"], "csv")
+        dropped = q.sample_sheet_dropped(result)
+        if dropped:
+            print(f"# caveat: {dropped} run(s) also have an unpaired FASTQ file; the sheet "
+                  "uses only _1 and _2 (the full list is in fastq_ftp, --format json)",
+                  file=sys.stderr)
     else:
         _write_rows(result["runs"], q.RUN_FIELDS, fmt)
 
@@ -81,10 +86,12 @@ def main(argv=None) -> int:
         g.add_argument("--taxid", type=int)
 
     def add_filters(sp):
-        sp.add_argument("--platform", default="ILLUMINA")
+        sp.add_argument("--platform", default="ILLUMINA",
+                        help="the catalog holds ILLUMINA runs only (issue #24)")
         sp.add_argument("--layout", default="PAIRED",
                         help="PAIRED, SINGLE, or '' for any")
-        sp.add_argument("--strategy", default="WGS")
+        sp.add_argument("--strategy", default="WGS",
+                        help="the catalog holds WGS GENOMIC runs only (issue #24)")
         sp.add_argument("--min-depth", type=float,
                         help="estimated x; a run with no estimate is dropped")
         sp.add_argument("--min-gbases", type=float)

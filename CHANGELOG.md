@@ -2,6 +2,17 @@
 
 ## 2026-11-08
 
+Sample sheet and catalog scope.
+
+- `popseq runs --format samples` and `popseq.to_sample_sheet` now choose mates by file name
+  (`_1`, `_2`), not by position. Before this, 15,035 runs that ENA lists with three files
+  (an unpaired `<RUN>.fastq.gz` plus `_1` and `_2`) could get the unpaired file as
+  `fastq_1`. The unpaired file is left out of the sheet. It stays in `fastq_ftp`, and the
+  CLI prints a stderr caveat with the number of runs affected. New:
+  `popseq.query.fastq_mates`, `popseq.query.sample_sheet_dropped`.
+- `catalog/index.json` and `catalog/api/index.json` gain a caveat: the run table is
+  WGS GENOMIC Illumina only (issue #24).
+
 Per-run quality flags (specification 008, draft).
 
 - `specifications/008-run-qc-flags.md`: a registry of per-run findings (contamination for now) from any project. The catalog records the finding; the consumer decides. A source replaces only its own rows; `curated_*` columns survive every import.

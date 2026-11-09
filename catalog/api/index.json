@@ -1,6 +1,6 @@
 {
  "popseq_schema": "1.0.0",
- "generated": "2026-11-07",
+ "generated": "2026-11-08",
  "what": "One static JSON file per fungal species with 100 or more isolates. Each holds the full description of the species and a pre-selected panel of up to 100 strains to profile.",
  "scope": "public whole-genome Illumina sequencing runs of fungal isolates, as ENA and NCBI describe them",
  "archive_snapshot": "2026-11-06",
@@ -28,7 +28,8 @@
   "A run count is not a strain count and an isolate count is not an independent-sample count. 52 of the 113 largest species take half or more of their isolates from one study. Read catalog/summary/clonality.csv.gz before treating a species as a population.",
   "est_depth_x comes from metadata, not from the reads.",
   "Only 113 species were reconciled against NCBI. For every other species ncbi_status is not_checked, which is not the same as absent.",
-  "Nothing here has been downloaded or verified. These are archive records."
+  "Nothing here has been downloaded or verified. These are archive records.",
+  "Scope: the run table holds only ENA runs with library_strategy=WGS, library_source=GENOMIC and instrument_platform=ILLUMINA (scripts/popseq_survey.py, QUERY_RUNS). A --strategy or --platform filter for anything else returns nothing because those runs were never harvested, not because none exist (issue #24)."
  ],
  "species_count": 113,
  "species": [
