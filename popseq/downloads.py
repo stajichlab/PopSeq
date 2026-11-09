@@ -10,6 +10,7 @@ Columns, in this order (the spec fixes them; do not reorder):
 
 * `outcome` is one of OUTCOMES. `unavailable_at_ncbi` is a real state, not a
   failure: the run exists at ENA, but neither AWS Open Data nor `prefetch` has it.
+  `unpaired` means pairs were required (`--require-pairs`) and no archive serves them.
 * `seconds` is the transfer wall time. `mb_per_s` is `bytes / seconds / 1e6`,
   computed here so that every writer computes it the same way.
 * An empty field means unknown. `NA` is never written (AGENTS.md section 8).
@@ -43,7 +44,7 @@ DOWNLOADS_CSV = os.path.join(ROOT, "benchmarks", "downloads.csv")
 
 FIELDS = ["utc", "run", "taxid", "tier", "route", "node_type", "bytes", "seconds",
           "mb_per_s", "verified", "outcome", "error"]
-OUTCOMES = ("ok", "verify_failed", "transfer_failed", "unavailable_at_ncbi")
+OUTCOMES = ("ok", "verify_failed", "transfer_failed", "unavailable_at_ncbi", "unpaired")
 TIERS = ("head", "windows", "stride", "full")
 # Route names. The four candidate routes of spec 002 for tier `full`, plus the
 # conversion-only step, which a benchmark may time on its own.

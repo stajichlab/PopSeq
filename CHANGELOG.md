@@ -2,6 +2,20 @@
 
 ## 2026-11-08
 
+Pairing is what ENA serves (owner decision 2026-11-08). One column added; nothing moved.
+
+- `catalog/runs/fungi_all_runs.csv.gz` gains `ena_layout`: `PAIRED` when ENA serves `_1`
+  and `_2`, `SINGLE` for one file, empty for none. The 34 existing columns of all 245,822
+  rows are identical to the previous build. `library_layout` disagrees with it for 2,274
+  runs: 806 labelled PAIRED serve one file, 1,468 labelled SINGLE serve pairs.
+- `--layout` (CLI, package, MCP) and the default panels now filter on `ena_layout`. 30
+  species files in `catalog/api/` change: 643 more paired isolates in total. Largest moves:
+  *Cryptococcus neoformans* +607, *Xylaria necrophora* 0 to 166, *C. gattii* +105,
+  *Schizosaccharomyces pombe* -242, *Saccharomyces cerevisiae* -51.
+- Specs 001 and 002 state the pairing rule, single-end verification and `--require-pairs`.
+  `read_count` is no longer described as a verification target. `popseq/downloads.py`
+  gains the outcome `unpaired`.
+
 Repository rules.
 
 - `AGENTS.md` section 7 (owner-approved): `catalog/runs/fungi_all_runs.csv.gz` is the

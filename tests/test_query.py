@@ -187,3 +187,29 @@ def test_host_filter_by_taxid_and_name():
     b = popseq.runs(taxid=ZT, host="Triticum aestivum", include_excluded=True)["runs"]
     assert a and {r["run_accession"] for r in a} <= {r["run_accession"] for r in b}
     assert all(r["host_taxid"] == "4565" for r in a)
+
+
+def test_ena_layout_comes_from_served_files_not_the_label():
+    base = "ftp.sra.ebi.ac.uk/vol1/fastq/ERR123/ERR123456/ERR123456"
+    lay = popseq.query.ena_layout
+    assert lay(f"{base}_1.fastq.gz;{base}_2.fastq.gz") == "PAIRED"
+    assert lay(f"{base}.fastq.gz;{base}_1.fastq.gz;{base}_2.fastq.gz") == "PAIRED"
+    assert lay(f"{base}.fastq.gz") == "SINGLE"
+    assert lay("") == ""
+
+
+def test_layout_filter_uses_ena_layout():
+    """A run labelled SINGLE that ENA serves as _1/_2 counts as PAIRED, and the reverse."""
+    base = "ftp.sra.ebi.ac.uk/vol1/fastq/ERR123/ERR123456/ERR123456"
+    common = dict(instrument_platform="ILLUMINA", library_strategy="WGS", exclusion="",
+                  base_count="1", first_public="2020-01-01")
+    rows = [
+        dict(common, run_accession="A", library_layout="SINGLE", ena_layout="PAIRED",
+             fastq_ftp=f"{base}_1.fastq.gz;{base}_2.fastq.gz"),
+        dict(common, run_accession="B", library_layout="PAIRED", ena_layout="SINGLE",
+             fastq_ftp=f"{base}.fastq.gz"),
+    ]
+    f = popseq.query._filter
+    assert [r["run_accession"] for r in f(rows, layout="PAIRED")] == ["A"]
+    assert [r["run_accession"] for r in f(rows, layout="SINGLE")] == ["B"]
+    assert len(f(rows, layout="")) == 2

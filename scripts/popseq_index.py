@@ -117,6 +117,14 @@ COLUMNS = {
                    "as 'soil' or 'culture'), same_as_organism (the host field names "
                    "the sequenced organism itself), ambiguous, conflicting, "
                    "unresolved.",
+    "library_layout": "PAIRED or SINGLE as the submitter labelled it. Metadata only: "
+                      "wrong for 2,274 catalog runs. Use ena_layout.",
+    "ena_layout": "PAIRED when ENA serves _1 and _2 files, SINGLE when it serves one "
+                  "file, blank when none. Decides pairing and the --layout filter "
+                  "(spec 001). NCBI may still hold a PAIRED run unpaired; the fetcher "
+                  "checks that (spec 002).",
+    "read_count": "Read pairs for SRR/DRR runs but reads for most ERR runs. Not a "
+                  "verification target (spec 002).",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes "
                         "';'-joined for multi-sample runs (issue #3).",
 }

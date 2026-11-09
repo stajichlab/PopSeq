@@ -71,10 +71,11 @@
         "host",
         "host_taxid",
         "host_name",
-        "host_status"
+        "host_status",
+        "ena_layout"
       ],
-      "bytes": 14495515,
-      "sha256": "a165d5f796df03dd7fe9d3bf0f707a38679a43920eabb91b089b2457a7cc7283"
+      "bytes": 14513743,
+      "sha256": "d1f119638e88627cfab5b05eebe73543ace3012002d18658d9a2403b58e3fcc8"
     },
     "species_summary": {
       "path": "catalog/kingdom/fungi_species_summary.csv.gz",
@@ -1101,6 +1102,9 @@
     "host": "Raw host from the BioSample: first non-empty of host, host_plant, specific hosts, host_common_name.",
     "host_taxid": "NCBI taxid of host. Blank unless host_status is ok or same_as_organism. Resolved via catalog/vocab/host_taxa.csv.gz.",
     "host_status": "ok, absent, missing, not_a_host (a lab or environment term such as 'soil' or 'culture'), same_as_organism (the host field names the sequenced organism itself), ambiguous, conflicting, unresolved.",
+    "library_layout": "PAIRED or SINGLE as the submitter labelled it. Metadata only: wrong for 2,274 catalog runs. Use ena_layout.",
+    "ena_layout": "PAIRED when ENA serves _1 and _2 files, SINGLE when it serves one file, blank when none. Decides pairing and the --layout filter (spec 001). NCBI may still hold a PAIRED run unpaired; the fetcher checks that (spec 002).",
+    "read_count": "Read pairs for SRR/DRR runs but reads for most ERR runs. Not a verification target (spec 002).",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes ';'-joined for multi-sample runs (issue #3)."
   },
   "caveats": [
