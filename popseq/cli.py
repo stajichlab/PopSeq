@@ -87,7 +87,7 @@ def main(argv=None) -> int:
 
     def add_filters(sp):
         sp.add_argument("--platform", default="ILLUMINA",
-                        help="the catalog holds ILLUMINA runs only (issue #24)")
+                        help="ILLUMINA (default), BGISEQ, DNBSEQ, or '' for any")
         sp.add_argument("--layout", default="PAIRED",
                         help="PAIRED, SINGLE, or '' for any. Matches what ENA serves "
                              "(ena_layout: _1 and _2 files = PAIRED), not ENA's label")

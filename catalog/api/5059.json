@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "5059",
   "species_name": "Aspergillus flavus",
-  "runs": "1350",
-  "isolates": "1342",
-  "studies": "94",
-  "total_gbase": "7551.1",
-  "est_download_tb": "2.1575",
-  "paired_runs": "1335",
+  "runs": "1354",
+  "isolates": "1346",
+  "studies": "95",
+  "total_gbase": "7558.8",
+  "est_download_tb": "2.1597",
+  "paired_runs": "1339",
   "single_runs": "15",
   "first_year": "2012",
   "last_year": "2026"
@@ -18,28 +18,28 @@
  "clonality": {
   "species_taxid": "5059",
   "species_name": "Aspergillus flavus",
-  "studies": "94",
-  "isolates": "1342",
-  "isolates_per_study": "14.28",
+  "studies": "95",
+  "isolates": "1346",
+  "isolates_per_study": "14.17",
   "largest_study": "547"
  },
  "coverage": {
   "species_taxid": "5059",
   "species_name": "Aspergillus flavus",
-  "runs_with_estimate": "1350",
-  "median_cov": "115.9",
-  "p10_cov": "50.7",
-  "p90_cov": "346.7",
-  "runs_ge_15x": "1341",
-  "runs_ge_30x": "1307"
+  "runs_with_estimate": "1354",
+  "median_cov": "115.6",
+  "p10_cov": "50.4",
+  "p90_cov": "345.4",
+  "runs_ge_15x": "1345",
+  "runs_ge_30x": "1311"
  },
  "runs_by_exclusion_label": {
-  "none": 1350
+  "none": 1354
  },
  "ncbi_status": {
   "in_ncbi": 1350,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 4
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

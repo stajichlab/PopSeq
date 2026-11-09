@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "1080349",
   "species_name": "Saccharomyces eubayanus",
-  "runs": "1053",
-  "isolates": "513",
-  "studies": "33",
-  "total_gbase": "804.2",
-  "est_download_tb": "0.2298",
-  "paired_runs": "1052",
+  "runs": "1055",
+  "isolates": "515",
+  "studies": "34",
+  "total_gbase": "806.0",
+  "est_download_tb": "0.2303",
+  "paired_runs": "1054",
   "single_runs": "1",
   "first_year": "2014",
   "last_year": "2026"
@@ -18,29 +18,29 @@
  "clonality": {
   "species_taxid": "1080349",
   "species_name": "Saccharomyces eubayanus",
-  "studies": "33",
-  "isolates": "513",
-  "isolates_per_study": "15.55",
+  "studies": "34",
+  "isolates": "515",
+  "isolates_per_study": "15.15",
   "largest_study": "186"
  },
  "coverage": {
   "species_taxid": "1080349",
   "species_name": "Saccharomyces eubayanus",
-  "runs_with_estimate": "1053",
-  "median_cov": "28.1",
+  "runs_with_estimate": "1054",
+  "median_cov": "28.3",
   "p10_cov": "0.5",
-  "p90_cov": "146.6",
-  "runs_ge_15x": "629",
-  "runs_ge_30x": "518"
+  "p90_cov": "148.8",
+  "runs_ge_15x": "630",
+  "runs_ge_30x": "519"
  },
  "runs_by_exclusion_label": {
-  "none": 1048,
+  "none": 1050,
   "evolution": 5
  },
  "ncbi_status": {
   "in_ncbi": 1053,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 2
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

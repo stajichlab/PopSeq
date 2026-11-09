@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "37769",
   "species_name": "Cryptococcus gattii",
-  "runs": "375",
-  "isolates": "298",
-  "studies": "25",
-  "total_gbase": "732.4",
-  "est_download_tb": "0.2093",
-  "paired_runs": "266",
+  "runs": "392",
+  "isolates": "315",
+  "studies": "26",
+  "total_gbase": "758.7",
+  "est_download_tb": "0.2168",
+  "paired_runs": "283",
   "single_runs": "109",
   "first_year": "2013",
   "last_year": "2026"
@@ -18,28 +18,29 @@
  "clonality": {
   "species_taxid": "37769",
   "species_name": "Cryptococcus gattii",
-  "studies": "25",
-  "isolates": "298",
-  "isolates_per_study": "11.92",
+  "studies": "26",
+  "isolates": "315",
+  "isolates_per_study": "12.12",
   "largest_study": "104"
  },
  "coverage": {
   "species_taxid": "37769",
   "species_name": "Cryptococcus gattii",
-  "runs_with_estimate": "375",
-  "median_cov": "72.8",
-  "p10_cov": "39.2",
-  "p90_cov": "198.8",
-  "runs_ge_15x": "363",
-  "runs_ge_30x": "352"
+  "runs_with_estimate": "392",
+  "median_cov": "73.8",
+  "p10_cov": "39.4",
+  "p90_cov": "198.6",
+  "runs_ge_15x": "380",
+  "runs_ge_30x": "369"
  },
  "runs_by_exclusion_label": {
-  "none": 375
+  "none": 375,
+  "mutant": 17
  },
  "ncbi_status": {
   "in_ncbi": 375,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 17
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

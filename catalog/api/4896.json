@@ -5,45 +5,45 @@
  "summary": {
   "species_taxid": "4896",
   "species_name": "Schizosaccharomyces pombe",
-  "runs": "3784",
-  "isolates": "3184",
-  "studies": "83",
-  "total_gbase": "5673.8",
-  "est_download_tb": "1.6211",
-  "paired_runs": "3652",
-  "single_runs": "132",
+  "runs": "3897",
+  "isolates": "3284",
+  "studies": "89",
+  "total_gbase": "6551.4",
+  "est_download_tb": "1.8718",
+  "paired_runs": "3759",
+  "single_runs": "138",
   "first_year": "2010",
   "last_year": "2026"
  },
  "clonality": {
   "species_taxid": "4896",
   "species_name": "Schizosaccharomyces pombe",
-  "studies": "83",
-  "isolates": "3175",
-  "isolates_per_study": "38.25",
+  "studies": "89",
+  "isolates": "3275",
+  "isolates_per_study": "36.8",
   "largest_study": "368"
  },
  "coverage": {
   "species_taxid": "4896",
   "species_name": "Schizosaccharomyces pombe",
-  "runs_with_estimate": "3783",
-  "median_cov": "74.7",
-  "p10_cov": "22.5",
-  "p90_cov": "246.7",
-  "runs_ge_15x": "3611",
-  "runs_ge_30x": "2945"
+  "runs_with_estimate": "3896",
+  "median_cov": "79.5",
+  "p10_cov": "22.6",
+  "p90_cov": "271.3",
+  "runs_ge_15x": "3724",
+  "runs_ge_30x": "3058"
  },
  "runs_by_exclusion_label": {
-  "mutant": 285,
-  "none": 2914,
+  "mutant": 373,
+  "none": 2933,
   "cross": 384,
-  "not_wgs": 36,
+  "not_wgs": 42,
   "evolution": 165
  },
  "ncbi_status": {
   "in_ncbi": 3778,
   "ena_only": 6,
-  "not_checked": 0
+  "not_checked": 113
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

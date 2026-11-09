@@ -107,7 +107,8 @@ different answers.
 ```
 library_strategy == "WGS"
 library_source   == "GENOMIC"
-instrument_platform == "ILLUMINA"
+instrument_platform == "ILLUMINA"   # the default; BGISEQ and DNBSEQ are in the
+                                    # catalog (2026-11-09) and selected on request
 ena_layout       == "PAIRED"     # what ENA serves, not the label
 read_count       >= 600000
 est_coverage     >= 15
@@ -263,3 +264,6 @@ A drop almost always means the query changed, not the archive.
 - 2026-11-08: added `ena_layout`, which decides pairing. `library_layout` is now metadata
   only. `read_count` is no longer described as a verification target. The eligibility
   filter uses `ena_layout == "PAIRED"` in place of the label and the two-file test.
+- 2026-11-09: BGISEQ and DNBSEQ WGS runs added from a supplementary snapshot (owner
+  decision 2026-11-08). The default platform filter stays ILLUMINA. New derived table
+  `catalog/species_layout.csv.gz`.

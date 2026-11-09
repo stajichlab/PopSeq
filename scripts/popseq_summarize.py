@@ -66,16 +66,21 @@ def write(name, header, rows, src, date):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--runs", default=None, help="ENA run table; default: newest in cache/")
+    p.add_argument("--runs", nargs="+", default=None,
+                   help="ENA snapshot(s), e.g. the full snapshot plus the BGISEQ/DNBSEQ "
+                        "supplement; default: the newest full snapshot in cache/")
     p.add_argument("--biosamples", default="catalog/kingdom/fungi_biosamples.csv.gz")
     p.add_argument("--taxmap", default="catalog/taxonomy_species_map.csv.gz")
     p.add_argument("--min-isolates", type=int, default=20,
                    help="species below this are pooled into an 'all others' row")
     args = p.parse_args()
 
-    runs_path = args.runs or sorted(glob.glob("cache/fungi_runs_ena_*.tsv.gz"))[-1]
-    date = os.path.basename(runs_path).replace("fungi_runs_ena_", "").replace(".tsv.gz", "")
-    print(f"runs: {runs_path} (ENA snapshot {date})", file=sys.stderr)
+    # A full snapshot is fungi_runs_ena_<YYYY-MM-DD>.tsv.gz; supplements carry a label
+    # (fungi_runs_ena_bgi_<date>) and are never picked by default.
+    runs_paths = args.runs or [sorted(glob.glob("cache/fungi_runs_ena_2*.tsv.gz"))[-1]]
+    date = "+".join(os.path.basename(x).replace("fungi_runs_ena_", "").replace(".tsv.gz", "")
+                    for x in runs_paths)
+    print(f"runs: {runs_paths} (ENA snapshot {date})", file=sys.stderr)
 
     taxmap = load_taxmap(args.taxmap)
     print(f"taxmap: {len(taxmap)}", file=sys.stderr)
@@ -111,34 +116,43 @@ def main():
         if tid and mb:
             genome_mb[tid] = mb
 
-    with gz(runs_path) as fh:
-        for r in csv.DictReader(fh, delimiter="\t"):
+    def snapshot_rows():
+        seen = set()
+        for path in runs_paths:
+            with gz(path) as fh:
+                for r in csv.DictReader(fh, delimiter="\t"):
+                    if r.get("run_accession") in seen:
+                        continue
+                    seen.add(r.get("run_accession"))
+                    yield r
+
+    for r in snapshot_rows():
+        try:
+            t = int(r["tax_id"])
+        except (KeyError, ValueError):
+            continue
+        e = taxmap.get(t)
+        if not e:
+            continue
+        sp, nm = e
+        name_of[sp] = nm
+        samples = [a.strip() for a in (r.get("sample_accession") or "").split(";") if a.strip()]
+        for a in samples:
+            sample_sp[a] = sp
+        yr = (r.get("first_public") or "")[:4]
+        if yr.isdigit():
+            k = (sp, yr)
+            by_year[k][0] += 1
+            by_year[k][1].update(samples)
+        stu = r.get("study_accession") or ""
+        if stu:
+            studies[sp][stu].update(samples)
+        mb = genome_mb.get(sp)
+        if mb:
             try:
-                t = int(r["tax_id"])
-            except (KeyError, ValueError):
-                continue
-            e = taxmap.get(t)
-            if not e:
-                continue
-            sp, nm = e
-            name_of[sp] = nm
-            samples = [a.strip() for a in (r.get("sample_accession") or "").split(";") if a.strip()]
-            for a in samples:
-                sample_sp[a] = sp
-            yr = (r.get("first_public") or "")[:4]
-            if yr.isdigit():
-                k = (sp, yr)
-                by_year[k][0] += 1
-                by_year[k][1].update(samples)
-            stu = r.get("study_accession") or ""
-            if stu:
-                studies[sp][stu].update(samples)
-            mb = genome_mb.get(sp)
-            if mb:
-                try:
-                    cov[sp].append(int(r.get("base_count") or 0) / (mb * 1e6))
-                except ValueError:
-                    pass
+                cov[sp].append(int(r.get("base_count") or 0) / (mb * 1e6))
+            except ValueError:
+                pass
 
     print("joining BioSample attributes...", file=sys.stderr)
     geo = defaultdict(Counter)
@@ -161,7 +175,7 @@ def main():
                 source[sp][s] += 1
 
     print("writing tables:", file=sys.stderr)
-    src = os.path.basename(runs_path)
+    src = " + ".join(os.path.basename(x) for x in runs_paths)
 
     write("by_year.csv.gz", ["species_taxid", "species_name", "year", "runs", "isolates"],
           sorted(([sp, name_of[sp], yr, v[0], len(v[1])]

@@ -5,41 +5,41 @@
  "summary": {
   "species_taxid": "4944",
   "species_name": "Saccharomycopsis fibuligera",
-  "runs": "101",
-  "isolates": "100",
-  "studies": "4",
-  "total_gbase": "525.4",
-  "est_download_tb": "0.1501",
-  "paired_runs": "101",
+  "runs": "102",
+  "isolates": "101",
+  "studies": "5",
+  "total_gbase": "532.4",
+  "est_download_tb": "0.1521",
+  "paired_runs": "102",
   "single_runs": "0",
-  "first_year": "2021",
+  "first_year": "2019",
   "last_year": "2024"
  },
  "clonality": {
   "species_taxid": "4944",
   "species_name": "Saccharomycopsis fibuligera",
-  "studies": "4",
-  "isolates": "100",
-  "isolates_per_study": "25.0",
+  "studies": "5",
+  "isolates": "101",
+  "isolates_per_study": "20.2",
   "largest_study": "97"
  },
  "coverage": {
   "species_taxid": "4944",
   "species_name": "Saccharomycopsis fibuligera",
-  "runs_with_estimate": "101",
-  "median_cov": "270.3",
+  "runs_with_estimate": "102",
+  "median_cov": "270.6",
   "p10_cov": "214.5",
-  "p90_cov": "313.1",
-  "runs_ge_15x": "101",
-  "runs_ge_30x": "101"
+  "p90_cov": "313.6",
+  "runs_ge_15x": "102",
+  "runs_ge_30x": "102"
  },
  "runs_by_exclusion_label": {
-  "none": 101
+  "none": 102
  },
  "ncbi_status": {
   "in_ncbi": 101,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 1
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "5180",
   "species_name": "Sclerotinia sclerotiorum",
-  "runs": "314",
-  "isolates": "314",
+  "runs": "315",
+  "isolates": "315",
   "studies": "9",
-  "total_gbase": "1005.2",
-  "est_download_tb": "0.2872",
-  "paired_runs": "314",
+  "total_gbase": "1008.9",
+  "est_download_tb": "0.2883",
+  "paired_runs": "315",
   "single_runs": "0",
   "first_year": "2019",
   "last_year": "2026"
@@ -19,28 +19,28 @@
   "species_taxid": "5180",
   "species_name": "Sclerotinia sclerotiorum",
   "studies": "9",
-  "isolates": "314",
-  "isolates_per_study": "34.89",
+  "isolates": "315",
+  "isolates_per_study": "35.0",
   "largest_study": "192"
  },
  "coverage": {
   "species_taxid": "5180",
   "species_name": "Sclerotinia sclerotiorum",
-  "runs_with_estimate": "313",
+  "runs_with_estimate": "314",
   "median_cov": "63.3",
   "p10_cov": "43.3",
   "p90_cov": "144.7",
-  "runs_ge_15x": "311",
-  "runs_ge_30x": "307"
+  "runs_ge_15x": "312",
+  "runs_ge_30x": "308"
  },
  "runs_by_exclusion_label": {
-  "none": 296,
+  "none": 297,
   "mutant": 18
  },
  "ncbi_status": {
   "in_ncbi": 314,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 1
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

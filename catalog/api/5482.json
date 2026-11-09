@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "5482",
   "species_name": "Candida tropicalis",
-  "runs": "1049",
-  "isolates": "1046",
-  "studies": "43",
-  "total_gbase": "2386.7",
-  "est_download_tb": "0.6819",
-  "paired_runs": "1048",
+  "runs": "1383",
+  "isolates": "1380",
+  "studies": "50",
+  "total_gbase": "3421.4",
+  "est_download_tb": "0.9776",
+  "paired_runs": "1382",
   "single_runs": "1",
   "first_year": "2013",
   "last_year": "2026"
@@ -18,28 +18,28 @@
  "clonality": {
   "species_taxid": "5482",
   "species_name": "Candida tropicalis",
-  "studies": "43",
-  "isolates": "1046",
-  "isolates_per_study": "24.33",
+  "studies": "50",
+  "isolates": "1380",
+  "isolates_per_study": "27.6",
   "largest_study": "452"
  },
  "coverage": {
   "species_taxid": "5482",
   "species_name": "Candida tropicalis",
-  "runs_with_estimate": "1035",
-  "median_cov": "149.5",
-  "p10_cov": "91.5",
-  "p90_cov": "236.7",
-  "runs_ge_15x": "1029",
-  "runs_ge_30x": "1020"
+  "runs_with_estimate": "1369",
+  "median_cov": "161.4",
+  "p10_cov": "96.4",
+  "p90_cov": "247.1",
+  "runs_ge_15x": "1363",
+  "runs_ge_30x": "1354"
  },
  "runs_by_exclusion_label": {
-  "none": 1049
+  "none": 1383
  },
  "ncbi_status": {
   "in_ncbi": 1049,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 334
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

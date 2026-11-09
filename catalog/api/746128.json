@@ -5,12 +5,12 @@
  "summary": {
   "species_taxid": "746128",
   "species_name": "Aspergillus fumigatus",
-  "runs": "4639",
-  "isolates": "4511",
-  "studies": "135",
-  "total_gbase": "18797.2",
-  "est_download_tb": "5.3706",
-  "paired_runs": "4590",
+  "runs": "4648",
+  "isolates": "4520",
+  "studies": "139",
+  "total_gbase": "18880.2",
+  "est_download_tb": "5.3943",
+  "paired_runs": "4599",
   "single_runs": "49",
   "first_year": "2010",
   "last_year": "2026"
@@ -18,23 +18,23 @@
  "clonality": {
   "species_taxid": "746128",
   "species_name": "Aspergillus fumigatus",
-  "studies": "135",
-  "isolates": "4511",
-  "isolates_per_study": "33.41",
+  "studies": "139",
+  "isolates": "4520",
+  "isolates_per_study": "32.52",
   "largest_study": "619"
  },
  "coverage": {
   "species_taxid": "746128",
   "species_name": "Aspergillus fumigatus",
-  "runs_with_estimate": "4637",
+  "runs_with_estimate": "4646",
   "median_cov": "83.7",
-  "p10_cov": "34.6",
-  "p90_cov": "189.9",
-  "runs_ge_15x": "4494",
-  "runs_ge_30x": "4277"
+  "p10_cov": "34.7",
+  "p90_cov": "190.1",
+  "runs_ge_15x": "4503",
+  "runs_ge_30x": "4286"
  },
  "runs_by_exclusion_label": {
-  "none": 4431,
+  "none": 4440,
   "evolution": 5,
   "not_wgs": 2,
   "mutant": 6,
@@ -43,7 +43,7 @@
  "ncbi_status": {
   "in_ncbi": 4639,
   "ena_only": 0,
-  "not_checked": 0
+  "not_checked": 9
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

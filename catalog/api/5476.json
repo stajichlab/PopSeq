@@ -5,45 +5,45 @@
  "summary": {
   "species_taxid": "5476",
   "species_name": "Candida albicans",
-  "runs": "3516",
-  "isolates": "3358",
-  "studies": "201",
-  "total_gbase": "7229.3",
-  "est_download_tb": "2.0655",
-  "paired_runs": "3435",
-  "single_runs": "81",
+  "runs": "4593",
+  "isolates": "4428",
+  "studies": "240",
+  "total_gbase": "8970.1",
+  "est_download_tb": "2.5629",
+  "paired_runs": "4510",
+  "single_runs": "83",
   "first_year": "2011",
   "last_year": "2026"
  },
  "clonality": {
   "species_taxid": "5476",
   "species_name": "Candida albicans",
-  "studies": "201",
-  "isolates": "3358",
-  "isolates_per_study": "16.71",
+  "studies": "240",
+  "isolates": "4428",
+  "isolates_per_study": "18.45",
   "largest_study": "378"
  },
  "coverage": {
   "species_taxid": "5476",
   "species_name": "Candida albicans",
-  "runs_with_estimate": "3494",
-  "median_cov": "108.7",
-  "p10_cov": "44.2",
-  "p90_cov": "233.4",
-  "runs_ge_15x": "3445",
-  "runs_ge_30x": "3331"
+  "runs_with_estimate": "4553",
+  "median_cov": "102.5",
+  "p10_cov": "49.6",
+  "p90_cov": "219.7",
+  "runs_ge_15x": "4504",
+  "runs_ge_30x": "4390"
  },
  "runs_by_exclusion_label": {
-  "none": 3110,
-  "mutant": 197,
+  "none": 4080,
+  "mutant": 292,
   "evolution": 204,
   "cross": 4,
-  "not_wgs": 1
+  "not_wgs": 13
  },
  "ncbi_status": {
   "in_ncbi": 3512,
   "ena_only": 4,
-  "not_checked": 0
+  "not_checked": 1077
  },
  "caveats": [
   "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy query reaches, so true per-species totals are higher (issue #2).",

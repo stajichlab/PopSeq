@@ -24,7 +24,8 @@ Columns added on top of the ENA fields:
                                   (popseq.query.ena_layout); library_layout is the
                                   submitter's label and is kept as metadata only
 
-    uv run python scripts/popseq_runs_table.py --ena cache/fungi_runs_ena_2026-11-06.tsv.gz
+    uv run python scripts/popseq_runs_table.py --ena cache/fungi_runs_ena_2026-11-06.tsv.gz \\
+        cache/fungi_runs_ena_bgi_2026-11-09.tsv.gz
 """
 from __future__ import annotations
 
@@ -39,6 +40,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(HERE, "scripts"))
 from popseq_survey import EXCLUDE_PATTERNS, RESCUE_PATTERN  # noqa: E402
 from popseq_vocab import biosample_hosts  # noqa: E402
+from popseq_species_summary import summarise  # noqa: E402
 
 sys.path.insert(0, HERE)
 from popseq import normalise  # noqa: E402
@@ -76,13 +78,15 @@ def label(row):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--ena", required=True)
+    p.add_argument("--ena", nargs="+", required=True,
+                   help="ENA snapshot(s); a run in more than one is taken from the first")
+    p.add_argument("--reconciled-ena",
+                   help="the snapshot the NCBI reconciliation compared against "
+                        "(default: the first --ena). Runs not in it are not_checked")
     p.add_argument("--taxmap", default=os.path.join(HERE, "catalog", "taxonomy_species_map.csv.gz"))
     p.add_argument("--genome-sizes", default=os.path.join(HERE, "catalog", "genome_sizes.csv"))
     p.add_argument("--ena-only", default=os.path.join(HERE, "catalog", "kingdom",
                                                       "fungi_byspecies.ena_only_runs.csv.gz"))
-    p.add_argument("--summary", default=os.path.join(HERE, "catalog", "kingdom",
-                                                     "fungi_species_summary.csv.gz"))
     p.add_argument("--biosamples", default=os.path.join(HERE, "catalog", "kingdom",
                                                         "fungi_biosamples.csv.gz"))
     p.add_argument("--out", default=os.path.join(HERE, "catalog", "runs", "fungi_all_runs.csv.gz"))
@@ -105,15 +109,18 @@ def main():
                 continue
     print(f"genome sizes: {len(sizes)} species", file=sys.stderr)
 
-    # Which species were reconciled against NCBI at all. A run of a species that was
-    # never checked must not be reported as "absent from NCBI".
-    checked = set()
-    with opener(args.summary) as fh:
-        if not fh.readline().startswith("#"):
-            fh.seek(0)
-        for r in csv.DictReader(fh):
-            if int(r["isolates"]) >= 100:
-                checked.add(int(r["species_taxid"]))
+    # Which runs were reconciled against NCBI at all. A run that was never checked must
+    # not be reported as in_ncbi or as absent from NCBI. The reconciliation covered the
+    # species with 100 or more isolates in the snapshot it compared against, and only
+    # the runs in that snapshot. A run from a later snapshot is not_checked.
+    reconciled_path = args.reconciled_ena or args.ena[0]
+    with opener(reconciled_path) as fh:
+        rec_rows = list(csv.DictReader(fh, delimiter="\t"))
+    reconciled_runs = {r["run_accession"] for r in rec_rows}
+    checked = {int(d["species_taxid"]) for d in
+               summarise(rec_rows, {str(k): (str(v), "") for k, v in taxmap.items()})
+               if d["isolates"] >= 100}
+    del rec_rows
     ena_only = set()
     with opener(args.ena_only) as fh:
         for r in csv.DictReader(fh):
@@ -129,12 +136,19 @@ def main():
     cstat, hstat, lstat = {}, {}, {}
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     tmp = args.out + ".tmp.gz"
-    with opener(args.ena) as src, gzip.open(tmp, "wt", newline="") as dst:
+    def snapshot_rows():
+        for path in args.ena:
+            with opener(path) as src:
+                yield from csv.DictReader(src, delimiter="\t")
+
+    seen = set()
+    with gzip.open(tmp, "wt", newline="") as dst:
         w = csv.DictWriter(dst, fieldnames=OUT_FIELDS, extrasaction="ignore")
         w.writeheader()
-        for r in csv.DictReader(src, delimiter="\t"):
-            if not (r.get("run_accession") or "").strip():
+        for r in snapshot_rows():
+            if not (r.get("run_accession") or "").strip() or r["run_accession"] in seen:
                 continue
+            seen.add(r["run_accession"])
             try:
                 raw = int(str(r.get("tax_id") or "").strip())
             except ValueError:
@@ -149,7 +163,7 @@ def main():
             except ValueError:
                 bases = 0
             r["est_depth_x"] = f"{bases / gsize:.1f}" if gsize and bases else ""
-            if sp in checked:
+            if sp in checked and r["run_accession"] in reconciled_runs:
                 status = "ena_only" if r["run_accession"] in ena_only else "in_ncbi"
             else:
                 status = "not_checked"
