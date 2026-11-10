@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-09 (latest): `popseq fetch` (issue #13)
+
+- **`popseq fetch`** downloads one run (or a manifest) at tier `head`, `windows`, `stride`,
+  `full` or the new `coverage` (genome size x target coverage from evenly spaced windows),
+  verified against the archive that served the bytes, with a `<RUN>.json` sidecar. Temporary
+  files go in `$SCRATCH`. `--exec CMD` runs on the verified reads before they are deleted.
+  `--require-pairs` sends a run NCBI holds unpaired to ENA, or ends it with exit 11. Exit codes
+  0, 2, 10, 11, 12, 13, 14. Spec 002 defines the tier, the verification of subsampled tiers
+  (weaker than the full-run check, and it says so) and the result row first.
+- **`benchmarks/downloads.csv` gains a trailing `concurrency` column** (issue #27): the number
+  of fetches the caller declared it was running at once (`--concurrency`, default 20,
+  UNMEASURED). The 58 existing rows have an empty value (unknown). Columns were not reordered.
+  The writer follows the file's own header, so a file without the column still takes rows.
+- 11 rows from the acceptance run (`benchmarks/2026-11-09_fetch_acceptance_*.tsv`) were added
+  to the log, declared at concurrency 1.
+- The route and lookup helpers moved from `scripts/popseq_bench_routes.py` to
+  `popseq/routes.py` and `popseq/lookup.py`; the benchmark script imports them.
+
 ## 2026-11-09 (later)
 
 Curated species labels for assemblies (issue #33; owner answers of 2026-11-09). New paths only: no path moved, no

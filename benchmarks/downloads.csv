@@ -1,59 +1,70 @@
-utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
-2026-11-08T00:53:16Z,SRR36290343,498019,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T00:55:15Z,SRR36290343,498019,full,ncbi_prefetch,compute,369164434,37.70,9.793,true,ok,
-2026-11-08T00:55:53Z,SRR36290343,498019,full,aws_odp,compute,369164434,74.11,4.981,true,ok,
-2026-11-08T01:03:34Z,SRR36290343,498019,full,ena_https,compute,535357230,607.81,0.881,true,ok,
-2026-11-08T01:05:47Z,ERR9802648,4932,full,ena_aspera,compute,,1.37,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:06:18Z,SRR16988686,51922,full,ena_aspera,compute,,1.35,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:07:30Z,ERR9802648,4932,full,ncbi_prefetch,compute,393120347,27.30,14.399,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok"
-2026-11-08T01:07:50Z,ERR9802648,4932,full,aws_odp,compute,393120347,44.18,8.898,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok"
-2026-11-08T01:10:08Z,ERR9802648,4932,full,ena_aspera,compute,,1.40,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:10:29Z,SRR16988686,51922,full,ena_aspera,compute,,1.39,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:11:47Z,ERR9802648,4932,full,aws_odp,compute,393120347,20.96,18.754,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok"
-2026-11-08T01:11:54Z,ERR9802648,4932,full,ncbi_prefetch,compute,393120347,29.56,13.298,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok"
-2026-11-08T01:21:59Z,SRR16988686,51922,full,aws_odp,compute,1805147445,358.84,5.030,true,ok,
-2026-11-08T01:22:07Z,SRR16988686,51922,full,ncbi_prefetch,compute,1805147445,369.92,4.880,true,ok,
-2026-11-08T01:22:33Z,ERR9802648,4932,full,ena_https,compute,645985147,732.17,0.882,false,verify_failed,"expected 11867252 pairs, mate1 5933626, mate2 5933626, md5_ok true"
-2026-11-08T01:27:47Z,ERR17038970,4896,full,aws_odp,compute,919195197,132.86,6.919,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok"
-2026-11-08T01:28:13Z,ERR17038970,4896,full,ncbi_prefetch,compute,919195197,125.98,7.297,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok"
-2026-11-08T01:28:16Z,ERR17038970,4896,full,ena_aspera,compute,,1.36,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:33:11Z,SRR16988686,51922,full,ena_https,compute,963093154,1334.62,0.722,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/SRR16988686/ena_https/SRR16988686_2.fastq.gz (rc 3)
-2026-11-08T01:33:24Z,SRR25902591,286115,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:37:24Z,SRR25902591,286115,full,aws_odp,compute,1962868480,205.70,9.543,true,ok,
-2026-11-08T01:37:42Z,SRR25902591,286115,full,ncbi_prefetch,compute,1962868480,214.76,9.140,true,ok,
-2026-11-08T01:37:49Z,ERR1309507,4932,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:44:07Z,ERR1309507,4932,full,ncbi_prefetch,compute,2048083773,122.76,16.684,true,ok,
-2026-11-08T01:50:17Z,ERR17038970,4896,full,ena_https,compute,1370178695,1643.01,0.834,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok true"
-2026-11-08T01:50:25Z,SRR12548862,27344,full,ena_aspera,compute,,2.89,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T01:50:30Z,ERR1309507,4932,full,aws_odp,compute,2048083773,84.96,24.106,true,ok,
-2026-11-08T02:03:16Z,SRR12548862,27344,full,aws_odp,compute,2585121826,232.25,11.131,true,ok,
-2026-11-08T02:05:59Z,SRR25902591,286115,full,ena_https,compute,1885972685,1932.51,0.976,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/SRR25902591/ena_https/SRR25902591_1.fastq.gz (rc 3)
-2026-11-08T02:14:51Z,SRR12548862,27344,full,ncbi_prefetch,compute,2585121826,159.81,16.177,true,ok,
-2026-11-08T02:28:32Z,ERR6049275,144538,full,aws_odp,compute,3601329725,169.83,21.206,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok"
-2026-11-08T02:31:45Z,ERR1309507,4932,full,ena_https,compute,2646593506,3160.01,0.838,true,ok,
-2026-11-08T02:32:21Z,ERR6049275,144538,full,ena_aspera,compute,,1.66,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T02:48:13Z,ERR6049275,144538,full,ncbi_prefetch,compute,3601329725,529.10,6.807,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok"
-2026-11-08T02:55:38Z,SRR23214362,1913371,full,aws_odp,compute,5592216489,353.16,15.835,true,ok,
-2026-11-08T02:55:54Z,SRR23214362,1913371,full,ena_aspera,compute,,3.33,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T02:58:23Z,SRR12548862,27344,full,ena_https,compute,3662015346,4005.21,0.914,true,ok,
-2026-11-08T03:12:10Z,ERR2286963,286115,full,ncbi_prefetch,compute,3266646523,152.01,21.490,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/ERR2286963/ncbi_prefetch/ERR2286963_2.fastq.gz (rc 1)
-2026-11-08T03:12:23Z,ERR2286963,286115,full,ena_aspera,compute,,1.36,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T03:20:20Z,SRR23214362,1913371,full,ncbi_prefetch,compute,5592216489,894.05,6.255,true,ok,
-2026-11-08T03:35:43Z,ERR2286963,286115,full,aws_odp,compute,3266646523,234.72,13.917,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/ERR2286963/aws_odp/ERR2286963_2.fastq.gz (rc 1)
-2026-11-08T03:36:11Z,ERR2188722,,full,ena_aspera,compute,,1.37,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting."
-2026-11-08T03:40:47Z,ERR6049275,144538,full,ena_https,compute,5245379245,5589.65,0.938,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok true"
-2026-11-08T03:41:19Z,ERR2188722,,full,aws_odp,compute,,0.28,,,unavailable_at_ncbi,AWS HTTP 404
-2026-11-08T03:41:31Z,ERR2188722,,full,ncbi_prefetch,compute,,1.40,,,unavailable_at_ncbi,2026-11-08T03:41:30 prefetch.3.2.0: 1) Resolving 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0: Current preference is set to retrieve SRA Normalized Format files with full base quality scores 2026-11-08T03:41:31 prefetch.3.2.0: 1) Failed to resolve 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0 err: name not found while resolving query within virtual file system module - failed to resolve accession 'ERR2188722' - no data ( 404 ); ncbi_phid='946417FAAEFEE7110000000000180018.m_1'
-2026-11-08T04:51:35Z,ERR2188722,,full,ena_https,compute,3976655321,4421.91,0.899,false,verify_failed,"expected 29467106 pairs, mate1 29461216, mate2 29461216, md5_ok true"
-2026-11-08T05:08:09Z,SRR23214362,1913371,full,ena_https,compute,7210061986,7772.07,0.928,true,ok,
-2026-11-08T05:15:38Z,SRR16988686,51922,full,ena_https,compute,963093154,1068.77,0.901,true,ok,
-2026-11-08T05:31:43Z,SRR25902591,286115,full,ena_https,compute,1885972685,2011.45,0.938,true,ok,
-2026-11-08T06:00:19Z,ERR2286963,286115,full,ena_https,compute,10009091215,9882.07,1.013,true,ok,
-2026-11-09T05:48:09Z,ERR10174988,5476,full,aws_odp,compute,806676806,32.82,24.581,true,ok,
-2026-11-09T05:48:18Z,SRR29710527,4932,full,aws_odp,compute,871043911,45.72,19.054,true,ok,
-2026-11-09T05:48:57Z,SRR31374214,45513,full,aws_odp,compute,1117812535,41.56,26.896,,unavailable_at_ncbi,"not paired at NCBI: spots 8118152, spots_with_mates 0"
-2026-11-09T05:50:20Z,SRR28828113,,full,aws_odp,compute,1692588519,64.36,26.300,,unavailable_at_ncbi,"not paired at NCBI: spots 7768470, spots_with_mates 0"
-2026-11-09T05:58:46Z,ERR10174988,5476,full,ena_https,compute,1017326619,765.43,1.329,true,ok,
-2026-11-09T06:01:03Z,SRR28828113,,full,ena_https,compute,949286942,602.87,1.575,true,ok,
-2026-11-09T06:03:57Z,SRR29710527,4932,full,ena_https,compute,1110145299,1074.14,1.034,true,ok,
-2026-11-09T06:09:11Z,SRR31374214,45513,full,ena_https,compute,1579474435,1200.30,1.316,true,ok,
+utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error,concurrency
+2026-11-08T00:53:16Z,SRR36290343,498019,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T00:55:15Z,SRR36290343,498019,full,ncbi_prefetch,compute,369164434,37.70,9.793,true,ok,,
+2026-11-08T00:55:53Z,SRR36290343,498019,full,aws_odp,compute,369164434,74.11,4.981,true,ok,,
+2026-11-08T01:03:34Z,SRR36290343,498019,full,ena_https,compute,535357230,607.81,0.881,true,ok,,
+2026-11-08T01:05:47Z,ERR9802648,4932,full,ena_aspera,compute,,1.37,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:06:18Z,SRR16988686,51922,full,ena_aspera,compute,,1.35,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:07:30Z,ERR9802648,4932,full,ncbi_prefetch,compute,393120347,27.30,14.399,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok",
+2026-11-08T01:07:50Z,ERR9802648,4932,full,aws_odp,compute,393120347,44.18,8.898,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok",
+2026-11-08T01:10:08Z,ERR9802648,4932,full,ena_aspera,compute,,1.40,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:10:29Z,SRR16988686,51922,full,ena_aspera,compute,,1.39,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:11:47Z,ERR9802648,4932,full,aws_odp,compute,393120347,20.96,18.754,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok",
+2026-11-08T01:11:54Z,ERR9802648,4932,full,ncbi_prefetch,compute,393120347,29.56,13.298,false,verify_failed,"expected 11867252 pairs, mate1 5946824, mate2 5946824, md5_ok",
+2026-11-08T01:21:59Z,SRR16988686,51922,full,aws_odp,compute,1805147445,358.84,5.030,true,ok,,
+2026-11-08T01:22:07Z,SRR16988686,51922,full,ncbi_prefetch,compute,1805147445,369.92,4.880,true,ok,,
+2026-11-08T01:22:33Z,ERR9802648,4932,full,ena_https,compute,645985147,732.17,0.882,false,verify_failed,"expected 11867252 pairs, mate1 5933626, mate2 5933626, md5_ok true",
+2026-11-08T01:27:47Z,ERR17038970,4896,full,aws_odp,compute,919195197,132.86,6.919,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok",
+2026-11-08T01:28:13Z,ERR17038970,4896,full,ncbi_prefetch,compute,919195197,125.98,7.297,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok",
+2026-11-08T01:28:16Z,ERR17038970,4896,full,ena_aspera,compute,,1.36,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:33:11Z,SRR16988686,51922,full,ena_https,compute,963093154,1334.62,0.722,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/SRR16988686/ena_https/SRR16988686_2.fastq.gz (rc 3),
+2026-11-08T01:33:24Z,SRR25902591,286115,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:37:24Z,SRR25902591,286115,full,aws_odp,compute,1962868480,205.70,9.543,true,ok,,
+2026-11-08T01:37:42Z,SRR25902591,286115,full,ncbi_prefetch,compute,1962868480,214.76,9.140,true,ok,,
+2026-11-08T01:37:49Z,ERR1309507,4932,full,ena_aspera,compute,,1.34,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:44:07Z,ERR1309507,4932,full,ncbi_prefetch,compute,2048083773,122.76,16.684,true,ok,,
+2026-11-08T01:50:17Z,ERR17038970,4896,full,ena_https,compute,1370178695,1643.01,0.834,false,verify_failed,"expected 18279602 pairs, mate1 9139801, mate2 9139801, md5_ok true",
+2026-11-08T01:50:25Z,SRR12548862,27344,full,ena_aspera,compute,,2.89,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T01:50:30Z,ERR1309507,4932,full,aws_odp,compute,2048083773,84.96,24.106,true,ok,,
+2026-11-08T02:03:16Z,SRR12548862,27344,full,aws_odp,compute,2585121826,232.25,11.131,true,ok,,
+2026-11-08T02:05:59Z,SRR25902591,286115,full,ena_https,compute,1885972685,1932.51,0.976,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/SRR25902591/ena_https/SRR25902591_1.fastq.gz (rc 3),
+2026-11-08T02:14:51Z,SRR12548862,27344,full,ncbi_prefetch,compute,2585121826,159.81,16.177,true,ok,,
+2026-11-08T02:28:32Z,ERR6049275,144538,full,aws_odp,compute,3601329725,169.83,21.206,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok",
+2026-11-08T02:31:45Z,ERR1309507,4932,full,ena_https,compute,2646593506,3160.01,0.838,true,ok,,
+2026-11-08T02:32:21Z,ERR6049275,144538,full,ena_aspera,compute,,1.66,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T02:48:13Z,ERR6049275,144538,full,ncbi_prefetch,compute,3601329725,529.10,6.807,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok",
+2026-11-08T02:55:38Z,SRR23214362,1913371,full,aws_odp,compute,5592216489,353.16,15.835,true,ok,,
+2026-11-08T02:55:54Z,SRR23214362,1913371,full,ena_aspera,compute,,3.33,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T02:58:23Z,SRR12548862,27344,full,ena_https,compute,3662015346,4005.21,0.914,true,ok,,
+2026-11-08T03:12:10Z,ERR2286963,286115,full,ncbi_prefetch,compute,3266646523,152.01,21.490,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/ERR2286963/ncbi_prefetch/ERR2286963_2.fastq.gz (rc 1),
+2026-11-08T03:12:23Z,ERR2286963,286115,full,ena_aspera,compute,,1.36,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T03:20:20Z,SRR23214362,1913371,full,ncbi_prefetch,compute,5592216489,894.05,6.255,true,ok,,
+2026-11-08T03:35:43Z,ERR2286963,286115,full,aws_odp,compute,3266646523,234.72,13.917,false,verify_failed,pigz failed on /rhome/jstajich/projects/PopSeq/bench/2026-11-07_d1_routes/work/ERR2286963/aws_odp/ERR2286963_2.fastq.gz (rc 1),
+2026-11-08T03:36:11Z,ERR2188722,,full,ena_aspera,compute,,1.37,,,transfer_failed,"Session Stop (Error: failed to authenticate) ascp: failed to authenticate, exiting.",
+2026-11-08T03:40:47Z,ERR6049275,144538,full,ena_https,compute,5245379245,5589.65,0.938,false,verify_failed,"expected 63205138 pairs, mate1 31602569, mate2 31602569, md5_ok true",
+2026-11-08T03:41:19Z,ERR2188722,,full,aws_odp,compute,,0.28,,,unavailable_at_ncbi,AWS HTTP 404,
+2026-11-08T03:41:31Z,ERR2188722,,full,ncbi_prefetch,compute,,1.40,,,unavailable_at_ncbi,2026-11-08T03:41:30 prefetch.3.2.0: 1) Resolving 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0: Current preference is set to retrieve SRA Normalized Format files with full base quality scores 2026-11-08T03:41:31 prefetch.3.2.0: 1) Failed to resolve 'ERR2188722'... 2026-11-08T03:41:31 prefetch.3.2.0 err: name not found while resolving query within virtual file system module - failed to resolve accession 'ERR2188722' - no data ( 404 ); ncbi_phid='946417FAAEFEE7110000000000180018.m_1',
+2026-11-08T04:51:35Z,ERR2188722,,full,ena_https,compute,3976655321,4421.91,0.899,false,verify_failed,"expected 29467106 pairs, mate1 29461216, mate2 29461216, md5_ok true",
+2026-11-08T05:08:09Z,SRR23214362,1913371,full,ena_https,compute,7210061986,7772.07,0.928,true,ok,,
+2026-11-08T05:15:38Z,SRR16988686,51922,full,ena_https,compute,963093154,1068.77,0.901,true,ok,,
+2026-11-08T05:31:43Z,SRR25902591,286115,full,ena_https,compute,1885972685,2011.45,0.938,true,ok,,
+2026-11-08T06:00:19Z,ERR2286963,286115,full,ena_https,compute,10009091215,9882.07,1.013,true,ok,,
+2026-11-09T05:48:09Z,ERR10174988,5476,full,aws_odp,compute,806676806,32.82,24.581,true,ok,,
+2026-11-09T05:48:18Z,SRR29710527,4932,full,aws_odp,compute,871043911,45.72,19.054,true,ok,,
+2026-11-09T05:48:57Z,SRR31374214,45513,full,aws_odp,compute,1117812535,41.56,26.896,,unavailable_at_ncbi,"not paired at NCBI: spots 8118152, spots_with_mates 0",
+2026-11-09T05:50:20Z,SRR28828113,,full,aws_odp,compute,1692588519,64.36,26.300,,unavailable_at_ncbi,"not paired at NCBI: spots 7768470, spots_with_mates 0",
+2026-11-09T05:58:46Z,ERR10174988,5476,full,ena_https,compute,1017326619,765.43,1.329,true,ok,,
+2026-11-09T06:01:03Z,SRR28828113,,full,ena_https,compute,949286942,602.87,1.575,true,ok,,
+2026-11-09T06:03:57Z,SRR29710527,4932,full,ena_https,compute,1110145299,1074.14,1.034,true,ok,,
+2026-11-09T06:09:11Z,SRR31374214,45513,full,ena_https,compute,1579474435,1200.30,1.316,true,ok,,
+2026-11-10T05:49:39Z,SRR36290343,498019,full,aws_odp,compute,369164434,123.51,2.989,true,ok,,1
+2026-11-10T05:50:03Z,SRR36290343,498019,head,ena_https,compute,11881024,20.02,0.593,true,ok,,1
+2026-11-10T05:50:59Z,SRR36290343,498019,windows,aws_odp,compute,369164434,48.46,7.617,true,ok,,1
+2026-11-10T05:54:51Z,SRR36290343,498019,stride,aws_odp,compute,369164434,120.46,3.065,true,ok,,1
+2026-11-10T05:56:56Z,SRR36290343,498019,coverage,aws_odp,compute,369164434,109.53,3.371,true,ok,,1
+2026-11-10T05:56:59Z,ERR1069479,4932,full,aws_odp,compute,,,,,unavailable_at_ncbi,"not paired at NCBI (2290761 spots, none with mates): skipped",1
+2026-11-10T05:56:59Z,ERR1069479,4932,full,ncbi_prefetch,compute,,,,,unavailable_at_ncbi,"not paired at NCBI (2290761 spots, none with mates): skipped",1
+2026-11-10T06:00:28Z,ERR1069479,4932,full,ena_https,compute,197375091,203.28,0.971,true,ok,,1
+2026-11-10T06:00:55Z,SRR5628799,4932,full,aws_odp,compute,72949380,21.86,3.337,true,ok,,1
+2026-11-10T06:02:03Z,SRR36290343,498019,windows,aws_odp,compute,369164434,60.38,6.114,true,ok,,1
+2026-11-10T06:12:33Z,SRR16988686,51922,full,aws_odp,compute,1805147445,574.91,3.140,true,ok,,1
