@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-11-09 (later): `popseq fetch` (issue #13)
+## 2026-11-09 (latest): `popseq fetch` (issue #13)
 
 - **`popseq fetch`** downloads one run (or a manifest) at tier `head`, `windows`, `stride`,
   `full` or the new `coverage` (genome size x target coverage from evenly spaced windows),
@@ -17,6 +17,22 @@
   to the log, declared at concurrency 1.
 - The route and lookup helpers moved from `scripts/popseq_bench_routes.py` to
   `popseq/routes.py` and `popseq/lookup.py`; the benchmark script imports them.
+
+## 2026-11-09 (later)
+
+Curated species labels for assemblies (issue #33; owner answers of 2026-11-09). New paths only: no path moved, no
+column of an existing table changed.
+
+- **New spec `specifications/009-curated-species-labels.md`.** A label layer beside the NCBI taxonomy: an
+  authority's species (`label_*` columns) and a curator's (`curated_*`, never overwritten), with the evidence.
+- **New table `catalog/kingdom/fungi_assemblies.csv.gz`** (`scripts/popseq_assemblies.py`): 26,826 fungal GenBank
+  assemblies from NCBI's assembly summary, snapshot 2026-11-09; 26,819 have a BioSample, 669 a RefSeq copy. This is
+  the link from an assembly to its BioSample and runs.
+- **New `catalog/labels/`** (`scripts/popseq_labels_import.py`), first source `fusariumid_gmg_f1_2026-06-23`:
+  FusariumID labels for the 2,111 BFD fusarioid assemblies from GmG bench F1 in-silico barcoding. 1,916 confident,
+  143 ties, 52 no call; 1,040 name a different species than NCBI (mostly *F. oxysporum* to a FOSC species).
+  `run_labels.csv.gz` carries them to 1,000 runs that share a BioSample with 848 of the assemblies.
+- `catalog/index.json` lists the four new tables. Tests: `tests/test_labels_import.py`.
 
 ## 2026-11-09
 

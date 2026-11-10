@@ -95,6 +95,24 @@ TABLES = {
                            grain="runs present at NCBI and absent from ENA",
                            key="run_accession",
                            built_by="scripts/popseq_reconcile.py"),
+    "assemblies": dict(path="catalog/kingdom/fungi_assemblies.csv.gz",
+                       grain="one row per fungal GenBank assembly (GCA) in NCBI's current "
+                             "assembly summary",
+                       key="assembly_accession",
+                       built_by="scripts/popseq_assemblies.py build",
+                       snapshot="cache/ncbi_assembly_summary_fungi_{genbank,refseq}_2026-11-09.txt.gz"),
+    "assembly_labels": dict(path="catalog/labels/assembly_labels.csv.gz",
+                            grain="one row per assembly and label source (spec 009)",
+                            key="assembly_accession,source_id",
+                            built_by="scripts/popseq_labels_import.py"),
+    "run_labels": dict(path="catalog/labels/run_labels.csv.gz",
+                       grain="assembly labels carried to the runs of the same BioSample",
+                       key="run_accession,source_id",
+                       built_by="scripts/popseq_labels_import.py"),
+    "label_sources": dict(path="catalog/labels/sources.csv",
+                          grain="one row per label source: authority, release, method, rule",
+                          key="source_id",
+                          built_by="scripts/popseq_labels_import.py"),
 }
 
 COLUMNS = {
@@ -137,6 +155,18 @@ COLUMNS = {
                   "checks that (spec 002).",
     "read_count": "Read pairs for SRR/DRR runs but reads for most ERR runs. Not a "
                   "verification target (spec 002).",
+    "label_species": "Species named by a curated authority (catalog/labels/sources.csv), "
+                     "not by the submitter. ';'-joined when the authority cannot choose "
+                     "between species (label_status tie). Blank when it makes no call.",
+    "label_complex": "The species complex all names in label_species share, from the "
+                     "authority. Blank when they differ or when there is no label.",
+    "label_status": "confident (one species), tie (several, ';'-joined) or no_call.",
+    "label_agreement": "same, tie_includes_ncbi, differs, ncbi_unnamed (the NCBI name is "
+                       "sp./cf. or blank) or no_call, against ncbi_species.",
+    "ncbi_species": "The NCBI taxonomy name of the assembly's species_taxid, or the "
+                    "deposited organism name when the taxid is not in the taxonomy map.",
+    "curated_species": "A curator's species for this assembly. Ours, entered by hand, "
+                       "never overwritten by an import. When set it wins over label_species.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes "
                         "';'-joined for multi-sample runs (issue #3).",
 }

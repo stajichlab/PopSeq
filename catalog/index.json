@@ -1,6 +1,6 @@
 {
   "popseq_schema": "1.0.0",
-  "generated": "2026-11-08",
+  "generated": "2026-11-09",
   "archive_snapshot": "2026-11-06",
   "archive_snapshots": [
     {
@@ -1139,6 +1139,108 @@
       ],
       "bytes": 223805,
       "sha256": "4945874feba46b799c2b1b7269cfc854bb8ae47065801944e2d1fd42630e0d37"
+    },
+    "assemblies": {
+      "path": "catalog/kingdom/fungi_assemblies.csv.gz",
+      "grain": "one row per fungal GenBank assembly (GCA) in NCBI's current assembly summary",
+      "key": "assembly_accession",
+      "built_by": "scripts/popseq_assemblies.py build",
+      "snapshot": "cache/ncbi_assembly_summary_fungi_{genbank,refseq}_2026-11-09.txt.gz",
+      "columns": [
+        "assembly_accession",
+        "refseq_accession",
+        "asm_name",
+        "sample_accession",
+        "study_accession",
+        "tax_id",
+        "species_taxid",
+        "species_name",
+        "organism_name",
+        "strain",
+        "isolate",
+        "assembly_level",
+        "genome_rep",
+        "refseq_category",
+        "relation_to_type_material",
+        "seq_rel_date",
+        "asm_submitter",
+        "genome_size",
+        "excluded_from_refseq"
+      ],
+      "bytes": 991112,
+      "sha256": "907425c5671cffe3b7679c3ca09c2774d11fae7ef0d8364cf22df7340d7d912a"
+    },
+    "assembly_labels": {
+      "path": "catalog/labels/assembly_labels.csv.gz",
+      "grain": "one row per assembly and label source (spec 009)",
+      "key": "assembly_accession,source_id",
+      "built_by": "scripts/popseq_labels_import.py",
+      "columns": [
+        "assembly_accession",
+        "sample_accession",
+        "tax_id",
+        "species_taxid",
+        "ncbi_species",
+        "source_id",
+        "label_species",
+        "label_complex",
+        "label_status",
+        "label_agreement",
+        "nearest_species",
+        "distance",
+        "differences",
+        "aligned_bp",
+        "margin",
+        "runner_up",
+        "loci",
+        "curated_species",
+        "curated_note"
+      ],
+      "bytes": 46562,
+      "sha256": "deda356181e9b965d0e5071e26a72bd7567b55fce4f3d9bc3300545838a8b743"
+    },
+    "run_labels": {
+      "path": "catalog/labels/run_labels.csv.gz",
+      "grain": "assembly labels carried to the runs of the same BioSample",
+      "key": "run_accession,source_id",
+      "built_by": "scripts/popseq_labels_import.py",
+      "columns": [
+        "run_accession",
+        "sample_accession",
+        "assembly_accession",
+        "source_id",
+        "ncbi_species",
+        "label_species",
+        "label_complex",
+        "label_status",
+        "label_agreement",
+        "curated_species"
+      ],
+      "bytes": 12743,
+      "sha256": "1f1d9a4d6722cb8234a0e453055ca84f775612d2d7f9d266ead6e2274cae2abb"
+    },
+    "label_sources": {
+      "path": "catalog/labels/sources.csv",
+      "grain": "one row per label source: authority, release, method, rule",
+      "key": "source_id",
+      "built_by": "scripts/popseq_labels_import.py",
+      "columns": [
+        "source_id",
+        "authority",
+        "authority_release",
+        "project",
+        "tool",
+        "method",
+        "call_rule",
+        "reference",
+        "date",
+        "refresh",
+        "assemblies",
+        "runs",
+        "notes"
+      ],
+      "bytes": 1116,
+      "sha256": "bcae0599de96ba5904206dc0a9e21d2a3e60dd2e9accb3c951437127fc763385"
     }
   },
   "column_notes": {
@@ -1159,6 +1261,12 @@
     "library_layout": "PAIRED or SINGLE as the submitter labelled it. Metadata only: wrong for 2,274 catalog runs. Use ena_layout.",
     "ena_layout": "PAIRED when ENA serves _1 and _2 files, SINGLE when it serves one file, blank when none. Decides pairing and the --layout filter (spec 001). NCBI may still hold a PAIRED run unpaired; the fetcher checks that (spec 002).",
     "read_count": "Read pairs for SRR/DRR runs but reads for most ERR runs. Not a verification target (spec 002).",
+    "label_species": "Species named by a curated authority (catalog/labels/sources.csv), not by the submitter. ';'-joined when the authority cannot choose between species (label_status tie). Blank when it makes no call.",
+    "label_complex": "The species complex all names in label_species share, from the authority. Blank when they differ or when there is no label.",
+    "label_status": "confident (one species), tie (several, ';'-joined) or no_call.",
+    "label_agreement": "same, tie_includes_ncbi, differs, ncbi_unnamed (the NCBI name is sp./cf. or blank) or no_call, against ncbi_species.",
+    "ncbi_species": "The NCBI taxonomy name of the assembly's species_taxid, or the deposited organism name when the taxid is not in the taxonomy map.",
+    "curated_species": "A curator's species for this assembly. Ours, entered by hand, never overwritten by an import. When set it wins over label_species.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes ';'-joined for multi-sample runs (issue #3)."
   },
   "caveats": [
