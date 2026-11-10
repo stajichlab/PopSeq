@@ -11,6 +11,7 @@ One file per topic. These are the interface contracts other projects code agains
 | `005-local-and-unarchived-data.md` | local read data with no accession; provenance classes; reading the Population_Genomics convention | draft |
 | `006-beyond-fungal-isolates.md` | other organism groups, metagenomes, MAGs, uncultured taxa | draft |
 | `008-run-qc-flags.md` | per-run quality flags (contamination, mixtures, wrong organism) from any project: `catalog/qc/` registry and per-species files | draft |
+| `009-curated-species-labels.md` | species labels for assemblies from curated authorities (FusariumID first), beside the NCBI names: `catalog/labels/`, and the NCBI assembly table `catalog/kingdom/fungi_assemblies.csv.gz` | draft |
 
 ## Handoffs
 
