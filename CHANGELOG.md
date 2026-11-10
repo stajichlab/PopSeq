@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-09 (genome sizes for species with 10 or more isolates; issue #36)
+
+No path moved, no column added, renamed or removed.
+
+- **`catalog/genome_sizes.csv`: 115 to 459 species** (`popseq_genome_sizes.py
+  --min-isolates 10`). 418 have an NCBI reference size; 41 have none and keep an empty
+  size with the reason "no reference assembly at NCBI" (hybrids, unnamed `sp.` taxa and
+  species with no assembly). All 41 were fetched a second time with the same result.
+  The 115 existing rows are unchanged.
+- **`est_depth_x` filled for 12,109 runs in 308 species** in
+  `catalog/runs/fungi_all_runs.csv.gz`. Every changed cell was blank before. No other
+  cell changed.
+- `catalog/summary/coverage.csv.gz` grows from 112 to 419 species. The existing rows are
+  unchanged. `catalog/species_layout.csv.gz` gains single-only depth values for 62
+  species.
+- One study to know about: *Hortaea werneckii* PRJNA428320 has 54 runs labelled PAIRED
+  that ENA serves as one file, at a median 914x against a 25.33 Mb assembly. Its paired
+  runs and the other studies sit at 85x to 290x. The size is not the problem.
+
 ## 2026-11-09 (later)
 
 Curated species labels for assemblies (issue #33; owner answers of 2026-11-09). New paths only: no path moved, no

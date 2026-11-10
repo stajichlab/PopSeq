@@ -94,8 +94,8 @@
         "host_status",
         "ena_layout"
       ],
-      "bytes": 15100068,
-      "sha256": "e5e65ab11fe0f5c3b14df5e631a8af8f00a57054eed201de1b8ff41663fc68a9"
+      "bytes": 15152630,
+      "sha256": "6c11a1d61299268d221ae52818a123336662be8b037c6bac9e560042a348e5c8"
     },
     "species_summary": {
       "path": "catalog/kingdom/fungi_species_summary.csv.gz",
@@ -134,8 +134,8 @@
         "single_only_ge_10x",
         "runs_label_mismatch"
       ],
-      "bytes": 85368,
-      "sha256": "28e47fe0b2ab21d9303c7b7e762b98d5d22ff12fb7a20e4645217921905ac5e7"
+      "bytes": 85599,
+      "sha256": "bfd4ea0b1fe6c58a7790210e1cf805b83b58e556ab020b129deafc76a4ed7260"
     },
     "biosamples": {
       "path": "catalog/kingdom/fungi_biosamples.csv.gz",
@@ -974,8 +974,8 @@
         "assembly_level",
         "note"
       ],
-      "bytes": 7402,
-      "sha256": "8a25309cb4336b13320ba623ededa479217cc96dc09020c5fee9053d43b7a19b"
+      "bytes": 29105,
+      "sha256": "239cd5830fac993c4709a140b8aba84771cb2d3a187142f292cd72e0217b4f61"
     },
     "summary_by_year": {
       "path": "catalog/summary/by_year.csv.gz",
@@ -990,7 +990,7 @@
         "isolates"
       ],
       "bytes": 101183,
-      "sha256": "96911ccc6233f76f9c200bf105ce1425349629bea02406707adad641aa9bc46c"
+      "sha256": "a919ab94d05cf6837eaf552afa62b98b595cf1b3a44378c233fb91965bebcf73"
     },
     "summary_clonality": {
       "path": "catalog/summary/clonality.csv.gz",
@@ -1006,7 +1006,7 @@
         "largest_study"
       ],
       "bytes": 92427,
-      "sha256": "4bfabc1dea52ef17354b79c141b3763374f93c3059ca20bf0b87b3f96a7891a7"
+      "sha256": "d1964bcbd455418fd8659b7b3c9c43d6b71378345d6862051dc6e548245e3ba2"
     },
     "summary_coverage": {
       "path": "catalog/summary/coverage.csv.gz",
@@ -1023,8 +1023,8 @@
         "runs_ge_15x",
         "runs_ge_30x"
       ],
-      "bytes": 3500,
-      "sha256": "eb69779a9dbd9cf91f1a909b5cd0f3ae482d201977218b893af54f784e9c4670"
+      "bytes": 11178,
+      "sha256": "8ec677254574afb8f4ffc362cc589a3c5d04115979290052055318c17e4d7df1"
     },
     "summary_geography": {
       "path": "catalog/summary/geography.csv.gz",
@@ -1038,7 +1038,7 @@
         "isolates"
       ],
       "bytes": 89665,
-      "sha256": "b792d687312e36b4f1b4947c62cae6be1ffd96ec08ebf00eebaefb6bf697dcca"
+      "sha256": "c3f3025458644baa1a6cc5dfeef4dccdc698e1619041adcc2bb52d22326fe33c"
     },
     "summary_host_source": {
       "path": "catalog/summary/host_source.csv.gz",
@@ -1053,7 +1053,7 @@
         "isolates"
       ],
       "bytes": 118437,
-      "sha256": "9929d8a35e46288ae85c4e20b005cb9442dec8894f2d6230ecf5e5f0d952e735"
+      "sha256": "6810bf00766d2070d7585c9cdc2163c3d3fb2df21b0ef15acbc0751830ef3c07"
     },
     "vocab_country_aliases": {
       "path": "catalog/vocab/country_aliases.csv",
