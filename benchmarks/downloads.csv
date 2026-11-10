@@ -57,3 +57,14 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 2026-11-09T06:01:03Z,SRR28828113,,full,ena_https,compute,949286942,602.87,1.575,true,ok,,
 2026-11-09T06:03:57Z,SRR29710527,4932,full,ena_https,compute,1110145299,1074.14,1.034,true,ok,,
 2026-11-09T06:09:11Z,SRR31374214,45513,full,ena_https,compute,1579474435,1200.30,1.316,true,ok,,
+2026-11-10T05:49:39Z,SRR36290343,498019,full,aws_odp,compute,369164434,123.51,2.989,true,ok,,1
+2026-11-10T05:50:03Z,SRR36290343,498019,head,ena_https,compute,11881024,20.02,0.593,true,ok,,1
+2026-11-10T05:50:59Z,SRR36290343,498019,windows,aws_odp,compute,369164434,48.46,7.617,true,ok,,1
+2026-11-10T05:54:51Z,SRR36290343,498019,stride,aws_odp,compute,369164434,120.46,3.065,true,ok,,1
+2026-11-10T05:56:56Z,SRR36290343,498019,coverage,aws_odp,compute,369164434,109.53,3.371,true,ok,,1
+2026-11-10T05:56:59Z,ERR1069479,4932,full,aws_odp,compute,,,,,unavailable_at_ncbi,"not paired at NCBI (2290761 spots, none with mates): skipped",1
+2026-11-10T05:56:59Z,ERR1069479,4932,full,ncbi_prefetch,compute,,,,,unavailable_at_ncbi,"not paired at NCBI (2290761 spots, none with mates): skipped",1
+2026-11-10T06:00:28Z,ERR1069479,4932,full,ena_https,compute,197375091,203.28,0.971,true,ok,,1
+2026-11-10T06:00:55Z,SRR5628799,4932,full,aws_odp,compute,72949380,21.86,3.337,true,ok,,1
+2026-11-10T06:02:03Z,SRR36290343,498019,windows,aws_odp,compute,369164434,60.38,6.114,true,ok,,1
+2026-11-10T06:12:33Z,SRR16988686,51922,full,aws_odp,compute,1805147445,574.91,3.140,true,ok,,1

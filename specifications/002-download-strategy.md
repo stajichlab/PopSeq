@@ -468,6 +468,33 @@ A pipeline that treats this state as a failure will retry it forever. Record it 
 Failures are recorded because a route that works 95 percent of the time and a route that
 works 100 percent of the time look identical in a table of successes.
 
+## Acceptance of `popseq fetch` (2026-11-09, issue #13)
+
+One job on a compute node, from `$SCRATCH`, one fetch at a time (declared concurrency 1), from
+`scripts/fetch_acceptance.slurm`. Results: `benchmarks/2026-11-09_fetch_acceptance_results.tsv`
+(one line per fetch) and `..._checks.tsv` (one line per step with its own check). All 11 steps
+passed their checks. The log rows are in `benchmarks/downloads.csv`.
+
+| Step | Run | What was checked | Result |
+|---|---|---|---|
+| `full` | SRR36290343 | sidecar verified | 4,387,476 pairs, AWS, 141 s |
+| `head` | SRR36290343 | 100,000 pairs streamed from ENA, not the whole file | 11.9 MB transferred, 22 s |
+| `windows` | SRR36290343 | 8 windows, subsample verification | 400,000 pairs |
+| `stride` | SRR36290343 | full-run check before the cut | 438,748 pairs (step 10) |
+| `coverage` | SRR36290343 | 30x of 12.25 Mb | 367.5 Mb kept, 30.000x reached |
+| `unpaired` | ERR1069479 | `--require-pairs`, NCBI holds it unpaired | both SRA routes skipped with the reason; ENA pairs, verified |
+| `single` | SRR5628799 | single-end as one file | 1,064,035 reads, layout SINGLE |
+| `hook` | SRR36290343 | hook saw 400,000 reads | no FASTQ left in the output |
+| `resume` | SRR16988686 | killed 25 s into a full fetch | nothing complete-looking left; the rerun finished |
+| `usage` | SRR36290343 | coverage tier without `--genome-mb` | exit 2 |
+
+Not covered by a real fetch: exits 10, 12, 13 and 14. They are covered by `tests/test_fetch.py`
+(no real accession is known that NCBI and ENA both lack, and one is not invented). Two things to
+read with care. The per-task rates in these rows (AWS 3.0 to 7.6 MB/s) come from one node on one
+afternoon at unknown cluster load; they are rows for the concurrency measurement (#27), not a
+baseline. A task killed with `kill -9` writes no `downloads.csv` row, because it dies before it
+logs: a Slurm kill is invisible in the log, and the `resume` step shows only the finished run.
+
 ## Changes
 
 - 2026-11-06: first draft. Route order proposed, blocked on benchmark 7.1.
@@ -495,3 +522,5 @@ works 100 percent of the time look identical in a table of successes.
 - 2026-11-09: defined tier `coverage`, the verification rule for subsampled tiers, the `popseq fetch`
   command, its exit codes and its result row (issue #13). Added `hook_failed` as exit code 14.
   The subsample verification is weaker than the `full` check and says so.
+- 2026-11-09: added the `concurrency` column to the download log (issue #27) and the acceptance results of
+  `popseq fetch` (11 steps, one compute node, declared concurrency 1).
