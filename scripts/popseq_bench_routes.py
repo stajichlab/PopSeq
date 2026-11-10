@@ -40,29 +40,29 @@ from __future__ import annotations
 
 import argparse
 import csv
-import gzip
-import hashlib
 import io
 import json
 import math
 import os
 import random
 import shutil
-import socket
 import statistics
-import subprocess
 import sys
 import time
 
-import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from popseq import downloads as dl  # noqa: E402
+from popseq.lookup import (  # noqa: E402,F401
+    ENA_SEARCH, NCBI_RUNINFO, ena_lookup, ncbi_spots, open_table as _open,
+)
+from popseq.routes import (  # noqa: E402,F401
+    AWS_URL, SRA_ROUTES, _count_reads, _md5, _run, _version, expected_pairs, judge, tool_versions,
+    transfer,
+)
 from popseq.query import ROOT  # noqa: E402
 
 ROUTES = ["aws_odp", "ncbi_prefetch", "ena_aspera", "ena_https"]
-ENA_SEARCH = "https://www.ebi.ac.uk/ena/portal/api/search"
-AWS_URL = "https://sra-pub-run-odp.s3.amazonaws.com/sra/{run}/{run}"
 PLAN_FIELDS = ["run", "taxid", "species", "study", "read_count", "base_count",
                "fastq_bytes", "fastq_md5", "fastq_ftp", "fastq_aspera", "role",
                "ncbi_spots", "ncbi_spots_with_mates"]
@@ -76,33 +76,7 @@ DETAIL_FIELDS = ["utc_start", "run", "route", "node_type", "host", "slurm_job",
 CONTROL_RUN = "ERR2188722"
 
 
-def _open(path):
-    """Read .csv, .csv.gz or .csv.zst transparently (AGENTS.md section 8)."""
-    if path.endswith(".gz"):
-        return gzip.open(path, "rt", newline="")
-    if path.endswith(".zst"):
-        import zstandard
-        return io.TextIOWrapper(zstandard.ZstdDecompressor().stream_reader(
-            open(path, "rb")), newline="")
-    return open(path, newline="")
-
-
 # --------------------------------------------------------------------------- select
-
-def ena_lookup(accessions):
-    """read_count, fastq_bytes, fastq_md5, URLs for each run, from the ENA portal."""
-    out = {}
-    fields = "run_accession,read_count,base_count,fastq_bytes,fastq_md5,fastq_ftp,fastq_aspera"
-    for i in range(0, len(accessions), 200):
-        chunk = accessions[i:i + 200]
-        r = requests.post(ENA_SEARCH, data={
-            "result": "read_run", "includeAccessions": ",".join(chunk),
-            "fields": fields, "format": "tsv", "limit": 0}, timeout=120)
-        r.raise_for_status()
-        for row in csv.DictReader(io.StringIO(r.text), delimiter="\t"):
-            out[row["run_accession"]] = row
-    return out
-
 
 def cmd_select(a):
     rng = random.Random(a.seed)
@@ -193,153 +167,6 @@ def cmd_annotate(a):
 
 
 # --------------------------------------------------------------------------- attempt
-
-def _run(cmd, timeout=None, **kw):
-    """Run a command, stdin closed (prefetch/curl/ascp read stdin; spec 002)."""
-    t0 = time.monotonic()
-    try:
-        p = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                           timeout=timeout, **kw)
-        rc, err = p.returncode, (p.stderr or "")[-2000:]
-        out = p.stdout
-    except subprocess.TimeoutExpired:
-        rc, err, out = 124, f"timeout after {timeout}s", ""
-    return rc, time.monotonic() - t0, out, err
-
-
-def _version(cmd):
-    try:
-        p = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL,
-                           timeout=30)
-        txt = (p.stdout + p.stderr).strip().splitlines()
-        return " ".join(txt[0].split()) if txt else ""
-    except (OSError, subprocess.TimeoutExpired):
-        return ""
-
-
-def tool_versions():
-    return {"curl": _version(["curl", "--version"]),
-            "prefetch": _version(["prefetch", "--version"]),
-            "parallel-fastq-dump": _version(["parallel-fastq-dump", "--version"]),
-            "ascp": _version(["ascp", "--version"])}
-
-
-def _count_reads(path):
-    """Reads in a gzipped FASTQ: lines / 4, decompressed with pigz."""
-    p1 = subprocess.Popen(["pigz", "-dc", path], stdout=subprocess.PIPE)
-    lines = 0
-    for chunk in iter(lambda: p1.stdout.read(1 << 22), b""):
-        lines += chunk.count(b"\n")
-    p1.wait()
-    if p1.returncode != 0:
-        raise RuntimeError(f"pigz failed on {path} (rc {p1.returncode})")
-    return lines // 4
-
-
-def _md5(path):
-    h = hashlib.md5()
-    with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 22), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def transfer(plan, route, wd, timeout, aspera_key):
-    """Move the bytes. Returns a dict; never raises on a network failure."""
-    run = plan["run"]
-    res = {"route": route, "rc": 0, "error": "", "bytes": 0, "seconds": 0.0,
-           "files": [], "file_kind": "", "unavailable": False,
-           "node_type": dl.node_type(), "host": socket.gethostname(),
-           "slurm_job": os.environ.get("SLURM_JOB_ID", ""),
-           "utc_start": dl.utc_now()}
-    if route == "aws_odp":
-        dest = os.path.join(wd, f"{run}.sra")
-        cmd = ["curl", "-sS", "-L", "--retry", "3", "-o", dest, "-w", "%{http_code}",
-               AWS_URL.format(run=run)]
-        rc, sec, out, err = _run(cmd, timeout)
-        code = out.strip()
-        if code == "404" or code == "403":
-            # S3 answers 403 for a missing key in a bucket that disallows listing.
-            res.update(unavailable=True, error=f"AWS HTTP {code}")
-            rc = rc or 22
-            if os.path.exists(dest):
-                os.remove(dest)
-        elif rc == 0 and code != "200":
-            rc, err = 22, f"AWS HTTP {code}"
-        res.update(rc=rc, seconds=sec, error=res["error"] or err.strip(),
-                   files=[dest] if rc == 0 else [], file_kind="sra")
-    elif route == "ncbi_prefetch":
-        cmd = ["prefetch", run, "-O", wd, "--max-size", "30G"]
-        rc, sec, out, err = _run(cmd, timeout)
-        found = []
-        for root, _, names in os.walk(os.path.join(wd, run)):
-            found += [os.path.join(root, n) for n in names
-                      if n.endswith((".sra", ".sralite"))]
-        txt = (out + err)
-        if rc != 0 and ("not found" in txt.lower() or "cannot resolve" in txt.lower()
-                        or "can't find" in txt.lower()):
-            res["unavailable"] = True
-        res.update(rc=rc, seconds=sec, error=" ".join(txt.split())[-500:] if rc else "",
-                   files=found if rc == 0 else [],
-                   file_kind=("sralite" if any(f.endswith(".sralite") for f in found)
-                              else "sra"))
-    elif route in ("ena_aspera", "ena_https"):
-        srcs = [s for s in plan["fastq_aspera" if route == "ena_aspera"
-                                 else "fastq_ftp"].split(";")
-                if s.endswith(("_1.fastq.gz", "_2.fastq.gz"))]
-        total, files, rc, err = 0.0, [], 0, ""
-        for src in srcs:
-            dest = os.path.join(wd, os.path.basename(src))
-            if route == "ena_aspera":
-                host, path = src.split(":", 1)
-                cmd = ["ascp", "-QT", "-l", "1000m", "-P33001", "-i", aspera_key,
-                       f"era-fasp@{host}:{path}", wd]
-            else:
-                cmd = ["curl", "-sS", "-f", "-L", "--retry", "3", "-o", dest,
-                       "https://" + src]
-            rc, sec, out, e = _run(cmd, timeout)
-            total += sec
-            if rc != 0:
-                err = " ".join((out + e).split())[-500:]
-                break
-            files.append(dest)
-        res.update(rc=rc, seconds=total, error=err, files=files if rc == 0 else [],
-                   file_kind="fastq.gz")
-    else:
-        raise ValueError(route)
-    res["bytes"] = sum(os.path.getsize(f) for f in res["files"] if os.path.exists(f))
-    return res
-
-
-SRA_ROUTES = ("aws_odp", "ncbi_prefetch")
-
-
-def expected_pairs(route, plan):
-    """The pair count a route must deliver, or "" when the check is by MD5.
-
-    Spec 002, adopted 2026-11-07: verify against the archive that served the
-    bytes. ENA `read_count` counts reads, not pairs, for most ERR runs (172 of
-    200 sampled), so it is not used as a target at all.
-    """
-    return plan.get("ncbi_spots_with_mates", "") if route in SRA_ROUTES else ""
-
-
-def judge(route, plan, m1, m2, md5_ok):
-    """(verified, error) under the adopted rule.
-
-    SRA routes: each mate equals NCBI `spots_with_mates`, stored at plan time.
-    ENA routes: both files match ENA's MD5 exactly, and the mates have equal
-    counts.
-    """
-    if route in SRA_ROUTES:
-        exp = expected_pairs(route, plan)
-        if not exp:
-            return False, "no NCBI spots_with_mates stored in the plan"
-        ok = m1 == int(exp) and m2 == int(exp)
-        return ok, "" if ok else f"expected {exp} pairs (NCBI), mate1 {m1}, mate2 {m2}"
-    ok = md5_ok == "true" and m1 == m2
-    return ok, "" if ok else f"md5_ok {md5_ok}, mate1 {m1}, mate2 {m2}"
-
 
 def finish(plan, res, wd, threads, tools, detail_csv, downloads_csv):
     """Convert and verify what a transfer left behind, then record both rows."""
@@ -461,19 +288,6 @@ def cmd_attempt(a):
 
 # --------------------------------------------------------------------------- countcheck
 
-NCBI_RUNINFO = "https://trace.ncbi.nlm.nih.gov/Traces/sra-db-be/runinfo?acc={run}"
-
-
-def ncbi_spots(run):
-    """(spots, spots_with_mates) from NCBI runinfo, or (None, None) if absent."""
-    try:
-        r = requests.get(NCBI_RUNINFO.format(run=run), timeout=60)
-        rows = list(csv.DictReader(io.StringIO(r.text)))
-    except (requests.RequestException, csv.Error):
-        return None, None
-    if not rows or not rows[0].get("spots"):
-        return None, None
-    return int(rows[0]["spots"] or 0), int(rows[0]["spots_with_mates"] or 0)
 
 
 def cmd_countcheck(a):

@@ -1,0 +1,12 @@
+step	expect_exit	got_exit	check	status
+full	0	0	sidecar verified	ok
+head	0	0	100000 pairs	ok
+windows	0	0	8 windows	ok
+stride	0	0	full check before stride	ok
+coverage	0	0	coverage target 30.0 reached 30.0 bases 367500000	ok
+unpaired	0	0	pairs from ENA	ok
+single	0	0	one file	ok
+hook	0	0	reads gone, hook saw 400000	ok
+resume_killed	-	-	0 complete-looking files after the kill	ok
+resume	0	0	finished after the kill	ok
+usage	2	2		ok

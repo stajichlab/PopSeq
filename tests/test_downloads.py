@@ -119,3 +119,34 @@ def test_unpaired_is_an_outcome(tmp_path):
     dl.record(f, run="ERR2286963", route="ena_https", outcome="unpaired",
               error="--require-pairs: no _1/_2 at ENA, spots_with_mates 0 at NCBI")
     assert "unpaired" in f.read_text()
+
+
+# ---------------------------------------------------------------- concurrency column (issue #27)
+def test_concurrency_is_recorded_validated_and_empty_means_unknown(tmp_path):
+    p = str(tmp_path / "d.csv")
+    r = dl.record(p, run="SRR1", outcome="ok", route="aws_odp", verified=True, concurrency=20)
+    assert r["concurrency"] == "20"
+    assert dl.make_row(run="SRR1", outcome="transfer_failed", route="aws_odp")["concurrency"] == ""
+    with pytest.raises(ValueError, match="concurrency"):
+        dl.make_row(run="SRR1", outcome="transfer_failed", route="aws_odp", concurrency=0)
+    assert dl.FIELDS[-1] == "concurrency"
+
+
+def test_a_file_with_the_old_header_still_takes_rows_without_going_ragged(tmp_path):
+    p = tmp_path / "old.csv"
+    old = [f for f in dl.FIELDS if f != "concurrency"]
+    p.write_text(",".join(old) + "\n2026-11-08T00:00:00Z,SRR9,5476,full,aws_odp,compute,1,1.0,,true,ok,\n")
+    dl.record(str(p), run="SRR1", outcome="ok", route="aws_odp", verified=True, concurrency=20)
+    rows = list(csv.reader(open(p)))
+    assert rows[0] == old and all(len(r) == len(old) for r in rows)
+
+
+def test_the_live_log_has_the_concurrency_header_and_no_ragged_rows():
+    import os
+
+    path = dl.DOWNLOADS_CSV
+    if not os.path.exists(path):
+        pytest.skip("no benchmarks/downloads.csv here")
+    rows = list(csv.reader(open(path)))
+    assert rows[0] == dl.FIELDS
+    assert all(len(r) == len(dl.FIELDS) for r in rows)

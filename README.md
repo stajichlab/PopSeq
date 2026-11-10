@@ -35,6 +35,24 @@ uv run popseq describe --taxid 1047171
 Exit 0 on success, 2 when the species is not found or the name is ambiguous,
 3 when the filters leave nothing, so a caller branches without parsing.
 
+**Fetching reads** (one run per call, from a Slurm array or a Nextflow task; temporary files go
+in `$SCRATCH`; every download is verified against the archive that served it):
+
+```bash
+# 30x of the genome size, from 8 evenly spaced windows, kept in a directory
+uv run popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
+
+# sketch a run without keeping its reads: the hook sees the verified FASTQ, then it is deleted
+uv run popseq fetch SRR1553610 --tier windows --out "$SCRATCH/x" --exec ./sketch.sh
+
+# pairs or nothing: a run NCBI holds unpaired is taken from ENA, or exits 11
+uv run popseq fetch ERR1069479 --tier full --require-pairs
+```
+
+Tiers `head`, `windows` (default), `stride`, `full` (cached under `cache/<taxid>/<RUN>/`) and
+`coverage`. Exit codes: 0 ok, 2 usage, 10 unavailable at NCBI, 11 unpaired, 12 verify failed,
+13 transient, 14 hook failed. See `specifications/002-download-strategy.md`.
+
 **Python**
 
 ```python

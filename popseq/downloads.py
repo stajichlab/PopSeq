@@ -4,9 +4,13 @@ Spec 002 ("Performance capture") and issue #14 require a row for **every**
 attempt, failures included. A route that works 95 percent of the time and one
 that works 100 percent of the time look the same in a table of successes.
 
-Columns, in this order (the spec fixes them; do not reorder):
+Columns, in this order (the spec fixes them; do not reorder; new columns go at the end):
 
-    utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
+    utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error,concurrency
+
+* `concurrency` is the number of fetches the caller declared it was running at once. It is
+  recorded so the download concurrency cap can be measured from real rows (issue #27). Empty
+  means unknown (every row written before 2026-11-09 and every benchmark row).
 
 * `outcome` is one of OUTCOMES. `unavailable_at_ncbi` is a real state, not a
   failure: the run exists at ENA, but neither AWS Open Data nor `prefetch` has it.
@@ -43,9 +47,9 @@ from popseq.query import ROOT
 DOWNLOADS_CSV = os.path.join(ROOT, "benchmarks", "downloads.csv")
 
 FIELDS = ["utc", "run", "taxid", "tier", "route", "node_type", "bytes", "seconds",
-          "mb_per_s", "verified", "outcome", "error"]
+          "mb_per_s", "verified", "outcome", "error", "concurrency"]
 OUTCOMES = ("ok", "verify_failed", "transfer_failed", "unavailable_at_ncbi", "unpaired")
-TIERS = ("head", "windows", "stride", "full")
+TIERS = ("head", "windows", "stride", "full", "coverage")
 # Route names. The four candidate routes of spec 002 for tier `full`, plus the
 # conversion-only step, which a benchmark may time on its own.
 ROUTES = ("aws_odp", "ncbi_prefetch", "ena_aspera", "ena_https", "fasterq_dump")
@@ -81,7 +85,7 @@ def _fmt_bool(v) -> str:
 def make_row(*, run: str, outcome: str, route: str, tier: str = "full",
              taxid=None, node: Optional[str] = None, bytes_: Optional[int] = None,
              seconds: Optional[float] = None, verified=None, error: str = "",
-             utc: Optional[str] = None) -> dict:
+             utc: Optional[str] = None, concurrency: Optional[int] = None) -> dict:
     """Validate one attempt and return it as a row of strings.
 
     Raises ValueError on anything the spec does not allow, so that a bad row
@@ -108,6 +112,12 @@ def make_row(*, run: str, outcome: str, route: str, tier: str = "full",
         raise ValueError("bytes must be >= 0")
     if seconds is not None and float(seconds) < 0:
         raise ValueError("seconds must be >= 0")
+    if concurrency in (None, ""):
+        conc = ""
+    else:
+        if int(concurrency) < 1:
+            raise ValueError("concurrency must be >= 1")
+        conc = str(int(concurrency))
     mbps = ""
     if bytes_ and seconds:
         mbps = f"{int(bytes_) / float(seconds) / 1e6:.3f}"
@@ -127,19 +137,28 @@ def make_row(*, run: str, outcome: str, route: str, tier: str = "full",
         "verified": ver,
         "outcome": outcome,
         "error": err,
+        "concurrency": conc,
     }
 
 
 def append(row: dict, path: str = DOWNLOADS_CSV) -> None:
     """Append one validated row. Writes the header if the file is new or empty."""
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o664)
+    # O_RDWR so the header can be read; O_APPEND still sends every write to the end.
+    fd = os.open(path, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o664)
     try:
         fcntl.flock(fd, fcntl.LOCK_EX)
         buf = io.StringIO()
-        w = csv.DictWriter(buf, fieldnames=FIELDS, lineterminator="\n")
+        fields = FIELDS
         if os.fstat(fd).st_size == 0:
+            w = csv.DictWriter(buf, fieldnames=fields, lineterminator="\n")
             w.writeheader()
+        else:
+            # Follow the header the file already has: a file written before a column was added
+            # keeps working, and a row is never longer than its header.
+            first = os.pread(fd, 4096, 0).split(b"\n", 1)[0].decode()
+            fields = first.split(",")
+            w = csv.DictWriter(buf, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         w.writerow(row)
         os.write(fd, buf.getvalue().encode())
         # Others must be able to append too (AGENTS.md section 1).
@@ -177,12 +196,14 @@ def main(argv=None) -> int:
     a.add_argument("--verified", default="")
     a.add_argument("--outcome", required=True, choices=OUTCOMES)
     a.add_argument("--error", default="")
+    a.add_argument("--concurrency", type=int,
+                   help="fetches the caller runs at once (declared; empty = unknown)")
     args = p.parse_args(argv)
     try:
         row = record(args.file, run=args.run, taxid=args.taxid, tier=args.tier,
                      route=args.route, node=args.node_type, bytes_=args.bytes,
                      seconds=args.seconds, verified=args.verified,
-                     outcome=args.outcome, error=args.error)
+                     outcome=args.outcome, error=args.error, concurrency=args.concurrency)
     except ValueError as exc:
         print(f"popseq.downloads: {exc}", file=sys.stderr)
         return 2

@@ -1,0 +1,10 @@
+run	tier	route	layout	bases_kept	reads_kept	coverage_target	coverage_reached	seconds	verified	outcome
+SRR36290343	full	aws_odp	PAIRED	1316242800	4387476			141.1	true	ok
+SRR36290343	head	ena_https	PAIRED	30000000	100000			21.9	true	ok
+SRR36290343	windows	aws_odp	PAIRED	120000000	400000			53.6	true	ok
+SRR36290343	stride	aws_odp	PAIRED	131624400	438748			230.4	true	ok
+SRR36290343	coverage	aws_odp	PAIRED	367500000	1225000	30.000	30.000	122.8	true	ok
+ERR1069479	full	ena_https	PAIRED	572690250	2290761			211.7	true	ok
+SRR5628799	full	aws_odp	SINGLE	150028935	1064035			25.2	true	ok
+SRR36290343	windows	aws_odp	PAIRED	120000000	400000			66.5	true	ok
+SRR16988686	full	aws_odp	PAIRED	2767247674	5514272			604.5	true	ok
