@@ -14,6 +14,7 @@ A caller states what it needs. The fetcher never guesses.
 | `windows` | N spots drawn from W evenly spaced windows, default 2,000,000 in 8 | ~1 GB | no | `$SCRATCH` |
 | `stride` | every Nth read pair | ~1 Gb of bases | no | `$SCRATCH` |
 | `full` | the entire run | 0.5-15 GB | yes | `cache/<taxid>/<RUN>/` |
+| `coverage` | bases = genome size x target coverage, from evenly spaced windows | genome x coverage / 3.5 (UNMEASURED) | no | `$SCRATCH` or `--out` |
 
 Only `full` is cached. The subsampled tiers cost less to refetch than to index and manage.
 
@@ -38,6 +39,126 @@ or `stride`. The cost difference is small; the bias is not.
 `windows` is the default subsample. It is the one with a stated reason to prefer it over
 `stride`, and `stride` requires reading the whole run to produce its output, so it saves
 storage but not transfer.
+
+## Tier `coverage` (added 2026-11-09, issue #13)
+
+Both consumers already target a coverage, not a read count: the MATPredict sketch store keeps
+30x of the genome size in 8 windows, and GmG wants 20-30x of the genome size, not the
+0.5-1 Gb that its every-Nth-pair sampler gives. A coverage tier states that directly.
+
+```
+popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
+```
+
+**Target.** `target_bases = genome_mb x 1e6 x coverage`. `genome_mb` comes from
+`catalog/genome_sizes.csv` by `species_taxid` (113 species have one). A species with no size
+needs `--genome-mb`; without either the fetch fails before any download, with a usage error.
+
+**Spots needed.** `n_spots = ceil(target_bases / bases_per_spot)`, where
+`bases_per_spot = base_count / spots` and `spots` is NCBI's count for an SRA route. For ENA,
+`bases_per_spot` is measured on the first window, because ENA `read_count` does not count
+pairs for most ERR runs (see below). A paired spot counts both mates.
+
+**Windows.** The spots come from `W` windows (default 8, `--windows`). Each window holds
+`w = ceil(n_spots / W)` consecutive spots. Window `i` (0-based) starts at spot
+`floor(i * (S - w) / (W - 1))`, where `S` is the number of spots in the run, so the windows are
+evenly spaced and the first and last touch the ends of the run. This is the `windows` tier of
+this spec with its size set by coverage instead of by a spot count.
+
+**A run shorter than the target.** If `n_spots >= S`, the whole run is kept, the tier is
+recorded as `coverage` with `coverage_reached` below the target, and the outcome is `ok`. The
+fetcher never pads, repeats or fails a short run. On a run only slightly longer than the
+target, `w` rounded up would make windows overlap; the windows are then shrunk to
+non-overlapping ones of `floor(S / W)` spots, and `coverage_reached` may fall a little below
+the target.
+
+**What is logged, per run.** `bases_kept`, `reads_kept` (pairs for a paired run),
+`coverage_reached = bases_kept / (genome_mb x 1e6)`, the target, and the windows used.
+`coverage_reached` is measured on the bases written, not computed from the metadata.
+
+**Where the windows are read.** From the `.sra` for an SRA route:
+`fastq-dump -N <start+1> -X <start+w> --split-files --gzip` per window. For ENA the file is
+streamed and the windows are cut from it. Both mates come from one source and one run of the
+same window boundaries.
+
+### Verification of the subsampled tiers
+
+A subsampled tier cannot be checked against `spots_with_mates`, because only part of the run
+is written. The rule for `head`, `windows` and `coverage` is:
+
+1. **Count.** Each mate holds exactly the number of reads that were requested, and mate 1
+   equals mate 2.
+2. **Pairing.** In a paired run, the read names of mate 1 and mate 2 agree at the first and
+   last read of every window.
+3. **Source integrity.** SRA route: the `.sra` is complete (`prefetch` checks its own
+   checksum; for AWS the file size equals the HTTP `Content-Length`). ENA route: the whole
+   streamed file matches ENA's MD5, or, when the stream is stopped early (`head`), the bytes
+   read are a gzip prefix that decompresses without error.
+4. A failure of any of these ends the task with `verify_failed`; the output is deleted.
+
+This is weaker than the check on `full`, which counts every read against NCBI. **UNMEASURED:**
+whether these three checks would have caught the corruption of 2026-10-24 (a looping ENA
+fetcher that resumed onto an SRA-derived file). The single-source rule prevents that case; the
+checks are a second layer, not a proof. `stride` reads the whole run through `full`
+conversion, so it keeps the full check before it subsamples.
+
+## The fetch command (issue #13)
+
+```
+popseq fetch RUN|MANIFEST --tier head|windows|stride|full|coverage --out DIR
+    [--coverage X] [--genome-mb MB] [--windows W] [--spots N] [--require-pairs]
+    [--exec CMD] [--plan FILE] [--results FILE]
+```
+
+- **Input.** One run accession, or a manifest: CSV or TSV, plain or gzip or zstd, with a
+  `run_accession` column (AGENTS section 8). One run per call is the supported mode for a
+  Slurm array or a Nextflow task; a manifest runs its rows one after the other.
+- **Plan-time values.** The catalog row gives the taxid, the species, `fastq_ftp`,
+  `ena_layout`, `base_count`. NCBI `spots` and `spots_with_mates`, and ENA `fastq_md5` and
+  `fastq_bytes`, are not in the catalog. The fetcher looks them up once, before the transfer,
+  and stores them in the sidecar. `--plan FILE` supplies them from a plan CSV (the benchmark
+  7.1 plan format) for a node with no internet; with neither, the run fails as `transient`
+  before downloading anything.
+- **Working files.** Everything temporary (the `.sra`, the converted FASTQ, partial windows) is
+  under `${SCRATCH:?}` and is removed when the task ends, whatever the outcome. Only the
+  declared output is kept: `cache/<taxid>/<RUN>/` for `full`, `--out` for the other tiers.
+- **The hook.** `--exec CMD` runs once per verified run, before the reads are deleted, with the
+  run accession and the FASTQ paths: `CMD RUN FASTQ_1 [FASTQ_2]` (one path for a single-end
+  run). It runs only after verification passed. The reads are deleted after it exits, unless
+  the tier keeps its output (`full`). A non-zero exit from the hook ends the task as `hook_failed`
+  (exit code 14), not as a download failure; the download row still records `ok`.
+- **Resume.** A run whose sidecar says `verified: true` for the same tier and parameters is
+  skipped. A run with a partial transfer resumes where `curl -C -` can; everything else
+  restarts. A killed task leaves nothing in the output that looks complete: the output
+  directory is written under a temporary name and renamed after verification.
+- **Concurrency.** The fetcher does not cap concurrency; the caller does, and says so with
+  `--concurrency N`, which is written to every `downloads.csv` row and to the sidecar. The
+  starting value is 20. **UNMEASURED** (issue #27): the cap will be measured from these rows.
+
+### Exit codes and the result row
+
+A caller branches on the exit code and never parses text.
+
+| Exit | Outcome | Meaning |
+|---|---|---|
+| 0 | `ok` | fetched and verified; the result row says what was kept |
+| 2 | usage | bad arguments, no genome size for `coverage`, unknown run |
+| 10 | `unavailable_at_ncbi` | no SRA route has the run and ENA cannot serve it either. Not retried |
+| 11 | `unpaired` | `--require-pairs`, and neither archive serves `_1` and `_2`. Not retried |
+| 12 | `verify_failed` | a route delivered bytes that failed the check; the files are deleted |
+| 13 | `transient` | the transfer failed or the plan-time lookup could not be made; retry is reasonable |
+| 14 | `hook_failed` | the download is `ok`; the `--exec` command returned non-zero |
+
+A run that SRA routes lack but ENA serves as verified pairs is `ok` (route `ena_https`); the
+failed SRA attempts are rows in `benchmarks/downloads.csv` with `unavailable_at_ncbi`.
+
+Every call writes one line to stdout, tab separated, and appends it to `--results` when given:
+
+```
+run  tier  route  layout  bases_kept  reads_kept  coverage_target  coverage_reached  seconds  verified  outcome
+```
+
+`layout` is the layout actually obtained (`PAIRED` or `SINGLE`), not the label.
 
 ## Route order
 
@@ -303,8 +424,16 @@ quoted to anyone.
 Every attempt, including every failure, appends one row to `benchmarks/downloads.csv`:
 
 ```csv
-utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
+utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error,concurrency
 ```
+
+`concurrency` (added 2026-11-09, issue #27) is the number of fetches the caller declared it was
+running at once (`popseq fetch --concurrency N`, default 20, **UNMEASURED**). `popseq fetch` does
+not enforce it. It is recorded so that the concurrency cap can be measured from real rows after
+`popseq fetch` is in use, with no separate benchmark: per-task MB/s (`mb_per_s`) and `outcome`
+are already in the row. The overlap that actually happened can also be recovered from `utc` and
+`seconds`. An empty value means unknown: every row written before 2026-11-09 and every
+benchmark 7.1 row has none.
 
 `outcome` is one of:
 
@@ -363,3 +492,6 @@ works 100 percent of the time look identical in a table of successes.
   stay UNMEASURED.
 - 2026-11-08: added the pairing rule (the archives decide, not the label), single-end
   verification, and `--require-pairs`.
+- 2026-11-09: defined tier `coverage`, the verification rule for subsampled tiers, the `popseq fetch`
+  command, its exit codes and its result row (issue #13). Added `hook_failed` as exit code 14.
+  The subsample verification is weaker than the `full` check and says so.
