@@ -1,0 +1,2084 @@
+name: pop_sra_ge10_cap300
+title: Up to 300 isolates of every fungal species with at least 10 paired Illumina isolates
+taxid: 'many: see species_taxid in metadata.csv'
+created: '2026-11-09'
+created_by: scripts/popseq_panel_set.py
+question: 'Population structure per species from read sketches: GmG static PCoA and PCA pages
+  (PopSeq issue #36). Each species is a separate population; do not pool species in one ordination.'
+selection:
+  source_catalog_commit: 7b08547
+  criteria: 'popseq.panel(n=300, seed=0) with filters {''platform'': ''ILLUMINA'', ''layout'':
+    ''PAIRED'', ''strategy'': ''WGS'', ''include_excluded'': False, ''require_fastq'': True};
+    one run per isolate, deepest wins, round-robin across studies; species kept when >= 10
+    isolates pass the filters'
+  rule_caveat: a sampling rule, not a guarantee of independence
+  n_species: 412
+  n_samples: 34673
+  n_runs: 34673
+  samples_without_depth_estimate: 1888
+  runs_with_an_unpaired_third_file: 575
+fastq_paths: 'ENA HTTPS URLs, not local paths: nothing has been fetched. Rewrite after fetching
+  (issue #13).'
+depth_tier: not fetched
+species:
+- species_taxid: 4932
+  species_name: Saccharomyces cerevisiae
+  selected: 300
+  isolates_available: 91663
+  studies_in_panel: 300
+- species_taxid: 498019
+  species_name: Candidozyma auris
+  selected: 300
+  isolates_available: 27574
+  studies_in_panel: 146
+- species_taxid: 5207
+  species_name: Cryptococcus neoformans
+  selected: 300
+  isolates_available: 3646
+  studies_in_panel: 300
+- species_taxid: 746128
+  species_name: Aspergillus fumigatus
+  selected: 300
+  isolates_available: 4278
+  studies_in_panel: 127
+- species_taxid: 1047171
+  species_name: Zymoseptoria tritici
+  selected: 300
+  isolates_available: 4079
+  studies_in_panel: 157
+- species_taxid: 5476
+  species_name: Candida albicans
+  selected: 300
+  isolates_available: 2866
+  studies_in_panel: 180
+- species_taxid: 4896
+  species_name: Schizosaccharomyces pombe
+  selected: 300
+  isolates_available: 2038
+  studies_in_panel: 60
+- species_taxid: 5478
+  species_name: Nakaseomyces glabratus
+  selected: 300
+  isolates_available: 1419
+  studies_in_panel: 65
+- species_taxid: 5141
+  species_name: Neurospora crassa
+  selected: 300
+  isolates_available: 1200
+  studies_in_panel: 300
+- species_taxid: 318829
+  species_name: Pyricularia oryzae
+  selected: 300
+  isolates_available: 1515
+  studies_in_panel: 70
+- species_taxid: 5480
+  species_name: Lodderomyces parapsilosis
+  selected: 300
+  isolates_available: 1193
+  studies_in_panel: 54
+- species_taxid: 5059
+  species_name: Aspergillus flavus
+  selected: 300
+  isolates_available: 1326
+  studies_in_panel: 87
+- species_taxid: 5482
+  species_name: Candida tropicalis
+  selected: 300
+  isolates_available: 1032
+  studies_in_panel: 42
+- species_taxid: 5007
+  species_name: Brettanomyces bruxellensis
+  selected: 300
+  isolates_available: 1081
+  studies_in_panel: 14
+- species_taxid: 27291
+  species_name: Saccharomyces paradoxus
+  selected: 300
+  isolates_available: 1058
+  studies_in_panel: 23
+- species_taxid: 34373
+  species_name: Blumeria graminis
+  selected: 300
+  isolates_available: 948
+  studies_in_panel: 11
+- species_taxid: 27350
+  species_name: Puccinia striiformis
+  selected: 300
+  isolates_available: 964
+  studies_in_panel: 31
+- species_taxid: 28985
+  species_name: Kluyveromyces lactis
+  selected: 300
+  isolates_available: 946
+  studies_in_panel: 8
+- species_taxid: 5341
+  species_name: Agaricus bisporus
+  selected: 300
+  isolates_available: 318
+  studies_in_panel: 6
+- species_taxid: 5507
+  species_name: Fusarium oxysporum
+  selected: 300
+  isolates_available: 776
+  studies_in_panel: 93
+- species_taxid: 122368
+  species_name: Cercospora beticola
+  selected: 300
+  isolates_available: 746
+  studies_in_panel: 6
+- species_taxid: 4952
+  species_name: Yarrowia lipolytica
+  selected: 300
+  isolates_available: 438
+  studies_in_panel: 201
+- species_taxid: 176275
+  species_name: Beauveria bassiana
+  selected: 300
+  isolates_available: 662
+  studies_in_panel: 16
+- species_taxid: 40410
+  species_name: Cryptococcus deneoformans
+  selected: 300
+  isolates_available: 621
+  studies_in_panel: 27
+- species_taxid: 2739387
+  species_name: Trichophyton indotineae
+  selected: 300
+  isolates_available: 599
+  studies_in_panel: 14
+- species_taxid: 4909
+  species_name: Pichia kudriavzevii
+  selected: 300
+  isolates_available: 490
+  studies_in_panel: 300
+- species_taxid: 5353
+  species_name: Lentinula edodes
+  selected: 300
+  isolates_available: 551
+  studies_in_panel: 231
+- species_taxid: 1080349
+  species_name: Saccharomyces eubayanus
+  selected: 300
+  isolates_available: 507
+  studies_in_panel: 28
+- species_taxid: 230603
+  species_name: Saccharomyces uvarum
+  selected: 300
+  isolates_available: 496
+  studies_in_panel: 20
+- species_taxid: 13684
+  species_name: Parastagonospora nodorum
+  selected: 300
+  isolates_available: 477
+  studies_in_panel: 4
+- species_taxid: 53485
+  species_name: Pyrenophora teres
+  selected: 300
+  isolates_available: 465
+  studies_in_panel: 9
+- species_taxid: 5022
+  species_name: Plenodomus lingam
+  selected: 300
+  isolates_available: 457
+  studies_in_panel: 11
+- species_taxid: 5113
+  species_name: Epichloe typhina
+  selected: 300
+  isolates_available: 425
+  studies_in_panel: 4
+- species_taxid: 5116
+  species_name: Cryphonectria parasitica
+  selected: 300
+  isolates_available: 410
+  studies_in_panel: 7
+- species_taxid: 208348
+  species_name: Puccinia triticina
+  selected: 300
+  isolates_available: 373
+  studies_in_panel: 12
+- species_taxid: 27344
+  species_name: Puccinia coronata
+  selected: 300
+  isolates_available: 367
+  studies_in_panel: 5
+- species_taxid: 489137
+  species_name: Saccharomyces cerevisiae x Saccharomyces uvarum
+  selected: 300
+  isolates_available: 364
+  studies_in_panel: 7
+- species_taxid: 35725
+  species_name: Macrophomina phaseolina
+  selected: 300
+  isolates_available: 360
+  studies_in_panel: 10
+- species_taxid: 37727
+  species_name: Talaromyces marneffei
+  selected: 300
+  isolates_available: 358
+  studies_in_panel: 7
+- species_taxid: 595493
+  species_name: Saccharomyces cerevisiae x Saccharomyces paradoxus
+  selected: 300
+  isolates_available: 358
+  studies_in_panel: 28
+- species_taxid: 27337
+  species_name: Verticillium dahliae
+  selected: 300
+  isolates_available: 353
+  studies_in_panel: 17
+- species_taxid: 40559
+  species_name: Botrytis cinerea
+  selected: 300
+  isolates_available: 338
+  studies_in_panel: 12
+- species_taxid: 3028765
+  species_name: Trichaptum abietinum
+  selected: 300
+  isolates_available: 337
+  studies_in_panel: 4
+- species_taxid: 93612
+  species_name: Exserohilum turcicum
+  selected: 300
+  isolates_available: 331
+  studies_in_panel: 8
+- species_taxid: 109871
+  species_name: Batrachochytrium dendrobatidis
+  selected: 300
+  isolates_available: 326
+  studies_in_panel: 10
+- species_taxid: 5518
+  species_name: Fusarium graminearum
+  selected: 300
+  isolates_available: 318
+  studies_in_panel: 26
+- species_taxid: 5297
+  species_name: Puccinia graminis
+  selected: 300
+  isolates_available: 314
+  studies_in_panel: 67
+- species_taxid: 37769
+  species_name: Cryptococcus gattii
+  selected: 298
+  isolates_available: 298
+  studies_in_panel: 25
+- species_taxid: 5180
+  species_name: Sclerotinia sclerotiorum
+  selected: 295
+  isolates_available: 295
+  studies_in_panel: 8
+- species_taxid: 181124
+  species_name: Marasmius oreades
+  selected: 293
+  isolates_available: 293
+  studies_in_panel: 4
+- species_taxid: 5384
+  species_name: Suillus luteus
+  selected: 276
+  isolates_available: 276
+  studies_in_panel: 270
+- species_taxid: 5334
+  species_name: Schizophyllum commune
+  selected: 268
+  isolates_available: 268
+  studies_in_panel: 29
+- species_taxid: 199306
+  species_name: Coccidioides posadasii
+  selected: 257
+  isolates_available: 257
+  studies_in_panel: 14
+- species_taxid: 203908
+  species_name: Melampsora laricis-populina
+  selected: 256
+  isolates_available: 256
+  studies_in_panel: 176
+- species_taxid: 5454
+  species_name: Ascochyta rabiei
+  selected: 252
+  isolates_available: 252
+  studies_in_panel: 3
+- species_taxid: 1914972
+  species_name: Leucocoprinus sp.
+  selected: 239
+  isolates_available: 239
+  studies_in_panel: 1
+- species_taxid: 72228
+  species_name: Ophiocordyceps sinensis
+  selected: 237
+  isolates_available: 237
+  studies_in_panel: 2
+- species_taxid: 1859096
+  species_name: Cryptococcus deuterogattii
+  selected: 231
+  isolates_available: 231
+  studies_in_panel: 22
+- species_taxid: 36056
+  species_name: Boletus edulis
+  selected: 223
+  isolates_available: 223
+  studies_in_panel: 7
+- species_taxid: 101028
+  species_name: Fusarium pseudograminearum
+  selected: 226
+  isolates_available: 226
+  studies_in_panel: 9
+- species_taxid: 29879
+  species_name: Neurospora discreta
+  selected: 223
+  isolates_available: 223
+  studies_in_panel: 89
+- species_taxid: 2587412
+  species_name: Podospora anserina
+  selected: 217
+  isolates_available: 217
+  studies_in_panel: 8
+- species_taxid: 5970
+  species_name: Exophiala dermatitidis
+  selected: 216
+  isolates_available: 216
+  studies_in_panel: 94
+- species_taxid: 456999
+  species_name: Rhizoctonia solani
+  selected: 208
+  isolates_available: 208
+  studies_in_panel: 18
+- species_taxid: 76351
+  species_name: Ceratobasidium cereale
+  selected: 206
+  isolates_available: 206
+  studies_in_panel: 3
+- species_taxid: 64495
+  species_name: Rhizopus arrhizus
+  selected: 205
+  isolates_available: 205
+  studies_in_panel: 126
+- species_taxid: 5025
+  species_name: Venturia inaequalis
+  selected: 200
+  isolates_available: 200
+  studies_in_panel: 5
+- species_taxid: 2792576
+  species_name: Rhynchosporium graminicola
+  selected: 196
+  isolates_available: 196
+  studies_in_panel: 2
+- species_taxid: 5286
+  species_name: Rhodotorula toruloides
+  selected: 192
+  isolates_available: 192
+  studies_in_panel: 123
+- species_taxid: 552467
+  species_name: Cryptococcus bacillisporus
+  selected: 183
+  isolates_available: 183
+  studies_in_panel: 11
+- species_taxid: 5037
+  species_name: Histoplasma capsulatum
+  selected: 176
+  isolates_available: 176
+  studies_in_panel: 14
+- species_taxid: 5537
+  species_name: Rhodotorula mucilaginosa
+  selected: 169
+  isolates_available: 169
+  studies_in_panel: 18
+- species_taxid: 5039
+  species_name: Blastomyces dermatitidis
+  selected: 168
+  isolates_available: 168
+  studies_in_panel: 8
+- species_taxid: 2689400
+  species_name: Xylaria necrophora
+  selected: 166
+  isolates_available: 166
+  studies_in_panel: 1
+- species_taxid: 39291
+  species_name: Agroathelia rolfsii
+  selected: 164
+  isolates_available: 164
+  studies_in_panel: 4
+- species_taxid: 381046
+  species_name: Lachancea thermotolerans
+  selected: 163
+  isolates_available: 163
+  studies_in_panel: 6
+- species_taxid: 5128
+  species_name: Fusarium sambucinum
+  selected: 159
+  isolates_available: 159
+  studies_in_panel: 1
+- species_taxid: 45357
+  species_name: Candidozyma haemuli
+  selected: 159
+  isolates_available: 159
+  studies_in_panel: 7
+- species_taxid: 1307805
+  species_name: Acarospora socialis
+  selected: 159
+  isolates_available: 159
+  studies_in_panel: 1
+- species_taxid: 55169
+  species_name: Botryosphaeria dothidea
+  selected: 157
+  isolates_available: 157
+  studies_in_panel: 5
+- species_taxid: 155674
+  species_name: Leptographium pseudotsugae
+  selected: 155
+  isolates_available: 155
+  studies_in_panel: 1
+- species_taxid: 1859121
+  species_name: Cryptococcus tetragattii
+  selected: 149
+  isolates_available: 149
+  studies_in_panel: 8
+- species_taxid: 162425
+  species_name: Aspergillus nidulans
+  selected: 148
+  isolates_available: 148
+  studies_in_panel: 112
+- species_taxid: 5061
+  species_name: Aspergillus niger
+  selected: 146
+  isolates_available: 146
+  studies_in_panel: 56
+- species_taxid: 29856
+  species_name: Clonostachys rosea
+  selected: 141
+  isolates_available: 141
+  studies_in_panel: 10
+- species_taxid: 39966
+  species_name: Hypsizygus marmoreus
+  selected: 139
+  isolates_available: 139
+  studies_in_panel: 4
+- species_taxid: 85929
+  species_name: Sphaerulina musiva
+  selected: 139
+  isolates_available: 139
+  studies_in_panel: 4
+- species_taxid: 36080
+  species_name: Mucor circinelloides
+  selected: 137
+  isolates_available: 137
+  studies_in_panel: 30
+- species_taxid: 706553
+  species_name: Cercospora janseana
+  selected: 137
+  isolates_available: 137
+  studies_in_panel: 2
+- species_taxid: 460519
+  species_name: Komagataella phaffii
+  selected: 132
+  isolates_available: 132
+  studies_in_panel: 18
+- species_taxid: 36911
+  species_name: Clavispora lusitaniae
+  selected: 127
+  isolates_available: 127
+  studies_in_panel: 17
+- species_taxid: 5062
+  species_name: Aspergillus oryzae
+  selected: 113
+  isolates_available: 113
+  studies_in_panel: 11
+- species_taxid: 1684324
+  species_name: Saccharomyces cerevisiae x Saccharomyces eubayanus
+  selected: 125
+  isolates_available: 125
+  studies_in_panel: 8
+- species_taxid: 2447956
+  species_name: Antrodiella citrinella
+  selected: 124
+  isolates_available: 124
+  studies_in_panel: 1
+- species_taxid: 2016321
+  species_name: Phyllosticta paracitricarpa
+  selected: 121
+  isolates_available: 121
+  studies_in_panel: 1
+- species_taxid: 45513
+  species_name: Lizanozyma spartinae
+  selected: 110
+  isolates_available: 110
+  studies_in_panel: 3
+- species_taxid: 58291
+  species_name: Rhizopus microsporus
+  selected: 113
+  isolates_available: 113
+  studies_in_panel: 48
+- species_taxid: 948311
+  species_name: Fusarium proliferatum
+  selected: 110
+  isolates_available: 110
+  studies_in_panel: 16
+- species_taxid: 2494676
+  species_name: Ustilago bromivora x Ustilago hordei
+  selected: 109
+  isolates_available: 109
+  studies_in_panel: 1
+- species_taxid: 5082
+  species_name: Penicillium roqueforti
+  selected: 108
+  isolates_available: 108
+  studies_in_panel: 7
+- species_taxid: 5272
+  species_name: Microbotryum violaceum
+  selected: 107
+  isolates_available: 107
+  studies_in_panel: 3
+- species_taxid: 5516
+  species_name: Fusarium culmorum
+  selected: 105
+  isolates_available: 105
+  studies_in_panel: 4
+- species_taxid: 175648
+  species_name: Coniferiporia sulphurascens
+  selected: 104
+  isolates_available: 104
+  studies_in_panel: 2
+- species_taxid: 523103
+  species_name: Trichophyton mentagrophytes
+  selected: 103
+  isolates_available: 103
+  studies_in_panel: 12
+- species_taxid: 5127
+  species_name: Fusarium fujikuroi
+  selected: 100
+  isolates_available: 100
+  studies_in_panel: 5
+- species_taxid: 4944
+  species_name: Saccharomycopsis fibuligera
+  selected: 100
+  isolates_available: 100
+  studies_in_panel: 4
+- species_taxid: 1173061
+  species_name: Geotrichum candidum
+  selected: 100
+  isolates_available: 100
+  studies_in_panel: 12
+- species_taxid: 273371
+  species_name: Lodderomyces orthopsilosis
+  selected: 68
+  isolates_available: 68
+  studies_in_panel: 13
+- species_taxid: 40127
+  species_name: Neurospora tetrasperma
+  selected: 97
+  isolates_available: 97
+  studies_in_panel: 5
+- species_taxid: 27292
+  species_name: Saccharomyces pastorianus
+  selected: 96
+  isolates_available: 96
+  studies_in_panel: 21
+- species_taxid: 1173713
+  species_name: Ganoderma sichuanense
+  selected: 96
+  isolates_available: 96
+  studies_in_panel: 2
+- species_taxid: 5501
+  species_name: Coccidioides immitis
+  selected: 95
+  isolates_available: 95
+  studies_in_panel: 9
+- species_taxid: 1231522
+  species_name: Candidozyma duobushaemuli
+  selected: 95
+  isolates_available: 95
+  studies_in_panel: 9
+- species_taxid: 81066
+  species_name: Gloeoporus taxicola
+  selected: 94
+  isolates_available: 94
+  studies_in_panel: 1
+- species_taxid: 4927
+  species_name: Hansenula anomala
+  selected: 92
+  isolates_available: 92
+  studies_in_panel: 14
+- species_taxid: 190466
+  species_name: Lophodermium nitens
+  selected: 93
+  isolates_available: 93
+  studies_in_panel: 1
+- species_taxid: 332112
+  species_name: Saccharomyces cerevisiae x Saccharomyces kudriavzevii
+  selected: 93
+  isolates_available: 93
+  studies_in_panel: 9
+- species_taxid: 29833
+  species_name: Hanseniaspora uvarum
+  selected: 92
+  isolates_available: 92
+  studies_in_panel: 8
+- species_taxid: 36050
+  species_name: Fusarium poae
+  selected: 90
+  isolates_available: 90
+  studies_in_panel: 5
+- species_taxid: 27327
+  species_name: Metschnikowia reukaufii
+  selected: 89
+  isolates_available: 89
+  studies_in_panel: 3
+- species_taxid: 67723
+  species_name: Amanita phalloides
+  selected: 89
+  isolates_available: 89
+  studies_in_panel: 2
+- species_taxid: 931006
+  species_name: Beauveria pseudobassiana
+  selected: 88
+  isolates_available: 88
+  studies_in_panel: 3
+- species_taxid: 1387563
+  species_name: Ophidiomyces ophidiicola
+  selected: 89
+  isolates_available: 89
+  studies_in_panel: 3
+- species_taxid: 1904429
+  species_name: Puccinia novopanici
+  selected: 89
+  isolates_available: 89
+  studies_in_panel: 2
+- species_taxid: 5068
+  species_name: Aspergillus tubingensis
+  selected: 88
+  isolates_available: 88
+  studies_in_panel: 11
+- species_taxid: 55181
+  species_name: Phyllosticta citricarpa
+  selected: 88
+  isolates_available: 88
+  studies_in_panel: 1
+- species_taxid: 176626
+  species_name: Rhizopogon salebrosus
+  selected: 88
+  isolates_available: 88
+  studies_in_panel: 2
+- species_taxid: 1681229
+  species_name: Blastomyces gilchristii
+  selected: 88
+  isolates_available: 88
+  studies_in_panel: 5
+- species_taxid: 4911
+  species_name: Kluyveromyces marxianus
+  selected: 57
+  isolates_available: 57
+  studies_in_panel: 27
+- species_taxid: 48565
+  species_name: Suillus brevipes
+  selected: 83
+  isolates_available: 83
+  studies_in_panel: 2
+- species_taxid: 286115
+  species_name: Synchytrium endobioticum
+  selected: 83
+  isolates_available: 83
+  studies_in_panel: 3
+- species_taxid: 707954
+  species_name: Penicillium biforme
+  selected: 83
+  isolates_available: 83
+  studies_in_panel: 2
+- species_taxid: 545650
+  species_name: Sporothrix brasiliensis
+  selected: 82
+  isolates_available: 82
+  studies_in_panel: 4
+- species_taxid: 655981
+  species_name: Pseudogymnoascus destructans
+  selected: 81
+  isolates_available: 81
+  studies_in_panel: 7
+- species_taxid: 220672
+  species_name: Plenodomus biglobosus
+  selected: 79
+  isolates_available: 79
+  studies_in_panel: 4
+- species_taxid: 684837
+  species_name: Puccinia polysora
+  selected: 79
+  isolates_available: 79
+  studies_in_panel: 2
+- species_taxid: 5580
+  species_name: Aureobasidium pullulans
+  selected: 78
+  isolates_available: 78
+  studies_in_panel: 16
+- species_taxid: 1873960
+  species_name: Pseudocercospora fijiensis
+  selected: 78
+  isolates_available: 78
+  studies_in_panel: 2
+- species_taxid: 192011
+  species_name: Cryptococcus neoformans x Cryptococcus deneoformans
+  selected: 77
+  isolates_available: 77
+  studies_in_panel: 4
+- species_taxid: 178872
+  species_name: Pisolithus microcarpus
+  selected: 75
+  isolates_available: 75
+  studies_in_panel: 32
+- species_taxid: 1663498
+  species_name: Pezicula neosporulosa
+  selected: 75
+  isolates_available: 75
+  studies_in_panel: 1
+- species_taxid: 5570
+  species_name: Cenococcum geophilum
+  selected: 74
+  isolates_available: 74
+  studies_in_panel: 17
+- species_taxid: 4950
+  species_name: Torulaspora delbrueckii
+  selected: 73
+  isolates_available: 73
+  studies_in_panel: 10
+- species_taxid: 2593060
+  species_name: Diaporthe humulicola
+  selected: 73
+  isolates_available: 73
+  studies_in_panel: 2
+- species_taxid: 45537
+  species_name: Diutina catenulata
+  selected: 72
+  isolates_available: 72
+  studies_in_panel: 9
+- species_taxid: 2282107
+  species_name: Pyrrhoderma noxium
+  selected: 72
+  isolates_available: 72
+  studies_in_panel: 2
+- species_taxid: 5627
+  species_name: Grifola frondosa
+  selected: 70
+  isolates_available: 70
+  studies_in_panel: 5
+- species_taxid: 78403
+  species_name: Neonectria neomacrospora
+  selected: 71
+  isolates_available: 71
+  studies_in_panel: 1
+- species_taxid: 42374
+  species_name: Candida dubliniensis
+  selected: 66
+  isolates_available: 66
+  studies_in_panel: 14
+- species_taxid: 196064
+  species_name: Calonectria pseudonaviculata
+  selected: 67
+  isolates_available: 67
+  studies_in_panel: 1
+- species_taxid: 36653
+  species_name: Penicillium commune
+  selected: 65
+  isolates_available: 65
+  studies_in_panel: 1
+- species_taxid: 121759
+  species_name: Paracoccidioides brasiliensis
+  selected: 65
+  isolates_available: 65
+  studies_in_panel: 3
+- species_taxid: 559388
+  species_name: fungal endophyte sp. D2-12A18-1
+  selected: 65
+  isolates_available: 65
+  studies_in_panel: 1
+- species_taxid: 51915
+  species_name: Maudiozyma humilis
+  selected: 64
+  isolates_available: 64
+  studies_in_panel: 7
+- species_taxid: 101480
+  species_name: Trichophyton interdigitale
+  selected: 62
+  isolates_available: 62
+  studies_in_panel: 9
+- species_taxid: 3081760
+  species_name: Pseudopithomyces toxicarius
+  selected: 64
+  isolates_available: 64
+  studies_in_panel: 1
+- species_taxid: 2867405
+  species_name: Blumeria hordei
+  selected: 62
+  isolates_available: 62
+  studies_in_panel: 7
+- species_taxid: 1031713
+  species_name: Tilletia maclaganii
+  selected: 61
+  isolates_available: 61
+  studies_in_panel: 61
+- species_taxid: 5067
+  species_name: Aspergillus parasiticus
+  selected: 60
+  isolates_available: 60
+  studies_in_panel: 11
+- species_taxid: 66502
+  species_name: Lophodermium australe
+  selected: 60
+  isolates_available: 60
+  studies_in_panel: 1
+- species_taxid: 5551
+  species_name: Trichophyton rubrum
+  selected: 59
+  isolates_available: 59
+  studies_in_panel: 22
+- species_taxid: 40126
+  species_name: Neurospora sitophila
+  selected: 58
+  isolates_available: 58
+  studies_in_panel: 2
+- species_taxid: 273372
+  species_name: Lodderomyces metapsilosis
+  selected: 58
+  isolates_available: 58
+  studies_in_panel: 9
+- species_taxid: 27294
+  species_name: Monosporozyma unispora
+  selected: 57
+  isolates_available: 57
+  studies_in_panel: 6
+- species_taxid: 27326
+  species_name: Metschnikowia pulcherrima
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 4
+- species_taxid: 42373
+  species_name: Ophiostoma novo-ulmi
+  selected: 57
+  isolates_available: 57
+  studies_in_panel: 1
+- species_taxid: 100816
+  species_name: Madurella mycetomatis
+  selected: 57
+  isolates_available: 57
+  studies_in_panel: 3
+- species_taxid: 1890683
+  species_name: Saitozyma podzolica
+  selected: 57
+  isolates_available: 57
+  studies_in_panel: 2
+- species_taxid: 2953079
+  species_name: Nakaseomyces cf. glabratus
+  selected: 55
+  isolates_available: 55
+  studies_in_panel: 1
+- species_taxid: 5270
+  species_name: Mycosarcoma maydis
+  selected: 54
+  isolates_available: 54
+  studies_in_panel: 6
+- species_taxid: 29908
+  species_name: Sporothrix schenckii
+  selected: 54
+  isolates_available: 54
+  studies_in_panel: 8
+- species_taxid: 51453
+  species_name: Trichoderma reesei
+  selected: 49
+  isolates_available: 49
+  studies_in_panel: 10
+- species_taxid: 1892770
+  species_name: Pseudopithomyces chartarum
+  selected: 53
+  isolates_available: 53
+  studies_in_panel: 1
+- species_taxid: 2496157
+  species_name: Magnusiomyces clavatus
+  selected: 53
+  isolates_available: 53
+  studies_in_panel: 5
+- species_taxid: 310453
+  species_name: Neofusicoccum parvum
+  selected: 50
+  isolates_available: 50
+  studies_in_panel: 12
+- species_taxid: 48589
+  species_name: Suillus tomentosus
+  selected: 49
+  isolates_available: 49
+  studies_in_panel: 49
+- species_taxid: 332947
+  species_name: Hirsutella minnesotensis
+  selected: 49
+  isolates_available: 49
+  studies_in_panel: 1
+- species_taxid: 5346
+  species_name: Coprinopsis cinerea
+  selected: 48
+  isolates_available: 48
+  studies_in_panel: 39
+- species_taxid: 4934
+  species_name: Lachancea kluyveri
+  selected: 47
+  isolates_available: 47
+  studies_in_panel: 5
+- species_taxid: 690256
+  species_name: Colletotrichum fructicola
+  selected: 47
+  isolates_available: 47
+  studies_in_panel: 7
+- species_taxid: 104669
+  species_name: Cryptococcus amylolentus
+  selected: 46
+  isolates_available: 46
+  studies_in_panel: 5
+- species_taxid: 170000
+  species_name: Phakopsora pachyrhizi
+  selected: 46
+  isolates_available: 46
+  studies_in_panel: 46
+- species_taxid: 5599
+  species_name: Alternaria alternata
+  selected: 33
+  isolates_available: 33
+  studies_in_panel: 20
+- species_taxid: 34465
+  species_name: Ganoderma resinaceum
+  selected: 45
+  isolates_available: 45
+  studies_in_panel: 2
+- species_taxid: 207832
+  species_name: Heterobasidion parviporum
+  selected: 45
+  isolates_available: 45
+  studies_in_panel: 2
+- species_taxid: 4837
+  species_name: Phycomyces blakesleeanus
+  selected: 44
+  isolates_available: 44
+  studies_in_panel: 26
+- species_taxid: 5321
+  species_name: Pleurotus cornucopiae
+  selected: 44
+  isolates_available: 44
+  studies_in_panel: 1
+- species_taxid: 63419
+  species_name: Trichophyton concentricum
+  selected: 44
+  isolates_available: 44
+  studies_in_panel: 2
+- species_taxid: 936053
+  species_name: Rhizopus delemar
+  selected: 44
+  isolates_available: 44
+  studies_in_panel: 8
+- species_taxid: 2008363
+  species_name: Trichaptum fuscoviolaceum
+  selected: 43
+  isolates_available: 43
+  studies_in_panel: 3
+- species_taxid: 81056
+  species_name: Wolfiporia cocos
+  selected: 42
+  isolates_available: 42
+  studies_in_panel: 3
+- species_taxid: 40483
+  species_name: Fomitopsis pinicola
+  selected: 41
+  isolates_available: 41
+  studies_in_panel: 1
+- species_taxid: 97096
+  species_name: Eutypa lata
+  selected: 41
+  isolates_available: 41
+  studies_in_panel: 2
+- species_taxid: 749598
+  species_name: Didymella arachidicola
+  selected: 41
+  isolates_available: 41
+  studies_in_panel: 2
+- species_taxid: 1853550
+  species_name: '[Candida] sp.'
+  selected: 41
+  isolates_available: 41
+  studies_in_panel: 5
+- species_taxid: 1659837
+  species_name: Exserohilum rostratum
+  selected: 40
+  isolates_available: 40
+  studies_in_panel: 6
+- species_taxid: 85982
+  species_name: Serpula lacrymans
+  selected: 39
+  isolates_available: 39
+  studies_in_panel: 4
+- species_taxid: 111012
+  species_name: Lecanosticta acicola
+  selected: 39
+  isolates_available: 39
+  studies_in_panel: 3
+- species_taxid: 4903
+  species_name: Williopsis jadinii
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 8
+- species_taxid: 114524
+  species_name: Saccharomyces kudriavzevii
+  selected: 38
+  isolates_available: 38
+  studies_in_panel: 9
+- species_taxid: 2902605
+  species_name: Histoplasma ohiense
+  selected: 38
+  isolates_available: 38
+  studies_in_panel: 8
+- species_taxid: 4956
+  species_name: Zygosaccharomyces rouxii
+  selected: 37
+  isolates_available: 37
+  studies_in_panel: 6
+- species_taxid: 5174
+  species_name: Ophiostoma ulmi
+  selected: 37
+  isolates_available: 37
+  studies_in_panel: 1
+- species_taxid: 83470
+  species_name: Stereocaulon vesuvianum
+  selected: 37
+  isolates_available: 37
+  studies_in_panel: 1
+- species_taxid: 637633
+  species_name: Dryadomyces quercivorus
+  selected: 37
+  isolates_available: 37
+  studies_in_panel: 2
+- species_taxid: 5081
+  species_name: Penicillium sp.
+  selected: 36
+  isolates_available: 36
+  studies_in_panel: 2
+- species_taxid: 5486
+  species_name: Candida viswanathii
+  selected: 36
+  isolates_available: 36
+  studies_in_panel: 4
+- species_taxid: 520446
+  species_name: Fusarium andiyazi
+  selected: 36
+  isolates_available: 36
+  studies_in_panel: 2
+- species_taxid: 746836
+  species_name: Hymenoscyphus fraxineus
+  selected: 36
+  isolates_available: 36
+  studies_in_panel: 6
+- species_taxid: 1069201
+  species_name: Aspergillus luchuensis
+  selected: 36
+  isolates_available: 36
+  studies_in_panel: 8
+- species_taxid: 27345
+  species_name: Puccinia hordei
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 2
+- species_taxid: 36914
+  species_name: Lodderomyces elongisporus
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 6
+- species_taxid: 64657
+  species_name: Tremella fuciformis
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 3
+- species_taxid: 94610
+  species_name: Neurospora tetraspora
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 1
+- species_taxid: 98342
+  species_name: Pleurotus citrinopileatus
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 2
+- species_taxid: 698440
+  species_name: Drepanopeziza brunnea
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 1
+- species_taxid: 2035803
+  species_name: Candida cf. parapsilosis
+  selected: 35
+  isolates_available: 35
+  studies_in_panel: 1
+- species_taxid: 41734
+  species_name: Aspergillus latus
+  selected: 34
+  isolates_available: 34
+  studies_in_panel: 5
+- species_taxid: 42676
+  species_name: Fusarium sacchari
+  selected: 34
+  isolates_available: 34
+  studies_in_panel: 6
+- species_taxid: 43265
+  species_name: Cordyceps javanica
+  selected: 34
+  isolates_available: 34
+  studies_in_panel: 2
+- species_taxid: 45277
+  species_name: Sarocladium kiliense
+  selected: 34
+  isolates_available: 34
+  studies_in_panel: 1
+- species_taxid: 78410
+  species_name: Neonectria ditissima
+  selected: 34
+  isolates_available: 34
+  studies_in_panel: 3
+- species_taxid: 5105
+  species_name: Ascosphaera apis
+  selected: 33
+  isolates_available: 33
+  studies_in_panel: 2
+- species_taxid: 79220
+  species_name: Leucocoprinus gongylophorus
+  selected: 33
+  isolates_available: 33
+  studies_in_panel: 6
+- species_taxid: 4959
+  species_name: Debaryomyces hansenii
+  selected: 32
+  isolates_available: 32
+  studies_in_panel: 10
+- species_taxid: 83788
+  species_name: Cetradonia linearis
+  selected: 32
+  isolates_available: 32
+  studies_in_panel: 1
+- species_taxid: 181762
+  species_name: Psilocybe cubensis
+  selected: 32
+  isolates_available: 32
+  studies_in_panel: 3
+- species_taxid: 264951
+  species_name: Paecilomyces variotii
+  selected: 32
+  isolates_available: 32
+  studies_in_panel: 5
+- species_taxid: 2304651
+  species_name: Neurospora sp. CHS-2018c
+  selected: 32
+  isolates_available: 32
+  studies_in_panel: 1
+- species_taxid: 38945
+  species_name: Flammulina velutipes
+  selected: 31
+  isolates_available: 31
+  studies_in_panel: 2
+- species_taxid: 42458
+  species_name: Lichtheimia corymbifera
+  selected: 31
+  isolates_available: 31
+  studies_in_panel: 31
+- species_taxid: 5499
+  species_name: Fulvia fulva
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 4
+- species_taxid: 56406
+  species_name: Hanseniaspora guilliermondii
+  selected: 28
+  isolates_available: 28
+  studies_in_panel: 7
+- species_taxid: 59586
+  species_name: Corynespora cassiicola
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 6
+- species_taxid: 60175
+  species_name: Penicillium nalgiovense
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 2
+- species_taxid: 64363
+  species_name: Dothistroma septosporum
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 4
+- species_taxid: 91943
+  species_name: Hortaea werneckii
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 7
+- species_taxid: 348901
+  species_name: Cercospora zeina
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 1
+- species_taxid: 3385123
+  species_name: Schizothecium sp. GE-2024h
+  selected: 30
+  isolates_available: 30
+  studies_in_panel: 1
+- species_taxid: 33203
+  species_name: Purpureocillium lilacinum
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 7
+- species_taxid: 82508
+  species_name: Trichosporon asahii
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 8
+- species_taxid: 105697
+  species_name: Mucor piriformis
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 2
+- species_taxid: 1954252
+  species_name: Lophodermium sp. 2 RO-2016
+  selected: 29
+  isolates_available: 29
+  studies_in_panel: 1
+- species_taxid: 42742
+  species_name: Gelatoporia subvermispora
+  selected: 28
+  isolates_available: 28
+  studies_in_panel: 8
+- species_taxid: 56646
+  species_name: Fusarium venenatum
+  selected: 28
+  isolates_available: 28
+  studies_in_panel: 4
+- species_taxid: 114525
+  species_name: Saccharomyces mikatae
+  selected: 28
+  isolates_available: 28
+  studies_in_panel: 5
+- species_taxid: 568076
+  species_name: Metarhizium robertsii
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 3
+- species_taxid: 2563009
+  species_name: Ophiocordyceps sp. 'leonardi'
+  selected: 28
+  isolates_available: 28
+  studies_in_panel: 1
+- species_taxid: 34460
+  species_name: Ganoderma gibbosum
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 1
+- species_taxid: 36630
+  species_name: Aspergillus fischeri
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 6
+- species_taxid: 463681
+  species_name: Penicillium fuscoglaucum
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 5
+- species_taxid: 1387573
+  species_name: Septoria pistaciarum
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 1
+- species_taxid: 2075311
+  species_name: Polyporus tsugae
+  selected: 26
+  isolates_available: 26
+  studies_in_panel: 3
+- species_taxid: 2420201
+  species_name: Laburnicola sp.
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 1
+- species_taxid: 3436079
+  species_name: Rhodotorula sp. 'mucilaginosa hybrid'
+  selected: 27
+  isolates_available: 27
+  studies_in_panel: 1
+- species_taxid: 5076
+  species_name: Penicillium chrysogenum
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 10
+- species_taxid: 5142
+  species_name: Neurospora intermedia
+  selected: 26
+  isolates_available: 26
+  studies_in_panel: 2
+- species_taxid: 1954251
+  species_name: Lophodermium sp. 1 RO-2016
+  selected: 26
+  isolates_available: 26
+  studies_in_panel: 1
+- species_taxid: 5075
+  species_name: Penicillium camemberti
+  selected: 25
+  isolates_available: 25
+  studies_in_panel: 6
+- species_taxid: 40302
+  species_name: Vairimorpha ceranae
+  selected: 25
+  isolates_available: 25
+  studies_in_panel: 4
+- species_taxid: 195108
+  species_name: Fusarium falciforme
+  selected: 25
+  isolates_available: 25
+  studies_in_panel: 7
+- species_taxid: 211096
+  species_name: Hanseniaspora opuntiae
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 7
+- species_taxid: 1094350
+  species_name: Geosmithia morbida
+  selected: 25
+  isolates_available: 25
+  studies_in_panel: 2
+- species_taxid: 5544
+  species_name: Trichoderma harzianum
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 16
+- species_taxid: 117187
+  species_name: Fusarium verticillioides
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 13
+- species_taxid: 1715230
+  species_name: Fusarium cf. solani
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 2
+- species_taxid: 2582771
+  species_name: Myrmecopterula velohortorum
+  selected: 24
+  isolates_available: 24
+  studies_in_panel: 1
+- species_taxid: 4929
+  species_name: Meyerozyma guilliermondii
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 22
+- species_taxid: 5111
+  species_name: Claviceps purpurea
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 2
+- species_taxid: 29829
+  species_name: Lipomyces starkeyi
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 4
+- species_taxid: 53685
+  species_name: Hanseniaspora valbyensis
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 7
+- species_taxid: 221103
+  species_name: Moniliophthora roreri
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 2
+- species_taxid: 1937702
+  species_name: Ogataea haglerorum
+  selected: 23
+  isolates_available: 23
+  studies_in_panel: 2
+- species_taxid: 55194
+  species_name: Malassezia furfur
+  selected: 22
+  isolates_available: 22
+  studies_in_panel: 6
+- species_taxid: 64493
+  species_name: Mucor hiemalis
+  selected: 22
+  isolates_available: 22
+  studies_in_panel: 22
+- species_taxid: 343501
+  species_name: Podospora tetraspora
+  selected: 22
+  isolates_available: 22
+  studies_in_panel: 2
+- species_taxid: 706196
+  species_name: Saccharomyces arboricola
+  selected: 22
+  isolates_available: 22
+  studies_in_panel: 3
+- species_taxid: 1069075
+  species_name: Beauveria asiatica
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 2
+- species_taxid: 1612424
+  species_name: Penicillium salamii
+  selected: 22
+  isolates_available: 22
+  studies_in_panel: 2
+- species_taxid: 4841
+  species_name: Mucor racemosus
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 21
+- species_taxid: 40199
+  species_name: Fusarium avenaceum
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 6
+- species_taxid: 118266
+  species_name: Beauveria brongniartii
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 4
+- species_taxid: 679948
+  species_name: Apophysomyces trapeziformis
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 2
+- species_taxid: 1173716
+  species_name: Zymoseptoria ardabiliae
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 2
+- species_taxid: 1233435
+  species_name: Ganoderma lingzhi
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 4
+- species_taxid: 2305204
+  species_name: Saccharomyces cerevisiae x Saccharomyces kudriavzevii x Saccharomyces mikatae
+    x Saccharomyces uvarum x Saccharomyces arboricola x Saccharomyces paradoxus
+  selected: 21
+  isolates_available: 21
+  studies_in_panel: 1
+- species_taxid: 4846
+  species_name: Rhizopus stolonifer
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 20
+- species_taxid: 5467
+  species_name: Colletotrichum truncatum
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 3
+- species_taxid: 29892
+  species_name: Auricularia auricula-judae
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 3
+- species_taxid: 77020
+  species_name: Malassezia pachydermatis
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 5
+- species_taxid: 112498
+  species_name: Ramularia collo-cygni
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 2
+- species_taxid: 1174673
+  species_name: Morchella importuna
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 4
+- species_taxid: 1278899
+  species_name: Metarhizium pingshaense
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 4
+- species_taxid: 1911678
+  species_name: Saccharomyces eubayanus x Saccharomyces uvarum
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 1
+- species_taxid: 2093215
+  species_name: Candidozyma vulturna
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 4
+- species_taxid: 2231729
+  species_name: Colletotrichum australisinense (nom. inval.)
+  selected: 20
+  isolates_available: 20
+  studies_in_panel: 2
+- species_taxid: 33178
+  species_name: Aspergillus terreus
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 10
+- species_taxid: 36075
+  species_name: Ganoderma sinense
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 3
+- species_taxid: 40145
+  species_name: Tricholoma matsutake
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 5
+- species_taxid: 45130
+  species_name: Bipolaris sorokiniana
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 7
+- species_taxid: 86838
+  species_name: Rhodotorula paludigena
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 5
+- species_taxid: 100756
+  species_name: Hericium coralloides
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 3
+- species_taxid: 2502994
+  species_name: Fusarium odoratissimum
+  selected: 19
+  isolates_available: 19
+  studies_in_panel: 4
+- species_taxid: 27335
+  species_name: Verticillium albo-atrum
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 2
+- species_taxid: 37662
+  species_name: Brettanomyces anomalus
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 5
+- species_taxid: 42251
+  species_name: Tuber borchii
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 18
+- species_taxid: 64518
+  species_name: Mortierella alpina
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 10
+- species_taxid: 169388
+  species_name: Fusarium solani
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 14
+- species_taxid: 1074906
+  species_name: Zygosaccharomyces siamensis
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 5
+- species_taxid: 1862628
+  species_name: Saccharomyces uvarum x Saccharomyces eubayanus
+  selected: 18
+  isolates_available: 18
+  studies_in_panel: 2
+- species_taxid: 5077
+  species_name: Penicillium citrinum
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 9
+- species_taxid: 13290
+  species_name: Tilletia caries
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 5
+- species_taxid: 29883
+  species_name: Laccaria bicolor
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 16
+- species_taxid: 36022
+  species_name: Petasospora fabianii
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 10
+- species_taxid: 37468
+  species_name: Pisolithus tinctorius
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 17
+- species_taxid: 42258
+  species_name: Zygosaccharomyces mellis
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 4
+- species_taxid: 47427
+  species_name: Armillaria gallica
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 2
+- species_taxid: 145971
+  species_name: Colletotrichum lupini
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 5
+- species_taxid: 460523
+  species_name: Ogataea polymorpha
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 7
+- species_taxid: 1176355
+  species_name: Hamiltosporidium tvaerminnensis
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 2
+- species_taxid: 1328300
+  species_name: Fusarium keratoplasticum
+  selected: 17
+  isolates_available: 17
+  studies_in_panel: 4
+- species_taxid: 4954
+  species_name: Zygosaccharomyces bailii
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 3
+- species_taxid: 5288
+  species_name: Rhodotorula diobovata
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 4
+- species_taxid: 5523
+  species_name: Fusarium lateritium
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 2
+- species_taxid: 38448
+  species_name: Monilinia fructicola
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 3
+- species_taxid: 133750
+  species_name: Puccinia kuehnii
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 1
+- species_taxid: 293373
+  species_name: Penicillium palitans
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 3
+- species_taxid: 1108849
+  species_name: Penicillium rubens
+  selected: 16
+  isolates_available: 16
+  studies_in_panel: 5
+- species_taxid: 63405
+  species_name: Microsporum canis
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 5
+- species_taxid: 101201
+  species_name: Trichoderma asperellum
+  selected: 15
+  isolates_available: 15
+  studies_in_panel: 14
+- species_taxid: 136370
+  species_name: Lasallia pustulata
+  selected: 15
+  isolates_available: 15
+  studies_in_panel: 4
+- species_taxid: 293939
+  species_name: Aspergillus lentulus
+  selected: 15
+  isolates_available: 15
+  studies_in_panel: 4
+- species_taxid: 595635
+  species_name: Phyllosticta citriasiana
+  selected: 15
+  isolates_available: 15
+  studies_in_panel: 2
+- species_taxid: 1295096
+  species_name: Penicillium swiecickii
+  selected: 15
+  isolates_available: 15
+  studies_in_panel: 15
+- species_taxid: 5016
+  species_name: Bipolaris maydis
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 12
+- species_taxid: 29881
+  species_name: Neurospora cerealis
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 29884
+  species_name: Ganoderma applanatum
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 33190
+  species_name: Rhodosporidiobolus fluvialis
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 68879
+  species_name: Penicillium paneum
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 2
+- species_taxid: 178870
+  species_name: Pisolithus albus
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 14
+- species_taxid: 474922
+  species_name: Colletotrichum gloeosporioides
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 9
+- species_taxid: 760013
+  species_name: Apophysomyces variabilis
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 2
+- species_taxid: 1709941
+  species_name: fungal sp.
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 1810908
+  species_name: Aspergillus spinulosporus
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 5
+- species_taxid: 2060934
+  species_name: Pisolithus croceorrhizus
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 14
+- species_taxid: 2563008
+  species_name: Ophiocordyceps furcata
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 2563010
+  species_name: Ophiocordyceps sp. 'saundersi'
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 1
+- species_taxid: 2661923
+  species_name: Zygosaccharomyces osmophilus
+  selected: 14
+  isolates_available: 14
+  studies_in_panel: 2
+- species_taxid: 4840
+  species_name: Rhizomucor pusillus
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 11
+- species_taxid: 41984
+  species_name: Aspergillus tamarii
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 6
+- species_taxid: 48490
+  species_name: Fusarium circinatum
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 3
+- species_taxid: 61186
+  species_name: Monilinia laxa
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 4
+- species_taxid: 121624
+  species_name: Phyllosticta capitalensis
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 3
+- species_taxid: 155126
+  species_name: Tilletia horrida
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 8
+- species_taxid: 203904
+  species_name: Hemileia vastatrix
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 2
+- species_taxid: 203961
+  species_name: Fusarium petroliphilum
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 2
+- species_taxid: 263815
+  species_name: Pneumocystis murina
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 3
+- species_taxid: 710243
+  species_name: Colletotrichum fioriniae
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 12
+- species_taxid: 1868870
+  species_name: Calonectria henricotiae
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 1
+- species_taxid: 2304650
+  species_name: Neurospora sp. CHS-2018b
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 1
+- species_taxid: 3434168
+  species_name: Rhodotorula aff. babjevae
+  selected: 13
+  isolates_available: 13
+  studies_in_panel: 1
+- species_taxid: 13291
+  species_name: Tilletia controversa
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 6
+- species_taxid: 35717
+  species_name: Epichloe festucae
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 4
+- species_taxid: 66738
+  species_name: Diplodia sapinea
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 2
+- species_taxid: 86836
+  species_name: Rhodotorula kratochvilovae
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 3
+- species_taxid: 100951
+  species_name: Naganishia albida
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 7
+- species_taxid: 119927
+  species_name: Alternaria tenuissima
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 6
+- species_taxid: 121235
+  species_name: Pichia manshurica
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 4
+- species_taxid: 148305
+  species_name: Pyricularia grisea
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 9
+- species_taxid: 418784
+  species_name: Candidozyma pseudohaemuli
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 4
+- species_taxid: 500171
+  species_name: Colletotrichum lini
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 1
+- species_taxid: 870730
+  species_name: Ogataea angusta
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 3
+- species_taxid: 984962
+  species_name: Heterobasidion irregulare
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 2
+- species_taxid: 1069079
+  species_name: Beauveria varroae
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 1
+- species_taxid: 1171613
+  species_name: Circinella muscae
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 12
+- species_taxid: 1365886
+  species_name: Zygosaccharomyces parabailii
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 2
+- species_taxid: 1921600
+  species_name: Pseudopithomyces palmicola
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 1
+- species_taxid: 2598436
+  species_name: Hanseniaspora opuntiae x Hanseniaspora pseudoguilliermondii
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 2
+- species_taxid: 2824671
+  species_name: Saccharomyces cerevisiae x Saccharomyces jurei
+  selected: 12
+  isolates_available: 12
+  studies_in_panel: 1
+- species_taxid: 4829
+  species_name: Absidia glauca
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 7
+- species_taxid: 5147
+  species_name: Sordaria macrospora
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 6
+- species_taxid: 5547
+  species_name: Trichoderma viride
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 2
+- species_taxid: 52247
+  species_name: Pichia inconspicua
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 2
+- species_taxid: 64623
+  species_name: Mucor indicus
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 11
+- species_taxid: 64654
+  species_name: Backusella lamprospora
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 11
+- species_taxid: 86832
+  species_name: Rhodotorula dairenensis
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 4
+- species_taxid: 91752
+  species_name: Hericium erinaceus
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 5
+- species_taxid: 135589
+  species_name: Coniferiporia weirii
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 2
+- species_taxid: 213030
+  species_name: Absidia cylindrospora
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 11
+- species_taxid: 221167
+  species_name: Fusarium xylarioides
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 3
+- species_taxid: 1095183
+  species_name: Magnusiomyces capitatus
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 3
+- species_taxid: 3129044
+  species_name: Saccharomyces sp. FC-2024a
+  selected: 11
+  isolates_available: 11
+  studies_in_panel: 1
+- species_taxid: 27357
+  species_name: Colletotrichum acutatum
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 8
+- species_taxid: 35722
+  species_name: Parasitella parasitica
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 6
+- species_taxid: 41058
+  species_name: Aspergillus sojae
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 2
+- species_taxid: 41688
+  species_name: Lomentospora prolificans
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 3
+- species_taxid: 83184
+  species_name: Diaporthe eres
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 5
+- species_taxid: 86630
+  species_name: Rhizopus azygosporus
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 4
+- species_taxid: 90261
+  species_name: Absidia caerulea
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 10
+- species_taxid: 132109
+  species_name: Akanthomyces dipterigenus
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 1
+- species_taxid: 148631
+  species_name: '[Candida] anglica'
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 10
+- species_taxid: 174685
+  species_name: Ordospora colligata
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 2
+- species_taxid: 288795
+  species_name: Microbotryum lychnidis-dioicae
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 2
+- species_taxid: 688394
+  species_name: Lichtheimia ramosa
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 10
+- species_taxid: 1077358
+  species_name: Coniothyrium glycines
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 4
+- species_taxid: 1209932
+  species_name: Colletotrichum scovillei
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 3
+- species_taxid: 1351752
+  species_name: Parastagonospora avenae
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 1
+- species_taxid: 1654605
+  species_name: Lachancea quebecensis
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 2
+- species_taxid: 2060913
+  species_name: Flammulina filiformis
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 2
+- species_taxid: 2304649
+  species_name: Neurospora sp. CHS-2018a
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 1
+- species_taxid: 2582766
+  species_name: Myrmecopterula nudihortorum
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 1
+- species_taxid: 2778372
+  species_name: Fusarium cf. falciforme
+  selected: 10
+  isolates_available: 10
+  studies_in_panel: 1

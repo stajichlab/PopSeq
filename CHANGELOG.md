@@ -12,12 +12,22 @@ No path moved, no column added, renamed or removed.
 - **`est_depth_x` filled for 12,109 runs in 308 species** in
   `catalog/runs/fungi_all_runs.csv.gz`. Every changed cell was blank before. No other
   cell changed.
-- `catalog/summary/coverage.csv.gz` grows from 112 to 419 species. The existing rows are
+- `catalog/summary/coverage.csv.gz` grows from 111 to 418 species. The existing rows are
   unchanged. `catalog/species_layout.csv.gz` gains single-only depth values for 62
   species.
 - One study to know about: *Hortaea werneckii* PRJNA428320 has 54 runs labelled PAIRED
   that ENA serves as one file, at a median 914x against a 25.33 Mb assembly. Its paired
   runs and the other studies sit at 85x to 290x. The size is not the problem.
+- **New panel `panels/pop_sra_ge10_cap300/`** (`scripts/popseq_panel_set.py`), the input
+  for GmG's per-species PCoA and PCA pages. It holds up to 300 isolates for every species
+  with at least 10 paired Illumina isolates (owner decision 2026-11-09). Each species is
+  selected by `popseq.panel(n=300)` with the default filters. The panel has 412 species
+  and 34,673 isolates. 47 species reach the cap of 300; 177 have 10 to 29 isolates.
+  - 1,888 isolates in 36 species have no depth estimate, because those species have no
+    genome size. 549 isolates are below 10x.
+  - Fetching 25x per isolate needs about 33.8 Tbases, against 135.3 Tbases for whole runs.
+  - `samples.csv` holds ENA URLs. Nothing has been fetched (#13).
+  - It was built from catalog commit 7b08547, which `panel.yaml` records.
 
 ## 2026-11-09 (later)
 
