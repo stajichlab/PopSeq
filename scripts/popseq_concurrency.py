@@ -18,7 +18,8 @@ during that fetch's window, itself included.
     # 2. run scripts/concurrency_sweep.slurm (see its header)
     # 3. summarise
     uv run python scripts/popseq_concurrency.py summary $W/tasks.tsv \\
-        --out benchmarks/2026-11-10_concurrency_sweep.csv
+        --out benchmarks/2026-11-11_concurrency_sweep.csv \\
+        --by-node-out benchmarks/2026-11-11_concurrency_by_node.csv
 
 tasks.tsv, one line per task, written by the SLURM script:
     level  run  taxid  node  start_epoch  end_epoch  exit  bytes  seconds_fetch
@@ -120,6 +121,43 @@ def summarise(tasks: list[dict]) -> list[dict]:
     return rows
 
 
+NODE_BINS = [(0, 2), (2, 5), (5, 10), (10, 20), (20, 1000)]
+
+
+def by_node(tasks: list[dict]) -> list[dict]:
+    """Per-stream MB/s binned by how many fetches shared the task's node.
+
+    SLURM packs array tasks onto few nodes, so a level's `%N` mixes two things: fetches
+    cluster-wide and fetches per node. Each successful task gets its time-weighted
+    in-flight count among all tasks (failures included) of its own level on its own node, then the rates are
+    binned on that count. Levels are pooled: the bin, not the level, is the variable."""
+    groups: dict[tuple, list[dict]] = defaultdict(list)
+    for t in tasks:
+        groups[(t["level"], t["node"])].append(t)   # failures still used the node
+    pairs = []
+    for g in groups.values():
+        for t, c in zip(g, in_flight(g)):
+            if int(t["exit"]) == OK_EXIT and float(t["seconds_fetch"] or 0) > 0:
+                pairs.append((c, float(t["bytes"]) / float(t["seconds_fetch"]) / 1e6))
+    rows = []
+    for lo, hi in NODE_BINS:
+        v = sorted(r for c, r in pairs if lo <= c < hi)
+        if not v:
+            continue
+        q = statistics.quantiles(v, n=4) if len(v) >= 2 else [v[0], v[0], v[0]]
+        rows.append({"same_node_in_flight": f"{lo}-{hi}" if hi < 1000 else f">={lo}",
+                     "n": len(v), "stream_mb_s_median": round(statistics.median(v), 2),
+                     "stream_mb_s_q1": round(q[0], 2), "stream_mb_s_q3": round(q[2], 2)})
+    return rows
+
+
+def _write(path, rows):
+    with open(path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
+
+
 def _open(path):
     return gzip.open(path, "rt", newline="") if path.endswith(".gz") else open(path, newline="")
 
@@ -144,6 +182,7 @@ def main():
     b = sub.add_parser("summary", help="summarise tasks.tsv per level")
     b.add_argument("tasks")
     b.add_argument("--out", required=True)
+    b.add_argument("--by-node-out", help="also write the per-node binning here")
     args = p.parse_args()
 
     if args.cmd == "plan":
@@ -190,10 +229,9 @@ def main():
         with _open(args.tasks) as fh:
             tasks = list(csv.DictReader(fh, delimiter="\t"))
         rows = summarise(tasks)
-        with open(args.out, "w", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator="\n")
-            w.writeheader()
-            w.writerows(rows)
+        _write(args.out, rows)
+        if args.by_node_out:
+            _write(args.by_node_out, by_node(tasks))
         for r in rows:
             print(r, file=sys.stderr)
 

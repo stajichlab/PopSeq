@@ -1,8 +1,9 @@
 # Spec 002: download strategy
 
 Status: **stable** (2026-11-08). Benchmark 7.1 settled the route order for tier `full` on
-compute nodes. See "Benchmark 7.1 results". Two measurements are still UNMEASURED and are
-tracked in issue #27: the login-node arm and the concurrency cap.
+compute nodes. See "Benchmark 7.1 results". The concurrency sweep (issue #27, 2026-11-11)
+measured the cap: see "Concurrency sweep results". The login-node arm was dropped
+(owner decision 2026-11-09).
 
 ## Depth tiers
 
@@ -133,7 +134,9 @@ popseq fetch RUN|MANIFEST --tier head|windows|stride|full|coverage --out DIR
   directory is written under a temporary name and renamed after verification.
 - **Concurrency.** The fetcher does not cap concurrency; the caller does, and says so with
   `--concurrency N`, which is written to every `downloads.csv` row and to the sidecar. The
-  starting value is 20. **UNMEASURED** (issue #27): the cap will be measured from these rows.
+  default is 20. The sweep of 2026-11-11 had no failures at 20 or at 40, and showed that
+  fetches per node, not fetches cluster-wide, set the speed of each fetch. See "Concurrency
+  sweep results".
 
 ### Exit codes and the result row
 
@@ -268,7 +271,72 @@ array.
 
 This settles the order for tier `full`: AWS Open Data, then `prefetch`, then ENA HTTPS.
 The TE_fungi_copy login-node figure for `prefetch` (20-23 MB/s, one run) was not reproduced
-on compute nodes, and the login-node arm is UNMEASURED (#27).
+on compute nodes. The login-node arm was dropped (owner decision 2026-11-09, #27): it cannot
+change the route order, and bulk transfers on the login node are not wanted.
+
+## Concurrency sweep results (2026-11-11, issue #27)
+
+**Method.** 80 runs, one per species, from `panels/pop_sra_ge10_cap300`: paired at NCBI,
+0.8 to 1.6 Gbases each (`benchmarks/2026-11-11_concurrency_plan.csv`, looked up once, so the
+fetches made no NCBI or ENA lookups). Each level N is a SLURM array with `%N`, tier `full`,
+route AWS Open Data, 4 cores per task, partition `short`. The levels ran one after another,
+18:41 to 19:47 UTC. Scripts: `scripts/concurrency_sweep.sh`, `scripts/concurrency_sweep.slurm`,
+`scripts/popseq_concurrency.py`. Per-task rows: `benchmarks/2026-11-11_concurrency_tasks.tsv`
+and `benchmarks/downloads.csv`.
+
+`%N` is a ceiling. The table reports the concurrency each fetch actually saw: the
+time-weighted number of fetches in flight during it, itself included. Stream MB/s is the
+transfer only (`seconds_fetch` in the sidecar), not the conversion.
+
+| Level N | Fetches | ok | Failed | Concurrency seen (median) | Nodes | Stream MB/s median (q1-q3) | Aggregate MB/s |
+|---|---|---|---|---|---|---|---|
+| 1 | 8 | 7 | 0 (1 crash) | 1.0 | 3 | 21.7 (20.5-23.5) | 3.2 |
+| 5 | 20 | 20 | 0 | 4.6 | 2 | 18.4 (16.2-20.9) | 12.9 |
+| 10 | 20 | 20 | 0 | 9.5 | 3 | 14.1 (11.0-18.6) | 20.7 |
+| 20 | 40 | 40 | 0 | 18.1 | 6 | 14.4 (12.6-18.2) | 38.9 |
+| 40 | 80 | 80 | 0 | 38.0 | 4 | 6.4 (5.1-11.9) | 69.7 |
+
+Source: `benchmarks/2026-11-11_concurrency_sweep.csv`. Aggregate is the bytes of the level's
+successful fetches over the level's wall span, conversion included, so it understates the
+network rate. The level-1 crash was a bug in `popseq fetch` (an empty genome size, PR #40),
+before any transfer. It is not a download failure.
+
+**Per node.** SLURM packed the tasks onto few nodes: at N = 40, 52 of 80 ran on one node.
+Binned by the fetches in flight on the same node (all levels pooled,
+`benchmarks/2026-11-11_concurrency_by_node.csv`):
+
+| Fetches in flight on the node | n | Stream MB/s median (q1-q3) |
+|---|---|---|
+| under 2 | 11 | 21.4 (19.7-23.5) |
+| 2 to 5 | 50 | 17.2 (13.8-19.0) |
+| 5 to 10 | 34 | 12.9 (10.2-16.9) |
+| 10 to 20 | 34 | 6.9 (5.6-12.7) |
+| 20 or more | 38 | 5.4 (4.4-6.9) |
+
+Among fetches with fewer than 10 on their node, the cluster-wide count mattered less: median
+20.0 MB/s at 0 to 5 in flight, 14.4 at 5 to 15, 14.2 at 15 to 30, 12.3 at 30 or more (n = 26,
+26, 37, 6; a one-off reading of the same tasks, not a committed table).
+
+**What this settles.**
+
+- **No failure cap was reached.** 160 of 160 fetches at N = 5 to 40 were verified `ok`. The
+  failures GmG saw at about 35 concurrent ("Rules that are not negotiable") were not
+  reproduced on the AWS route. Above 40 is UNMEASURED.
+- **Aggregate throughput still rises at 40** (69.7 MB/s), so 20 does not saturate the
+  cluster's path to AWS.
+- **The binding limit is per node.** Speed per fetch falls by half or more once 10 or more
+  fetches share a node. `%N` does not control that: SLURM decides the packing. A caller that
+  wants full per-fetch speed should keep about 5 fetches per node or fewer, for example by
+  running a fixed number of fetches inside each job rather than one array task per fetch.
+  That arrangement itself is UNMEASURED.
+- The default `--concurrency 20` stays. It is now a measured safe value, not a guess.
+
+**Limits of this measurement.** One sweep, one afternoon, 168 fetches. The cluster was busy
+(428 to 500 other jobs running at the start of each level,
+`benchmarks/2026-11-11_concurrency_queue_load.tsv`), and none of the lab's own download
+arrays were running. AWS route only; ENA HTTPS and `prefetch` were not swept. Runs of 0.8 to
+1.6 Gbases only. Whether the per-node slowdown is the network link or the node-local disk
+(`$SCRATCH`) is not separated.
 
 ## Verification is mandatory
 
@@ -370,9 +438,9 @@ detected it.
   2,023 runs on the first pass, while running about 35 concurrently. **Concurrency was not
   shown to be the cause.** GmG corrected this on 2026-11-06: 7 of the 28 were transient and
   all 7 succeeded on rerun at a cap of 3, which is consistent with a cap helping but does not
-  demonstrate it. A cap is cheap insurance, not a proven fix. The safe value is UNMEASURED;
-  20 is a starting point. Benchmark 7.1 did not measure it, because it needs a quiet cluster
-  (issue #27).
+  demonstrate it. A cap is cheap insurance, not a proven fix. The sweep of 2026-11-11 (issue
+  #27) had no failures at up to 40 concurrent on the AWS route; per-node packing, not the
+  cluster-wide count, is what slows each fetch. See "Concurrency sweep results".
 - **Retry before reporting a failure**, but distinguish the two causes. Of those 28 runs,
   21 were **permanent**: `sra-stat` returns 404 for every one, they are all `ERR` accessions
   from four ENA studies, and they exist at ENA but not at NCBI. That is
@@ -428,10 +496,11 @@ utc,run,taxid,tier,route,node_type,bytes,seconds,mb_per_s,verified,outcome,error
 ```
 
 `concurrency` (added 2026-11-09, issue #27) is the number of fetches the caller declared it was
-running at once (`popseq fetch --concurrency N`, default 20, **UNMEASURED**). `popseq fetch` does
-not enforce it. It is recorded so that the concurrency cap can be measured from real rows after
-`popseq fetch` is in use, with no separate benchmark: per-task MB/s (`mb_per_s`) and `outcome`
-are already in the row. The overlap that actually happened can also be recovered from `utc` and
+running at once (`popseq fetch --concurrency N`, default 20; measured in "Concurrency sweep
+results"). `popseq fetch` does not enforce it. It is recorded so that the effect of concurrency
+can be read from real rows: per-task MB/s (`mb_per_s`) and `outcome` are already in the row.
+`mb_per_s` here is bytes over transfer plus conversion; the sweep used the transfer alone, from
+the sidecar. The overlap that actually happened can also be recovered from `utc` and
 `seconds`. An empty value means unknown: every row written before 2026-11-09 and every
 benchmark 7.1 row has none.
 
@@ -524,3 +593,6 @@ logs: a Slurm kill is invisible in the log, and the `resume` step shows only the
   The subsample verification is weaker than the `full` check and says so.
 - 2026-11-09: added the `concurrency` column to the download log (issue #27) and the acceptance results of
   `popseq fetch` (11 steps, one compute node, declared concurrency 1).
+- 2026-11-11: measured the concurrency cap (issue #27): no failures at up to 40 concurrent fetches
+  on the AWS route; speed per fetch is set by fetches per node. Default 20 kept. Login-node arm
+  dropped.

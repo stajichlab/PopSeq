@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-11 (download concurrency measured; issue #27)
+
+No path moved, no column added, renamed or removed.
+
+- **The concurrency cap is measured** (spec 002, "Concurrency sweep results"). 168 `popseq
+  fetch --tier full` runs over AWS Open Data at levels 1, 5, 10, 20 and 40. Results:
+  - 160 of 160 fetches at levels 5 to 40 were verified `ok`. No failure cap was reached at 40.
+  - Aggregate throughput rose from 12.9 MB/s at 5 to 69.7 MB/s at 40.
+  - Median speed per fetch fell from 21.7 MB/s at 1 to 6.4 MB/s at 40. The driver is
+    fetches per node: 17.2 MB/s with 2 to 5 on a node, 5.4 MB/s with 20 or more.
+  - `--concurrency` keeps its default of 20, now a measured safe value. The login-node arm
+    was dropped (owner decision 2026-11-09).
+- New `benchmarks/2026-11-11_concurrency_*` files (plan, tasks, sweep, by_node,
+  queue_load), and 168 rows in `benchmarks/downloads.csv`, all `ok`, with the declared
+  concurrency.
+- New scripts `scripts/popseq_concurrency.py` (plan and summary, with tests),
+  `scripts/concurrency_sweep.sh` and `scripts/concurrency_sweep.slurm`.
+- Limits: one afternoon, a busy cluster (428 to 500 other jobs running), AWS route only, and
+  runs of 0.8 to 1.6 Gbases.
+
 ## 2026-11-09 (genome sizes for species with 10 or more isolates; issue #36)
 
 No path moved, no column added, renamed or removed.

@@ -1,0 +1,6 @@
+level,tasks,ok,failed,crashed,realised_concurrency_median,realised_concurrency_max,nodes,stream_mb_s_median,stream_mb_s_q1,stream_mb_s_q3,aggregate_mb_s,span_s
+1,8,7,0,1,1.0,1.0,3,21.65,20.51,23.54,3.24,1175
+5,20,20,0,0,4.6,5.0,2,18.39,16.24,20.91,12.9,838
+10,20,20,0,0,9.5,10.0,3,14.07,11.01,18.64,20.74,521
+20,40,40,0,0,18.1,20.0,6,14.43,12.56,18.24,38.87,568
+40,80,80,0,0,38.0,40.0,4,6.4,5.07,11.87,69.66,638

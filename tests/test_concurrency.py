@@ -45,3 +45,14 @@ def test_plan_size_band_ncbi_only_and_species_spread():
     accs = {r["run_accession"] for r in pool}
     assert len(pool) == 4 and not accs & {"BIG", "ENA"}
     assert sorted(r["species_taxid"] for r in pool) == ["0", "0", "1", "1"]
+
+
+def test_by_node_bins_on_same_node_overlap_only():
+    # n1: two successes overlap fully. n2: one success overlaps one failure, which
+    # still counts as in flight; a third n2 task runs later, alone.
+    ts = [_t(5, 0, 10, node="n1", sec=10), _t(5, 0, 10, node="n1", sec=10),
+          _t(5, 0, 10, node="n2", sec=5), _t(5, 0, 10, node="n2", exit=13),
+          _t(5, 20, 30, node="n2", sec=5)]
+    rows = {r["same_node_in_flight"]: r for r in pc.by_node(ts)}
+    assert rows["0-2"]["n"] == 1 and rows["0-2"]["stream_mb_s_median"] == 20.0
+    assert rows["2-5"]["n"] == 3 and rows["2-5"]["stream_mb_s_median"] == 10.0
