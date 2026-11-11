@@ -15,7 +15,7 @@ A caller states what it needs. The fetcher never guesses.
 | `windows` | N spots drawn from W evenly spaced windows, default 2,000,000 in 8 | ~1 GB | no | `$SCRATCH` |
 | `stride` | every Nth read pair | ~1 Gb of bases | no | `$SCRATCH` |
 | `full` | the entire run | 0.5-15 GB | yes | `cache/<taxid>/<RUN>/` |
-| `coverage` | bases = genome size x target coverage, from evenly spaced windows | genome x coverage / 3.5 (UNMEASURED) | no | `$SCRATCH` or `--out` |
+| `coverage` | bases = genome size x target coverage, as evenly spaced reads of the verified full run (default) or from contiguous windows | the kept bases are small; the whole run is transferred | no | `$SCRATCH` or `--out` |
 
 Only `full` is cached. The subsampled tiers cost less to refetch than to index and manage.
 
@@ -55,16 +55,46 @@ popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
 `catalog/genome_sizes.csv` by `species_taxid` (113 species have one). A species with no size
 needs `--genome-mb`; without either the fetch fails before any download, with a usage error.
 
-**Spots needed.** `n_spots = ceil(target_bases / bases_per_spot)`, where
-`bases_per_spot = base_count / spots` and `spots` is NCBI's count for an SRA route. For ENA,
-`bases_per_spot` is measured on the first window, because ENA `read_count` does not count
-pairs for most ERR runs (see below). A paired spot counts both mates.
+**Spots needed.** `n_spots = ceil(target_bases / bases_per_spot)`. With `--sampling stride`
+(the default) `bases_per_spot` is measured on the verified full files (bases / spots, both mates
+counted). With `--sampling windows`, `bases_per_spot = base_count / spots` for an SRA route (NCBI's
+count), and for ENA it is measured on the downloaded file, because ENA `read_count` does not count
+pairs for most ERR runs (see below).
 
-**Windows.** The spots come from `W` windows (default 8, `--windows`). Each window holds
+### Sampling: `stride` (default) or `windows` (changed 2026-11-11)
+
+**Why the default changed.** The first version of this tier cut contiguous windows. In a run that
+is sorted by genome position (old SRA files often are), contiguous reads come from one region, so
+`k` kept spots reach only `kept bases / depth` of the genome, at a far higher coverage than the
+target, however many windows there are. The phase 1 pilot (GmG PR #183, 10 isolates of one species,
+HPCC) found this: two of ten runs came out as a 2.2 and a 2.3 Mb genome at 106x, against 12.2 Mb
+at 12 to 20x for the other eight. The prediction `25 / depth x genome` (2.3 and 2.2 Mb) was within
+5% of the sketch's estimate. That the two runs are sorted was inferred from this match; the read
+order of the `.sra` was not inspected. n = 10 runs of one species.
+
+**`stride` (default).** The whole run is converted and verified first (the full check below), then
+exactly `n_spots` spots are kept, evenly spaced over the whole file: spot `i` is kept when
+`floor((i + 1) * n / S) > floor(i * n / S)`. This reaches every part of the genome whatever the read
+order, and the kept count is exact. It costs the full conversion: on the acceptance run
+(SRR36290343, 1.3 Gb) `stride` took 230 s against 54 s for `windows`, n = 1; the cost at scale is
+UNMEASURED. A run with `n_spots >= S` is kept whole.
+
+**`windows`.** The spots come from `W` windows (default 8, `--windows`). Each window holds
 `w = ceil(n_spots / W)` consecutive spots. Window `i` (0-based) starts at spot
 `floor(i * (S - w) / (W - 1))`, where `S` is the number of spots in the run, so the windows are
-evenly spaced and the first and last touch the ends of the run. This is the `windows` tier of
-this spec with its size set by coverage instead of by a spot count.
+evenly spaced and the first and last touch the ends of the run. Cheaper, and right for runs in
+random order; biased on a run sorted by genome position. Use it with a hook that checks the sample.
+
+**The fallback.** With `--sampling windows` (and the `windows` tier) and `--exec`, a hook that exits
+with code **75** says: this sample failed my check. `popseq fetch` then resamples the transfer it
+already holds, evenly spaced, with no second download, and runs the hook again. A second 75 ends the
+task as `hook_failed` (exit 14, "the sketch check failed even with evenly spaced sampling"). A 75
+under `stride`, `full` or `head` is `hook_failed` with no resampling. The fallback is logged: a
+`downloads.csv` row (outcome `ok`) whose `error` says the windowed sample was resampled, the sidecar
+(`sampling`, `fallback_from`, `hook_exit`) and the result row. What the check is, is the hook's
+business: `popseq fetch` knows only the exit code. (GmG's hook runs `popsketch check`: estimated size
+below 0.5 of the genome size, or k-mer coverage above 2.5 times the expected. Both thresholds come
+from one species, n = 10, and are UNMEASURED beyond it.)
 
 **A run shorter than the target.** If `n_spots >= S`, the whole run is kept, the tier is
 recorded as `coverage` with `coverage_reached` below the target, and the outcome is `ok`. The
@@ -77,15 +107,17 @@ the target.
 `coverage_reached = bases_kept / (genome_mb x 1e6)`, the target, and the windows used.
 `coverage_reached` is measured on the bases written, not computed from the metadata.
 
-**Where the windows are read.** From the `.sra` for an SRA route:
-`fastq-dump -N <start+1> -X <start+w> --split-files --gzip` per window. For ENA the file is
-streamed and the windows are cut from it. Both mates come from one source and one run of the
-same window boundaries.
+**Where the reads are read.** `stride`: the full conversion (`parallel-fastq-dump` for an SRA route,
+the verified ENA files for ENA), then the cut. `windows`: from the `.sra` for an SRA route,
+`fastq-dump -N <start+1> -X <start+w> --split-files --gzip` per window; for ENA the verified file
+is cut. Both mates come from one source and one set of boundaries.
 
 ### Verification of the subsampled tiers
 
-A subsampled tier cannot be checked against `spots_with_mates`, because only part of the run
-is written. The rule for `head`, `windows` and `coverage` is:
+With `--sampling stride` (and tier `stride`) the whole run is converted and checked against NCBI
+`spots_with_mates` (SRA) or its MD5 (ENA) **before** the cut: the full check, then the count and
+pairing of the cut. The windowed tiers write only part of the run, which cannot be checked against
+`spots_with_mates`. The rule for `head`, `windows` and `coverage` with `--sampling windows` is:
 
 1. **Count.** Each mate holds exactly the number of reads that were requested, and mate 1
    equals mate 2.
@@ -107,8 +139,8 @@ conversion, so it keeps the full check before it subsamples.
 
 ```
 popseq fetch RUN|MANIFEST --tier head|windows|stride|full|coverage --out DIR
-    [--coverage X] [--genome-mb MB] [--windows W] [--spots N] [--require-pairs]
-    [--exec CMD] [--plan FILE] [--results FILE]
+    [--coverage X] [--sampling stride|windows] [--genome-mb MB] [--windows W] [--spots N]
+    [--require-pairs] [--exec CMD] [--plan FILE] [--results FILE]
 ```
 
 - **Input.** One run accession, or a manifest: CSV or TSV, plain or gzip or zstd, with a
@@ -127,7 +159,11 @@ popseq fetch RUN|MANIFEST --tier head|windows|stride|full|coverage --out DIR
   run accession and the FASTQ paths: `CMD RUN FASTQ_1 [FASTQ_2]` (one path for a single-end
   run). It runs only after verification passed. The reads are deleted after it exits, unless
   the tier keeps its output (`full`). A non-zero exit from the hook ends the task as `hook_failed`
-  (exit code 14), not as a download failure; the download row still records `ok`.
+  (exit code 14), not as a download failure; the download row still records `ok`. Exit code 75 is
+  special: see "The fallback". The hook's environment has `POPSEQ_RUN`, `POPSEQ_TIER`,
+  `POPSEQ_SAMPLING`, `POPSEQ_ROUTE`, `POPSEQ_LAYOUT`, and, when the genome size is known,
+  `POPSEQ_GENOME_MB` and `POPSEQ_COVERAGE` (the x the kept reads give if sampled evenly: bases kept
+  / genome size), so a hook can check the sample against the genome.
 - **Resume.** A run whose sidecar says `verified: true` for the same tier and parameters is
   skipped. A run with a partial transfer resumes where `curl -C -` can; everything else
   restarts. A killed task leaves nothing in the output that looks complete: the output
@@ -158,10 +194,13 @@ failed SRA attempts are rows in `benchmarks/downloads.csv` with `unavailable_at_
 Every call writes one line to stdout, tab separated, and appends it to `--results` when given:
 
 ```
-run  tier  route  layout  bases_kept  reads_kept  coverage_target  coverage_reached  seconds  verified  outcome
+run  tier  route  layout  bases_kept  reads_kept  coverage_target  coverage_reached  seconds  verified  outcome  sampling  fallback_from
 ```
 
-`layout` is the layout actually obtained (`PAIRED` or `SINGLE`), not the label.
+`layout` is the layout actually obtained (`PAIRED` or `SINGLE`), not the label. `sampling` is how the
+reads were taken (`stride`, `windows`, `head` or `full`); `fallback_from` is `windows` when a windowed
+sample failed the hook's check and was resampled, and empty otherwise. The last two columns were
+added 2026-11-11.
 
 ## Route order
 
@@ -596,3 +635,11 @@ logs: a Slurm kill is invisible in the log, and the `resume` step shows only the
 - 2026-11-11: measured the concurrency cap (issue #27): no failures at up to 40 concurrent fetches
   on the AWS route; speed per fetch is set by fetches per node. Default 20 kept. Login-node arm
   dropped.
+- 2026-11-11: the coverage tier now samples by `stride` (evenly spaced reads of the verified full run)
+  by default, and `windows` is opt-in (`--sampling windows`). Reason: contiguous windows reach only
+  `kept bases / depth` of the genome on a run sorted by genome position (phase 1 pilot: two of ten
+  runs came out as a 2.2 and a 2.3 Mb genome, within 5% of that prediction). Added the hook exit
+  code 75 and the fallback from windows to stride, the hook's environment, and the `sampling` and
+  `fallback_from` result columns. The first version of this tier, which I wrote on 2026-11-09 from
+  the MATPredict `windows` pattern, was wrong for sorted runs; GmG's original every-Nth-pair
+  sampler had avoided this for that reason.

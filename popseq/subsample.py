@@ -124,6 +124,27 @@ class Every:
         return i % self.n == 0
 
 
+class Evenly:
+    """`keep` predicate for exactly `n` of `total` spots, evenly spaced, whatever the read order.
+
+    Spot `i` is kept when `floor((i + 1) * n / total)` is larger than `floor(i * n / total)`, so the
+    kept spots are spread over the whole file with gaps differing by at most one, and exactly `n`
+    are kept (`n` is capped at `total`). This is the sampling that reaches every part of the genome
+    even if the run is sorted by genome position: contiguous windows cannot, however many there
+    are, because the genome fraction they reach is the bases kept divided by the depth (found in
+    the phase 1 pilot, where two of ten runs came out as a 2.2 and a 2.3 Mb genome).
+    """
+
+    def __init__(self, total: int, n: int):
+        if total <= 0 or n <= 0:
+            raise ValueError("total and n must be positive")
+        self.total, self.n = total, min(n, total)
+        self.stop_after = None
+
+    def __call__(self, i: int) -> bool:
+        return (i + 1) * self.n // self.total > i * self.n // self.total
+
+
 class First:
     """`keep` predicate for the first `n` spots (tier `head`)."""
 

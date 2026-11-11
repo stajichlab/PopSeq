@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-11 (later): the coverage tier samples by stride, with a fallback from windows
+
+`popseq fetch --tier coverage` now keeps **evenly spaced reads of the verified full run** by default
+(`--sampling stride`), not contiguous windows. Reason: in a run sorted by genome position, contiguous
+windows reach only `kept bases / depth` of the genome; the GmG phase 1 pilot found two of ten runs
+coming out as a 2.2 and a 2.3 Mb genome (against 12.2 Mb for the others), within 5% of that
+prediction (n = 10, one species; the sorted order was inferred, not inspected). The first version of
+this tier (2026-11-09) was wrong for such runs.
+
+- `--sampling windows` is kept (cheaper; right for runs in random order). With `--exec`, a hook that
+  exits **75** after a windowed sample makes fetch resample the same transfer evenly spaced, with no
+  second download, and run the hook again; a second 75 is `hook_failed` (14). The fallback is logged.
+- The hook's environment gains `POPSEQ_RUN`, `POPSEQ_TIER`, `POPSEQ_SAMPLING`, `POPSEQ_ROUTE`,
+  `POPSEQ_LAYOUT`, `POPSEQ_GENOME_MB` and `POPSEQ_COVERAGE`, so it can check the sample.
+- The result line gains two trailing columns, `sampling` and `fallback_from`; the sidecar gains
+  `sampling`, `fallback_from` and `hook_exit`. Nothing was renamed or removed.
+- Stride costs the full conversion: 230 s against 54 s for windows on one 1.3 Gb run (n = 1);
+  the cost at scale is UNMEASURED.
+- 14 new tests (the sampler, stride from SRA and ENA, the hook environment, the fallback on both
+  routes and its failure modes). Spec 002 has the details and the evidence.
+
 ## 2026-11-11 (download concurrency measured; issue #27)
 
 No path moved, no column added, renamed or removed.

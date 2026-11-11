@@ -109,6 +109,7 @@ def _cmd_fetch(a) -> int:
                 plan_rows = {r["run"]: r for r in csv.DictReader(fh, delimiter=delim)}
         opt = fx.Options(
             tier=a.tier,
+            sampling=a.sampling,
             out=a.out,
             coverage=a.coverage,
             genome_mb=a.genome_mb,
@@ -240,6 +241,16 @@ def main(argv=None) -> int:
         help="output directory (required unless --tier full, which goes to cache/<taxid>/<RUN>/)",
     )
     f.add_argument("--coverage", type=float, help="tier coverage: target x of the genome size")
+    f.add_argument(
+        "--sampling",
+        choices=["stride", "windows"],
+        default="stride",
+        help="tier coverage: `stride` (default) keeps evenly spaced reads of the verified full run "
+        "and reaches every part of the genome even if the run is sorted by genome position; "
+        "`windows` cuts contiguous windows (cheaper, but covers only 25/depth of the genome on a "
+        "position-sorted run). With --exec, a hook that exits 75 after a windowed sample makes "
+        "fetch resample the same transfer by stride",
+    )
     f.add_argument(
         "--genome-mb",
         type=float,
