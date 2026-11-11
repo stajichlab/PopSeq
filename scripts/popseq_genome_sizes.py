@@ -11,7 +11,10 @@ Issue #16 covers inheriting a relative's size for those, explicitly flagged.
 Resumable: an existing row is kept unless --update.
 
 Usage:
-    uv run python scripts/popseq_genome_sizes.py --min-isolates 100
+    uv run python scripts/popseq_genome_sizes.py --min-isolates 10
+
+The committed table covers species with 10 or more isolates (issue #36, 2026-11-09).
+Before that it covered 100 or more.
 """
 
 import argparse

@@ -1,6 +1,35 @@
 # Changelog
 
-## 2026-11-09 (latest): `popseq fetch` (issue #13)
+## 2026-11-09 (genome sizes for species with 10 or more isolates; issue #36)
+
+No path moved, no column added, renamed or removed.
+
+- **`catalog/genome_sizes.csv`: 115 to 459 species** (`popseq_genome_sizes.py
+  --min-isolates 10`). 418 have an NCBI reference size; 41 have none and keep an empty
+  size with the reason "no reference assembly at NCBI" (hybrids, unnamed `sp.` taxa and
+  species with no assembly). All 41 were fetched a second time with the same result.
+  The 115 existing rows are unchanged.
+- **`est_depth_x` filled for 12,109 runs in 308 species** in
+  `catalog/runs/fungi_all_runs.csv.gz`. Every changed cell was blank before. No other
+  cell changed.
+- `catalog/summary/coverage.csv.gz` grows from 111 to 418 species. The existing rows are
+  unchanged. `catalog/species_layout.csv.gz` gains single-only depth values for 62
+  species.
+- One study to know about: *Hortaea werneckii* PRJNA428320 has 54 runs labelled PAIRED
+  that ENA serves as one file, at a median 914x against a 25.33 Mb assembly. Its paired
+  runs and the other studies sit at 85x to 290x. The size is not the problem.
+- **New panel `panels/pop_sra_ge10_cap300/`** (`scripts/popseq_panel_set.py`), the input
+  for GmG's per-species PCoA and PCA pages. It holds up to 300 isolates for every species
+  with at least 10 paired Illumina isolates (owner decision 2026-11-09). Each species is
+  selected by `popseq.panel(n=300)` with the default filters. The panel has 412 species
+  and 34,673 isolates. 47 species reach the cap of 300; 177 have 10 to 29 isolates.
+  - 1,888 isolates in 36 species have no depth estimate, because those species have no
+    genome size. 549 isolates are below 10x.
+  - Fetching 25x per isolate needs about 33.8 Tbases, against 135.3 Tbases for whole runs.
+  - `samples.csv` holds ENA URLs. Nothing has been fetched (#13).
+  - It was built from catalog commit 7b08547, which `panel.yaml` records.
+  
+## 2026-11-09: `popseq fetch` (issue #13)
 
 - **`popseq fetch`** downloads one run (or a manifest) at tier `head`, `windows`, `stride`,
   `full` or the new `coverage` (genome size x target coverage from evenly spaced windows),
@@ -18,7 +47,7 @@
 - The route and lookup helpers moved from `scripts/popseq_bench_routes.py` to
   `popseq/routes.py` and `popseq/lookup.py`; the benchmark script imports them.
 
-## 2026-11-09 (later)
+## 2026-11-09
 
 Curated species labels for assemblies (issue #33; owner answers of 2026-11-09). New paths only: no path moved, no
 column of an existing table changed.
