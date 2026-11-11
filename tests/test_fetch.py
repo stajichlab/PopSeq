@@ -681,3 +681,14 @@ def test_every_log_row_and_the_sidecar_carry_the_declared_concurrency(env):
     assert [x["concurrency"] for x in rows(env)] == ["7", "7", "7"]
     assert json.load(open(r.sidecar))["concurrency"] == 7
     assert fx.DEFAULT_CONCURRENCY == 20 and Options().concurrency == 20
+
+
+def test_genome_size_empty_catalog_value_is_unknown_not_a_crash(tmp_path):
+    # Issue #36 added species with no NCBI assembly as rows with an empty size.
+    p = tmp_path / "genome_sizes.csv"
+    p.write_text("species_taxid,species_name,genome_mb,accession,assembly_level,note\n"
+                 "1,Aus bus,31.5,GCA_1,Contig,\n"
+                 "2,Aus cus,,,,no reference assembly at NCBI\n")
+    assert fx.genome_size(1, str(p)) == 31.5
+    assert fx.genome_size(2, str(p)) is None
+    assert fx.genome_size(3, str(p)) is None
