@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-11 (measurement: can a cheap probe tell when stride sampling is needed?)
+
+No behaviour changed. `popseq fetch` is untouched; this measures a proposed `--sampling auto`.
+
+- **New `scripts/popseq_sortcheck.py`** (with `tests/test_sortcheck.py`). It scores whether a
+  run's reads are in genome-position order from about 4,000 mate-1 reads. The score is the
+  fraction of reads that share a 25-mer with one of the 50 reads before them. It probes both
+  archive copies: the head of the ENA FASTQ, and the SRA copy at the start, 1/3 and 2/3
+  (`fastq-dump -N/-X`, remote). Median 26 s per run.
+- **The order belongs to the archive copy, not the run.** NCBI holds ERR12543635 in genome
+  order (SRA 0.995 to 0.999), but its ENA FASTQ is not (0.004). It is the only one of 209
+  runs with both copies where the two disagree. The GmG pilot fetched it from AWS, which is
+  why windows were biased.
+- **Both biased pilot runs score at least 0.99** in the copy that was fetched. The 8 sound
+  pilot runs score at most 0.2.
+- **In 200 random runs of `pop_sra_ge10_cap300`, taking the highest SRA score per run:**
+  144 score below 0.1, 35 from 0.1 to 0.3, 9 from 0.3 to 0.5, 1 from 0.5 to 0.7, 2 from
+  0.7 to 0.9, and 9 at 0.9 or above (`benchmarks/2026-11-11_sortcheck_summary.csv`).
+  - Two runs are sorted at some positions and not at others (SRR1062948, SRR29057166).
+  - Whether windows are biased for scores of 0.3 to 0.9 is UNMEASURED.
+- **ENA `submitted_format` cannot be the rule.** It is empty for 173 of the 200 runs, and
+  it called ERR12543635 FASTQ.
+
 ## 2026-11-11 (later): the coverage tier samples by stride, with a fallback from windows
 
 `popseq fetch --tier coverage` now keeps **evenly spaced reads of the verified full run** by default
