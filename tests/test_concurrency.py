@@ -23,13 +23,14 @@ def test_in_flight_counts_overlap_time_weighted():
 
 def test_summary_per_level_stream_rate_failures_and_aggregate():
     ts = [_t(1, 0, 10, sec=10), _t(1, 10, 20, sec=5),
-          _t(2, 100, 110, sec=10), _t(2, 100, 110, exit=13)]
+          _t(2, 100, 110, sec=10), _t(2, 100, 110, exit=13), _t(2, 105, 106, exit=1)]
     lv1, lv2 = pc.summarise(ts)
     assert (lv1["level"], lv1["tasks"], lv1["ok"], lv1["failed"]) == (1, 2, 2, 0)
     assert lv1["realised_concurrency_median"] == 1.0
     assert lv1["stream_mb_s_median"] == 15.0          # 10 and 20 MB/s
     assert lv1["aggregate_mb_s"] == 10.0              # 200 MB over 20 s
-    assert (lv2["ok"], lv2["failed"], lv2["realised_concurrency_median"]) == (1, 1, 2.0)
+    assert (lv2["ok"], lv2["failed"], lv2["crashed"]) == (1, 1, 1)
+    assert lv2["realised_concurrency_median"] == 2.1   # the crash overlaps both
 
 
 def test_plan_size_band_ncbi_only_and_species_spread():

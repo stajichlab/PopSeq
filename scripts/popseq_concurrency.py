@@ -41,6 +41,10 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TASK_FIELDS = ["level", "run", "taxid", "node", "start_epoch", "end_epoch", "exit",
                "bytes", "seconds_fetch"]
 OK_EXIT = 0
+# popseq fetch exit codes that are download outcomes (spec 002). Any other non-zero exit
+# (a traceback is 1) failed before or outside the transfer: reported as `crashed`, not
+# counted as a download failure, because it says nothing about concurrency.
+DOWNLOAD_FAIL_EXITS = {10, 11, 12, 13}
 
 
 def plan(rows, n: int, lo_gbases: float, hi_gbases: float, seed: int = 0) -> list[dict]:
@@ -99,7 +103,10 @@ def summarise(tasks: list[dict]) -> list[dict]:
                 - min(float(t["start_epoch"]) for t in ts))
         q = statistics.quantiles(mbps, n=4) if len(mbps) >= 2 else [None] * 3
         rows.append({
-            "level": lvl, "tasks": len(ts), "ok": len(ok), "failed": len(ts) - len(ok),
+            "level": lvl, "tasks": len(ts), "ok": len(ok),
+            "failed": sum(1 for t in ts if int(t["exit"]) in DOWNLOAD_FAIL_EXITS),
+            "crashed": sum(1 for t in ts if int(t["exit"]) not in DOWNLOAD_FAIL_EXITS
+                           and int(t["exit"]) != OK_EXIT),
             "realised_concurrency_median": round(statistics.median(conc), 1),
             "realised_concurrency_max": round(max(conc), 1),
             "nodes": len({t["node"] for t in ts}),
