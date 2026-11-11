@@ -46,6 +46,10 @@ GENOME_SIZES = os.path.join(ROOT, "catalog", "genome_sizes.csv")
 CACHE_ROOT = os.path.join(ROOT, "cache")
 DEFAULT_SPOTS = {"head": 500_000, "windows": 2_000_000}
 DEFAULT_WINDOWS = 8
+# A hook that exits with this code says: the sample failed my check (for example `popsketch check`:
+# the reads miss part of the genome). After a windowed sample, fetch resamples the same transfer
+# evenly spaced and runs the hook again.
+HOOK_RESAMPLE = 75
 # The number of fetches a caller runs at once, recorded in every downloads.csv row. Measured
 # 2026-11-11 (issue #27, spec 002 "Concurrency sweep results"): no failures at up to 40; speed per
 # fetch is set by how many fetches share a node.
@@ -62,6 +66,8 @@ FETCH_FIELDS = [
     "seconds",
     "verified",
     "outcome",
+    "sampling",
+    "fallback_from",
 ]
 
 
@@ -320,6 +326,8 @@ class Result:
     sidecar: str = ""
     outputs: list = field(default_factory=list)
     resumed: bool = False
+    sampling: str = ""
+    fallback_from: str = ""
 
     def row(self) -> list:
         def f(x):
@@ -337,6 +345,8 @@ class Result:
             f"{self.seconds:.1f}",
             "true" if self.verified else "false",
             self.outcome,
+            self.sampling,
+            self.fallback_from,
         ]
 
 
@@ -346,6 +356,9 @@ class Result:
 @dataclass
 class Options:
     tier: str = "windows"
+    # tier coverage: `stride` (evenly spaced reads from the verified full run, the default) or
+    # `windows` (contiguous windows: cheaper, but biased on runs sorted by genome position)
+    sampling: str = "stride"
     out: Optional[str] = None
     coverage: Optional[float] = None
     genome_mb: Optional[float] = None
@@ -397,6 +410,8 @@ class Fetcher:
         t0 = time.monotonic()
         if opt.tier not in TIERS:
             raise Usage(f"tier must be one of {TIERS}")
+        if opt.sampling not in ("stride", "windows"):
+            raise Usage("--sampling must be stride or windows")
         scratch = os.environ.get("SCRATCH")
         if not scratch:
             raise Usage(
@@ -433,7 +448,7 @@ class Fetcher:
                 attempts.append(a)
                 self._log(plan, opt, a)
                 if a.outcome == "ok":
-                    return self._finish(plan, opt, a, dest, sidecar, t0)
+                    return self._finish(plan, opt, a, dest, sidecar, t0, wd)
                 if a.outcome == "verify_failed":
                     break  # a mismatch fails the task; the caller retries
                 self._clean(wd)  # delete partials before the next route starts
@@ -463,6 +478,7 @@ class Fetcher:
         return {
             "tier": opt.tier,
             "coverage": opt.coverage if cov else None,
+            "sampling": opt.sampling if cov else None,
             "windows": opt.windows if opt.tier in ("windows", "coverage") else None,
             "spots": opt.spots,
             "require_pairs": opt.require_pairs,
@@ -589,9 +605,12 @@ class Fetcher:
             a.error = res["error"] or f"exit {res['rc']}"
             return a
         sra = res["files"][0]
-        a.layout, a.scope = lay, ("full" if opt.tier in ("full", "stride") else "subsample")
+        by_stride = opt.tier == "coverage" and opt.sampling == "stride"
+        a.layout = lay
+        a.scope = "full" if (opt.tier in ("full", "stride") or by_stride) else "subsample"
+        a.extra["sra"] = sra
         try:
-            if opt.tier in ("full", "stride"):
+            if opt.tier in ("full", "stride") or by_stride:
                 return self._sra_full(plan, opt, a, sra, wd)
             return self._sra_windows(plan, opt, a, sra, wd)
         except (RuntimeError, OSError, ValueError) as exc:
@@ -626,11 +645,36 @@ class Fetcher:
             return a
         a.files, a.reads_kept, a.bases_kept = ([m1, m2] if m2 else [m1]), n1, b1 + b2
         if opt.tier == "stride":
+            a.extra["sampling"] = "stride"
             step = subsample.stride(a.reads_kept, opt.spots or DEFAULT_SPOTS["windows"])
             outs = [os.path.join(wd, "stride_" + os.path.basename(f)) for f in a.files]
             kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Every(step))
             return self._after_cut(a, outs, kept, f"stride {step}")
+        if opt.tier == "coverage" and opt.sampling == "stride":
+            return self._cut_even(plan, opt, a, wd)
         return a
+
+    def _cut_even(self, plan, opt, a, wd):
+        """Cut the verified full run to the target, evenly spaced (tier coverage) or to `--spots`.
+
+        Spaced over the whole file, so it reaches every part of the genome even if the run is sorted
+        by genome position. The bases per spot are measured on the verified files, not taken from
+        the metadata. A run shorter than the target is kept whole.
+        """
+        total = a.reads_kept
+        a.extra["sampling"] = "stride"
+        if opt.tier == "coverage":
+            mb = opt.genome_mb or plan.genome_mb
+            n = subsample.spots_for_coverage(mb, opt.coverage, a.bases_kept / max(1, total))
+            a.extra["coverage_target"] = opt.coverage
+        else:
+            n = opt.spots or DEFAULT_SPOTS["windows"]
+        if n >= total:
+            a.extra["cut"] = "whole run: it is not longer than the target"
+            return a
+        outs = [os.path.join(wd, "even_" + os.path.basename(f)) for f in a.files]
+        kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Evenly(total, n))
+        return self._after_cut(a, outs, kept, f"evenly spaced {n} of {total}")
 
     def _after_cut(self, a, outs, kept, note):
         """Check what a cutter wrote: counts equal the request, and the mates' names pair up."""
@@ -694,6 +738,7 @@ class Fetcher:
                 bps = sum(s[1] for s in st) / max(1, st[0][0])
         spans, target = self._window_spec(plan, opt, total, bps)
         a.extra["windows"], a.extra["coverage_target"] = spans, target
+        a.extra["sampling"] = "head" if opt.tier == "head" else "windows"
         a.expected = sum(c for _s, c in spans)
         parts = {"m1": [], "m2": []}
         conv = 0.0
@@ -845,10 +890,16 @@ class Fetcher:
 
     def _ena_cut(self, plan, opt, a, wd):
         total = a.reads_kept
+        # keep the verified full files: a fallback resamples them without a second download
+        a.extra.update(full_files=list(a.files), full_reads=a.reads_kept, full_bases=a.bases_kept)
+        if opt.tier == "coverage" and opt.sampling == "stride":
+            return self._cut_even(plan, opt, a, wd)
         if opt.tier == "stride":
+            a.extra["sampling"] = "stride"
             step = subsample.stride(total, opt.spots or DEFAULT_SPOTS["windows"])
             keep, note = subsample.Every(step), f"stride {step}"
         else:
+            a.extra["sampling"] = "windows"
             spans, target = self._window_spec(plan, opt, total, a.bases_kept / max(1, total))
             a.extra["windows"], a.extra["coverage_target"] = spans, target
             keep, note = subsample.Window(spans), "windows"
@@ -857,14 +908,50 @@ class Fetcher:
         kept, _read, _b = subsample.select_spots(a.files, outs, keep)
         return self._after_cut(a, outs, kept, note)
 
-    # -- success: place outputs, write the sidecar last, run the hook
-    def _finish(self, plan, opt, a: Attempt, dest, sidecar, t0) -> Result:
+    # -- success: run the hook (resampling by stride if its check fails), place outputs, write
+    # -- the sidecar last
+    def _finish(self, plan, opt, a: Attempt, dest, sidecar, t0, wd) -> Result:
+        genome = opt.genome_mb or plan.genome_mb
+        sampling = a.extra.get("sampling", opt.tier)
+        fallback_from, hook_rc, hook_note = "", None, ""
+        if opt.exec_cmd:
+            env = self._hook_env(plan, opt, a, genome, sampling)
+            hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
+            if hook_rc == HOOK_RESAMPLE and sampling == "windows":
+                # The hook's check says contiguous windows missed part of the genome (a run sorted
+                # by genome position). Resample the transfer already held, evenly spaced, and run
+                # the hook again.
+                b = self._resample_stride(plan, opt, a, wd)
+                self._log(plan, opt, b)
+                if b.outcome != "ok":
+                    code = "verify_failed" if b.outcome == "verify_failed" else "transient"
+                    return Result(
+                        plan.run,
+                        opt.tier,
+                        code,
+                        route=a.route,
+                        seconds=time.monotonic() - t0,
+                        exit_code=EXIT[code],
+                        message=f"resampling by stride after the sketch check failed: {b.error}"[
+                            :500
+                        ],
+                        sampling="stride",
+                        fallback_from="windows",
+                    )
+                fallback_from, a, sampling = "windows", b, "stride"
+                env = self._hook_env(plan, opt, a, genome, sampling)
+                hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
+            if hook_rc == HOOK_RESAMPLE:
+                hook_note = (
+                    "the sketch check failed even with evenly spaced sampling"
+                    if fallback_from
+                    else "the sketch check failed (no resampling for this sampling)"
+                )
         keep_reads = opt.tier == "full" or opt.keep or not opt.exec_cmd
         names = [
             f"{plan.run}.fastq.gz" if len(a.files) == 1 else f"{plan.run}_{i + 1}.fastq.gz"
             for i in range(len(a.files))
         ]
-        genome = opt.genome_mb or plan.genome_mb
         reached = (a.bases_kept / (genome * 1e6)) if (genome and opt.tier == "coverage") else None
         target = a.extra.get("coverage_target") or (
             opt.coverage if opt.tier == "coverage" else None
@@ -875,6 +962,9 @@ class Fetcher:
             "biosample": plan.sample,
             "route": a.route,
             "tier": opt.tier,
+            "sampling": sampling,
+            "fallback_from": fallback_from or None,
+            "hook_exit": hook_rc,
             "params": self._params(plan, opt),
             "fetched_utc": dl.utc_now(),
             "node_type": dl.node_type(),
@@ -905,7 +995,6 @@ class Fetcher:
             "tools": self.backend.tool_versions(),
         }
         os.makedirs(dest, exist_ok=True)
-        hook_rc = self._hook(opt.exec_cmd, plan.run, a.files) if opt.exec_cmd else None
         if keep_reads:
             for src, name in zip(a.files, names):
                 tmp = os.path.join(dest, f".{name}.part")
@@ -930,17 +1019,79 @@ class Fetcher:
             verified=True,
             sidecar=sidecar,
             outputs=[os.path.join(dest, n) for n in names] if keep_reads else [],
+            sampling=sampling,
+            fallback_from=fallback_from,
         )
         if hook_rc not in (None, 0):
             r.outcome, r.exit_code = "hook_failed", EXIT["hook_failed"]
-            r.message = f"--exec returned {hook_rc}; the download is ok and verified"
+            r.message = (
+                f"--exec returned {hook_rc}"
+                + (f": {hook_note}" if hook_note else "")
+                + "; the download is ok and verified"
+            )
+        elif fallback_from:
+            r.message = "windows sampling failed the sketch check; resampled evenly spaced"
         return r
 
+    def _resample_stride(self, plan, opt, a: Attempt, wd) -> Attempt:
+        """Resample, evenly spaced, the transfer a windowed attempt holds (no new download)."""
+        b = Attempt(route=a.route, outcome="ok", layout=a.layout, scope="full", verified=True)
+        b.error = (
+            "windows sampling failed the sketch check (hook exit 75); "
+            "resampled evenly spaced from the same transfer"
+        )
+        wd2 = os.path.join(wd, f"{a.route}_resample")
+        os.makedirs(wd2, exist_ok=True)
+        try:
+            if a.route == "ena_https":
+                b.files = list(a.extra["full_files"])
+                b.reads_kept, b.bases_kept = a.extra["full_reads"], a.extra["full_bases"]
+                b.m1, b.m2 = a.m1, a.m2
+            else:
+                b.extra["sra"] = a.extra["sra"]
+                b = self._sra_full(plan, opt, b, a.extra["sra"], wd2)
+                if b.outcome != "ok":
+                    return b
+                b.error = (
+                    "windows sampling failed the sketch check (hook exit 75); "
+                    "resampled evenly spaced from the same transfer"
+                )
+            return self._cut_even(plan, opt, b, wd2)
+        except (RuntimeError, OSError, ValueError, KeyError) as exc:
+            b.outcome, b.error, b.verified = (
+                "verify_failed",
+                f"resampling failed: {exc}"[:400],
+                False,
+            )
+            return b
+
     @staticmethod
-    def _hook(cmd, run, files):
-        """`CMD RUN FASTQ_1 [FASTQ_2]`, stdin closed, after verification and before the reads go."""
+    def _hook_env(plan, opt, a: Attempt, genome, sampling) -> dict:
+        """The hook's environment: what it needs to check the sample against the genome."""
+        env = dict(os.environ)
+        env.update(
+            POPSEQ_RUN=plan.run,
+            POPSEQ_TIER=opt.tier,
+            POPSEQ_SAMPLING=sampling,
+            POPSEQ_ROUTE=a.route,
+            POPSEQ_LAYOUT=a.layout or "",
+        )
+        if genome:
+            env["POPSEQ_GENOME_MB"] = f"{genome:g}"
+            env["POPSEQ_COVERAGE"] = f"{a.bases_kept / (genome * 1e6):.3f}"
+        return env
+
+    @staticmethod
+    def _hook(cmd, run, files, env=None):
+        """`CMD RUN FASTQ_1 [FASTQ_2]`, stdin closed, after verification and before the reads go.
+
+        Exit code 75 (`HOOK_RESAMPLE`) means the sample failed the hook's own check.
+        """
         p = subprocess.run(
-            shlex.split(cmd) + [run] + list(files), stdin=subprocess.DEVNULL, check=False
+            shlex.split(cmd) + [run] + list(files),
+            stdin=subprocess.DEVNULL,
+            check=False,
+            env=env,
         )
         return p.returncode
 

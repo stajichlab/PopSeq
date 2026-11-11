@@ -553,7 +553,7 @@ def test_coverage_tier_keeps_bases_equal_to_genome_times_coverage(env):
     # 10,000 spots x 100 bases (2 mates x 50) = 1 Mb; genome 0.03 Mb x 10x = 0.3 Mb -> 3,000 spots
     plan = plan_for(spots=10_000, base_count=1_000_000, genome=0.03)
     be = Fake()
-    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="windows")
     assert r.outcome == "ok"
     assert r.reads_kept == 3000 and r.bases_kept == 300_000
     assert r.coverage_target == 10.0 and r.coverage_reached == pytest.approx(10.0)
@@ -564,13 +564,15 @@ def test_coverage_tier_keeps_bases_equal_to_genome_times_coverage(env):
 
 def test_coverage_genome_size_option_overrides_a_missing_catalog_size(env):
     plan = plan_for(spots=10_000, base_count=1_000_000, genome=None)
-    r = run_fetch(env, Fake(), plan, tier="coverage", coverage=10.0, genome_mb=0.03)
+    r = run_fetch(
+        env, Fake(), plan, tier="coverage", coverage=10.0, sampling="windows", genome_mb=0.03
+    )
     assert r.outcome == "ok" and r.coverage_reached == pytest.approx(10.0)
 
 
 def test_a_run_shorter_than_the_target_keeps_the_whole_run_and_reports_what_it_reached(env):
     plan = plan_for(spots=1000, base_count=100_000, genome=0.03)  # needs 3,000 spots, has 1,000
-    r = run_fetch(env, Fake(), plan, tier="coverage", coverage=10.0)
+    r = run_fetch(env, Fake(), plan, tier="coverage", coverage=10.0, sampling="windows")
     assert (r.outcome, r.reads_kept) == ("ok", 1000)
     assert r.coverage_reached == pytest.approx(10.0 / 3, rel=1e-6) and r.coverage_target == 10.0
 
@@ -578,7 +580,7 @@ def test_a_run_shorter_than_the_target_keeps_the_whole_run_and_reports_what_it_r
 def test_coverage_from_ena_is_cut_from_the_md5_verified_file(env):
     plan = with_md5(plan_for(ncbi_status="absent", genome=0.01), 2000)
     be = Fake(ena_reads=2000)
-    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="windows")
     # 2,000 reads x 100 bases: 0.01 Mb x 10x = 100,000 bases = 1,000 reads
     assert (r.outcome, r.route, r.reads_kept) == (
         "ok",
@@ -631,6 +633,7 @@ def test_the_download_log_accepts_the_coverage_tier(env):
         plan_for(spots=10_000, base_count=1_000_000, genome=0.03),
         tier="coverage",
         coverage=5.0,
+        sampling="windows",
     )
     assert rows(env)[-1]["tier"] == "coverage"
 
@@ -686,9 +689,292 @@ def test_every_log_row_and_the_sidecar_carry_the_declared_concurrency(env):
 def test_genome_size_empty_catalog_value_is_unknown_not_a_crash(tmp_path):
     # Issue #36 added species with no NCBI assembly as rows with an empty size.
     p = tmp_path / "genome_sizes.csv"
-    p.write_text("species_taxid,species_name,genome_mb,accession,assembly_level,note\n"
-                 "1,Aus bus,31.5,GCA_1,Contig,\n"
-                 "2,Aus cus,,,,no reference assembly at NCBI\n")
+    p.write_text(
+        "species_taxid,species_name,genome_mb,accession,assembly_level,note\n"
+        "1,Aus bus,31.5,GCA_1,Contig,\n"
+        "2,Aus cus,,,,no reference assembly at NCBI\n"
+    )
     assert fx.genome_size(1, str(p)) == 31.5
     assert fx.genome_size(2, str(p)) is None
     assert fx.genome_size(3, str(p)) is None
+
+
+# ------------------------------------------------------------- the evenly spaced sampler
+def test_evenly_keeps_exactly_n_spread_over_the_whole_file():
+    for total, n in [(1000, 100), (1000, 333), (4_387_476, 1_225_000), (10, 7), (7, 7), (5, 9)]:
+        keep = ss.Evenly(total, n)
+        kept = [i for i in range(total) if keep(i)] if total < 50_000 else None
+        if kept is not None:
+            assert len(kept) == min(n, total)
+            gaps = [b - a for a, b in zip(kept, kept[1:])]
+            if gaps:
+                assert max(gaps) - min(gaps) <= 1, (total, n)
+            assert (
+                kept[0] <= total // n + 1 and kept[-1] >= total - total // n - 2
+            )  # both ends are reached
+        else:
+            assert sum(1 for i in range(total) if keep(i)) == n
+    with pytest.raises(ValueError):
+        ss.Evenly(0, 5)
+
+
+def test_evenly_reaches_every_part_of_a_position_sorted_file_where_windows_do_not():
+    """A file sorted by genome position: spot i is at position i. 18% of positions are covered by 8 contiguous windows
+    holding 18% of the spots; evenly spaced spots of the same number cover the whole range."""
+    total, n = 100_000, 18_000
+    windows_pos = {i for s, c in ss.windows(total, n, 8) for i in range(s, s + c)}
+    even = ss.Evenly(total, n)
+    even_pos = [i for i in range(total) if even(i)]
+    bins = 100
+    covered = lambda pos: len({p * bins // total for p in pos})  # noqa: E731
+    assert covered(windows_pos) < 35, "8 windows touch about a quarter of the 100 regions"
+    assert covered(even_pos) == bins, "evenly spaced spots touch every region"
+
+
+# ------------------------------------------- tier coverage by evenly spaced reads (the default)
+def hook_script(tmp_path, body, name="hook.sh"):
+    p = tmp_path / name
+    p.write_text("#!/bin/sh\n" + body)
+    p.chmod(0o755)
+    return str(p)
+
+
+def spot_numbers(path):
+    names = [l.split("/")[0][1:] for l in gzip.open(path, "rt").read().split("\n")[::4] if l]
+    return [int(n.replace("spot", "")) for n in names]
+
+
+def test_coverage_tier_is_evenly_spaced_from_the_verified_full_run_by_default(env):
+    plan = plan_for(spots=10_000, genome=0.03)  # no base_count needed: bases per spot are measured
+    be = Fake(sra_spots=10_000)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0)
+    assert (r.outcome, r.sampling, r.fallback_from) == ("ok", "stride", "")
+    assert r.reads_kept == 3000 and r.bases_kept == 300_000
+    assert r.coverage_reached == pytest.approx(10.0)
+    kinds = [c[0] for c in be.calls]
+    assert kinds.count("convert") == 1 and "window" not in kinds
+    s = json.load(open(r.sidecar))
+    assert s["verify_scope"] == "full" and s["sampling"] == "stride" and s["windows"] is None
+    nums = spot_numbers(os.path.join(env["out"], "SRR1_1.fastq.gz"))
+    assert len(nums) == 3000 and nums[0] <= 5 and nums[-1] >= 9990, (
+        "both ends of the run are reached"
+    )
+    assert (
+        max(b - a for a, b in zip(nums, nums[1:])) - min(b - a for a, b in zip(nums, nums[1:])) <= 1
+    )
+    assert_scratch_clean(env)
+
+
+def test_the_full_run_check_comes_before_the_cut_for_coverage_by_stride(env):
+    r = run_fetch(
+        env,
+        Fake(convert_reads=9_000),
+        plan_for(spots=10_000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+    )
+    assert r.outcome == "verify_failed"
+
+
+def test_a_run_shorter_than_the_target_is_kept_whole_by_stride(env):
+    r = run_fetch(env, Fake(), plan_for(spots=1000, genome=0.03), tier="coverage", coverage=10.0)
+    assert (r.outcome, r.reads_kept) == ("ok", 1000)  # 3,000 spots needed, 1,000 held
+    assert r.coverage_reached == pytest.approx(100_000 / 0.03e6) and r.coverage_target == 10.0
+
+
+def test_coverage_by_stride_from_ena_is_cut_from_the_md5_verified_files(env):
+    plan = with_md5(plan_for(ncbi_status="absent", genome=0.01), 2000)
+    r = run_fetch(env, Fake(ena_reads=2000), plan, tier="coverage", coverage=10.0)
+    assert (r.outcome, r.route, r.sampling, r.reads_kept) == ("ok", "ena_https", "stride", 1000)
+    assert r.coverage_reached == pytest.approx(10.0)
+
+
+def test_the_hook_gets_the_genome_size_the_coverage_and_the_sampling(env, tmp_path):
+    log = tmp_path / "env.log"
+    hook = hook_script(
+        tmp_path,
+        f'echo "$POPSEQ_RUN $POPSEQ_TIER $POPSEQ_SAMPLING $POPSEQ_GENOME_MB $POPSEQ_COVERAGE $POPSEQ_ROUTE $POPSEQ_LAYOUT" > {log}\n',
+    )
+    run_fetch(
+        env,
+        Fake(sra_spots=10_000),
+        plan_for(spots=10_000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+        exec_cmd=hook,
+    )
+    assert log.read_text().split() == [
+        "SRR1",
+        "coverage",
+        "stride",
+        "0.03",
+        "10.000",
+        "aws_odp",
+        "PAIRED",
+    ]
+
+
+# ----------------------------------------------- windows with a fallback to stride (hook exit 75)
+FLIP = """n=$(cat {c} 2>/dev/null || echo 0); n=$((n+1)); echo $n > {c}
+echo "$POPSEQ_SAMPLING $2" >> {l}
+[ "$n" -eq {fail_times} ] && exit 75
+[ "$n" -lt {fail_times} ] && exit 75
+exit 0
+"""
+
+
+def flip_hook(tmp_path, fail_times=1):
+    c, l = tmp_path / "count", tmp_path / "calls.log"
+    return hook_script(tmp_path, FLIP.format(c=c, l=l, fail_times=fail_times)), l
+
+
+def test_a_hook_that_rejects_windowed_reads_makes_fetch_resample_by_stride_without_a_new_download(
+    env, tmp_path
+):
+    hook, log = flip_hook(tmp_path)
+    plan, be = plan_for(spots=10_000, genome=0.03, base_count=1_000_000), Fake(sra_spots=10_000)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="windows", exec_cmd=hook)
+    assert (r.outcome, r.exit_code, r.sampling, r.fallback_from) == ("ok", 0, "stride", "windows")
+    assert r.reads_kept == 3000 and r.coverage_reached == pytest.approx(10.0)
+    calls = [l.split()[0] for l in log.read_text().splitlines()]
+    assert calls == ["windows", "stride"], "the hook ran on the windows, then on the resample"
+    kinds = [c for c in be.calls]
+    assert kinds.count(("transfer", "aws_odp")) == 1, "the .sra was downloaded once"
+    assert (
+        sum(1 for c in kinds if c[0] == "window") == 8
+        and sum(1 for c in kinds if c[0] == "convert") == 1
+    )
+    s = json.load(open(r.sidecar))
+    assert s["sampling"] == "stride" and s["fallback_from"] == "windows" and s["hook_exit"] == 0
+    assert s["verify_scope"] == "full" and s["windows"] is None
+    last = rows(env)[-1]
+    assert last["outcome"] == "ok" and "resampled evenly spaced" in last["error"]
+    assert "resampled evenly spaced" in r.message
+    assert_scratch_clean(env)
+
+
+def test_the_fallback_also_works_for_an_ena_transfer_and_does_not_download_again(env, tmp_path):
+    hook, log = flip_hook(tmp_path)
+    plan = with_md5(plan_for(ncbi_status="absent", genome=0.01), 2000)
+    be = Fake(ena_reads=2000)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="windows", exec_cmd=hook)
+    assert (r.outcome, r.route, r.sampling, r.fallback_from, r.reads_kept) == (
+        "ok",
+        "ena_https",
+        "stride",
+        "windows",
+        1000,
+    )
+    assert be.calls.count(("transfer", "ena_https")) == 1
+    assert [l.split()[0] for l in log.read_text().splitlines()] == ["windows", "stride"]
+
+
+def test_tier_windows_falls_back_to_stride_with_the_same_number_of_spots(env, tmp_path):
+    hook, _ = flip_hook(tmp_path)
+    r = run_fetch(
+        env,
+        Fake(sra_spots=10_000),
+        plan_for(spots=10_000),
+        tier="windows",
+        spots=800,
+        exec_cmd=hook,
+    )
+    assert (r.outcome, r.sampling, r.fallback_from, r.reads_kept) == (
+        "ok",
+        "stride",
+        "windows",
+        800,
+    )
+
+
+def test_if_the_check_fails_even_by_stride_the_run_is_hook_failed_not_looped(env, tmp_path):
+    hook, log = flip_hook(tmp_path, fail_times=99)
+    r = run_fetch(
+        env,
+        Fake(sra_spots=10_000),
+        plan_for(spots=10_000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+        sampling="windows",
+        exec_cmd=hook,
+    )
+    assert (r.outcome, r.exit_code) == ("hook_failed", 14)
+    assert "even with evenly spaced sampling" in r.message and r.fallback_from == "windows"
+    assert len(log.read_text().splitlines()) == 2, "the hook ran twice, no more"
+
+
+def test_a_stride_or_full_sample_that_fails_the_check_is_hook_failed_with_no_resampling(
+    env, tmp_path
+):
+    for tier in ("coverage", "full"):
+        d = tmp_path / tier
+        d.mkdir()
+        hook, log = flip_hook(d, fail_times=99)
+        extra = {"coverage": 10.0} if tier == "coverage" else {}
+        plan = plan_for(run=f"R{tier}", spots=10_000, genome=0.03)
+        r = run_fetch(env, Fake(sra_spots=10_000), plan, tier=tier, exec_cmd=hook, **extra)
+        assert (r.outcome, r.exit_code) == ("hook_failed", 14), tier
+        assert len(log.read_text().splitlines()) == 1, f"{tier}: the hook ran once"
+        assert r.fallback_from == "", tier
+
+
+def test_other_hook_failures_do_not_trigger_a_resample(env, tmp_path):
+    r = run_fetch(
+        env,
+        Fake(sra_spots=10_000),
+        plan_for(spots=10_000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+        sampling="windows",
+        exec_cmd="false",
+    )
+    assert (r.outcome, r.fallback_from) == ("hook_failed", "")
+
+
+def test_a_failed_resample_reports_why_and_keeps_the_exit_code_of_the_cause(env, tmp_path):
+    hook, _ = flip_hook(tmp_path)
+    be = Fake(sra_spots=10_000)
+    orig = be.convert_sra
+
+    def short(sra, wd, threads):  # the conversion for the resample returns the wrong count
+        be.convert_reads = 9_000
+        return orig(sra, wd, threads)
+
+    be.convert_sra = short
+    r = run_fetch(
+        env,
+        be,
+        plan_for(spots=10_000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+        sampling="windows",
+        exec_cmd=hook,
+    )
+    assert (r.outcome, r.exit_code) == ("verify_failed", 12) and "resampling" in r.message
+
+
+def test_changing_the_sampling_is_a_new_request_not_a_resume(env):
+    plan, be = plan_for(spots=1000, genome=0.03), Fake()
+    run_fetch(env, be, plan, tier="coverage", coverage=10.0)
+    assert run_fetch(env, be, plan, tier="coverage", coverage=10.0).resumed
+    assert not run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="windows").resumed
+
+
+def test_the_sampling_option_is_validated_and_in_the_result_row_and_the_cli(env, capsys):
+    with pytest.raises(Usage, match="sampling"):
+        run_fetch(env, Fake(), plan_for(), sampling="random")
+    r = run_fetch(
+        env,
+        Fake(),
+        plan_for(spots=1000, genome=0.03),
+        tier="coverage",
+        coverage=10.0,
+        sampling="stride",
+    )
+    row = dict(zip(fx.FETCH_FIELDS, r.row()))
+    assert row["sampling"] == "stride" and row["fallback_from"] == ""
+    from popseq import cli
+
+    with pytest.raises(SystemExit):
+        cli.main(["fetch", "--help"])
+    assert "--sampling" in capsys.readouterr().out
