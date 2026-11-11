@@ -71,3 +71,29 @@ def test_summarise_bins_and_excludes():
     assert (out["0.0-0.1"]["ena"], out["0.9-1.0"]["sra_max"]) == (1, 1)
     assert (out["0.3-0.5"]["ena"], out["no_score"]["sra_max"]) == (1, 1)
     assert out["0.9-1.0"]["ena"] == 0
+
+
+def test_truth_pick_takes_all_high_and_some_controls():
+    rows = [dict(run=f"H{i}", sra_score_max="0.5") for i in range(3)]
+    rows += [dict(run=f"L{i}", sra_score_max="0.01") for i in range(10)]
+    rows += [dict(run=f"M{i}", sra_score_max="0.2") for i in range(10)]
+    rows += [dict(run="X", sra_score_max="")]
+    pick = [r["run"] for r in sc.truth_pick(rows, n_low=2, n_mid=1)]
+    assert pick[:3] == ["H0", "H1", "H2"] and len(pick) == 6 and "X" not in pick
+
+
+def test_truth_spots_coverage_cap_and_default():
+    # 25x of 10 Mb at 300 bases per spot = 833,333 spots, under a third of 9M spots
+    assert sc.truth_spots(9_000_000, 9_000_000 * 300, 10.0) == 833_333
+    assert sc.truth_spots(1_200_000, 1_200_000 * 300, 10.0) == 400_000   # a third of the run
+    assert sc.truth_spots(9_000_000, 9_000_000 * 300, None) == 2_000_000
+
+
+def test_truth_summary_ratio():
+    truth = [dict(run="A", tier="windows", bases="1", mash_genome="2200000", mash_cov="100"),
+             dict(run="A", tier="stride", bases="1", mash_genome="11000000", mash_cov="20"),
+             dict(run="B", tier="windows", bases="1", mash_genome="5", mash_cov="1")]
+    (a,) = sc.truth_summary(truth, {"A": dict(sra_score_max="0.99",
+                                              sra_scores="0.99;0.1;0.95")})
+    assert a["ratio"] == 0.2 and a["genome_stride"] == "11000000"
+    assert a["sra_score_median"] == 0.95

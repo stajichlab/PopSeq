@@ -36,6 +36,7 @@ import gzip
 import io
 import os
 import random
+import statistics
 import sys
 import time
 import urllib.request
@@ -231,6 +232,56 @@ def summarise(rows: list[dict], exclude: set[str] = frozenset()) -> list[dict]:
     return out
 
 
+def truth_pick(rows: list[dict], lo: float = 0.3, n_low: int = 6, n_mid: int = 3,
+               seed: int = 0) -> list[dict]:
+    """Runs for the ground truth: every run with an SRA score >= lo, plus n_low random runs
+    below 0.1 and n_mid random runs from 0.1 to lo, as controls."""
+    scored = [r for r in rows if _f(r.get("sra_score_max")) is not None]
+    hi = [r for r in scored if _f(r["sra_score_max"]) >= lo]
+    rng = random.Random(seed)
+    low = [r for r in scored if _f(r["sra_score_max"]) < 0.1]
+    mid = [r for r in scored if 0.1 <= _f(r["sra_score_max"]) < lo]
+    return hi + rng.sample(low, min(n_low, len(low))) + rng.sample(mid, min(n_mid, len(mid)))
+
+
+def truth_spots(spots: int, bases: float, genome_mb, coverage: float = 25.0,
+                default: int = 2_000_000, floor: int = 200_000) -> int:
+    """Spots per sample: coverage x genome when the size is known, else `default`; never more
+    than a third of the run, so a windows sample is a real subset of it."""
+    if genome_mb and bases and spots:
+        n = int(coverage * genome_mb * 1e6 / (bases / spots))
+    else:
+        n = default
+    return max(min(n, spots // 3), min(floor, spots // 3))
+
+
+def truth_summary(truth: list[dict], probe: dict[str, dict]) -> list[dict]:
+    """One row per run with both samples: estimated genome size of each and their ratio."""
+    by: dict[str, dict] = {}
+    for t in truth:
+        by.setdefault(t["run"], {})[t["tier"]] = t
+    out = []
+    for run, d in by.items():
+        w, st = d.get("windows"), d.get("stride")
+        if not w or not st:
+            continue
+        gw, gs = _f(w["mash_genome"]), _f(st["mash_genome"])
+        scores = [v for x in probe.get(run, {}).get("sra_scores", "").split(";")
+                  if (v := _f(x)) is not None]
+        out.append({"run": run, "sra_score_max": probe.get(run, {}).get("sra_score_max", ""),
+                    "sra_score_median": round(statistics.median(scores), 4) if scores else "",
+                    "sra_scores": probe.get(run, {}).get("sra_scores", ""),
+                    "bases": st["bases"], "genome_windows": w["mash_genome"],
+                    "genome_stride": st["mash_genome"],
+                    "cov_windows": w["mash_cov"], "cov_stride": st["mash_cov"],
+                    "ratio": round(gw / gs, 3) if gw and gs else ""})
+    out.sort(key=lambda r: -(_f(r["sra_score_max"]) or 0))
+    return out
+
+
+TRUTH_FIELDS = ["run", "tier", "bases", "mash_genome", "mash_cov"]
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -249,6 +300,17 @@ def main():
     c.add_argument("probe")
     c.add_argument("--exclude", help="file of runs to leave out (e.g. the pilot runs)")
     c.add_argument("--out", required=True)
+    t = sub.add_parser("truth-plan", help="runs and sample sizes for the ground truth")
+    t.add_argument("probe")
+    t.add_argument("--runs-table", default=os.path.join(HERE, "catalog", "runs",
+                                                        "fungi_all_runs.csv.gz"))
+    t.add_argument("--genome-sizes", default=os.path.join(HERE, "catalog", "genome_sizes.csv"))
+    t.add_argument("--exclude", help="runs to leave out of the control draws (not of >= 0.3)")
+    t.add_argument("--out", required=True)
+    u = sub.add_parser("truth-summary", help="windows vs stride genome size per run")
+    u.add_argument("truth", help="the hook's TSV (no header): run tier bases genome cov")
+    u.add_argument("probe")
+    u.add_argument("--out", required=True)
     b = sub.add_parser("sample", help="random runs from a panel's metadata.csv")
     b.add_argument("--panel", default=os.path.join(HERE, "panels", "pop_sra_ge10_cap300",
                                                    "metadata.csv"))
@@ -262,6 +324,45 @@ def main():
             rows = list(csv.DictReader(fh, delimiter="\t"))
         excl = set(open(args.exclude).read().split()) if args.exclude else set()
         out = summarise(rows, excl)
+        with open(args.out, "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(out[0]), lineterminator="\n")
+            w.writeheader()
+            w.writerows(out)
+        return
+
+    if args.cmd == "truth-plan":
+        with open(args.probe, newline="") as fh:
+            rows = list(csv.DictReader(fh, delimiter="\t"))
+        excl = set(open(args.exclude).read().split()) if args.exclude else set()
+        pick = truth_pick([r for r in rows if r["run"] not in excl
+                           or (_f(r["sra_score_max"]) or 0) >= 0.3])
+        want = {r["run"] for r in pick}
+        with open(args.genome_sizes, newline="") as fh:
+            gs = {r["species_taxid"]: _f(r["genome_mb"]) for r in csv.DictReader(fh)}
+        info = {}
+        with gzip.open(args.runs_table, "rt", newline="") as fh:
+            for r in csv.DictReader(fh):
+                if r["run_accession"] in want:
+                    info[r["run_accession"]] = r
+        with open(args.out, "w", newline="") as fh:
+            w = csv.writer(fh, lineterminator="\n")
+            w.writerow(["run", "spots", "sra_score_max", "species_taxid", "species_name",
+                        "genome_mb"])
+            for r in pick:
+                m = info.get(r["run"], {})
+                g = gs.get(m.get("species_taxid", ""))
+                n = truth_spots(int(r["sra_spots"]), _f(m.get("base_count")), g)
+                w.writerow([r["run"], n, r["sra_score_max"], m.get("species_taxid", ""),
+                            m.get("species_name", ""), g or ""])
+        print(f"wrote {args.out}: {len(pick)} runs", file=sys.stderr)
+        return
+
+    if args.cmd == "truth-summary":
+        with open(args.truth, newline="") as fh:
+            truth = list(csv.DictReader(fh, fieldnames=TRUTH_FIELDS, delimiter="\t"))
+        with open(args.probe, newline="") as fh:
+            probe = {r["run"]: r for r in csv.DictReader(fh, delimiter="\t")}
+        out = truth_summary(truth, probe)
         with open(args.out, "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=list(out[0]), lineterminator="\n")
             w.writeheader()

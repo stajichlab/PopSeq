@@ -22,6 +22,26 @@ No behaviour changed. `popseq fetch` is untouched; this measures a proposed `--s
   - Whether windows are biased for scores of 0.3 to 0.9 is UNMEASURED.
 - **ENA `submitted_format` cannot be the rule.** It is empty for 173 of the 200 runs, and
   it called ERR12543635 FASTQ.
+- **Ground truth: windows against stride.** For 32 runs (`scripts/sortcheck_truth.slurm`),
+  each run was fetched both ways with the same number of spots. `mash sketch -r -m 2` then
+  estimated the genome size of each sample (`benchmarks/2026-11-11_sortcheck_truth_summary.csv`).
+  A ratio well below 1 (windows over stride) means the windows reached only part of the genome.
+  30 runs finished.
+  - Controls scoring under 0.3 (n = 9): ratio 0.979 to 1.032.
+  - Runs scoring 0.9 or more at all three positions: ratio 0.21 to 0.39, except Boletus
+    SRR10346195 at 0.74 (about 5x coverage). One tiny Lophodermium run (SRR5241364, 6x)
+    gave 1.05.
+  - Puccinia graminis SRR640960 (0.82 to 0.86 at all three positions): ratio 0.61.
+  - Runs scoring 0.3 to 0.55: ratio 0.95 to 1.03, except Diaporthe SRR32416523 (0.35 to
+    0.48) at 0.87.
+  - SRR1062948, sorted at the start only (0.85, 0.02, 0.01): ratio 0.98.
+- **A candidate rule: stride when the median of the three SRA positions is 0.8 or more.**
+  On the 30 runs it catches 9 of the 10 runs with a ratio under 0.9. It misses SRR32416523,
+  whose genome comes out 13% short. Its one false positive is SRR5241364, which only costs
+  time. In the random 200, it would send 10 runs (5%) to stride.
+- **Stride's memory grows with run size.** The two Puccinia triticina runs (10.6 and 16.1
+  million spots) were killed for exceeding 8 GB in the stride step. The next largest peak
+  was 5.9 GB. PR #42 measured 3.1 GB on C. auris (`benchmarks/2026-11-11_sortcheck_truth_sacct.tsv`).
 
 ## 2026-11-11 (later): the coverage tier samples by stride, with a fallback from windows
 
