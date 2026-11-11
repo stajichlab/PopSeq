@@ -276,8 +276,8 @@ def main(argv=None) -> int:
         type=int,
         default=20,
         help="how many fetches the caller runs at once; recorded in every "
-        "downloads.csv row and the sidecar, not enforced (default 20, UNMEASURED: "
-        "issue #27)",
+        "downloads.csv row and the sidecar, not enforced (default 20; no failures "
+        "up to 40 in the 2026-11-11 sweep, issue #27)",
     )
     f.add_argument("--header", action="store_true", help="print the result header line first")
 

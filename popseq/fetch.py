@@ -46,8 +46,9 @@ GENOME_SIZES = os.path.join(ROOT, "catalog", "genome_sizes.csv")
 CACHE_ROOT = os.path.join(ROOT, "cache")
 DEFAULT_SPOTS = {"head": 500_000, "windows": 2_000_000}
 DEFAULT_WINDOWS = 8
-# The number of fetches a caller runs at once. UNMEASURED (issue #27): 20 is a starting point, not a
-# finding. It is recorded in every downloads.csv row so the cap can be measured from real rows.
+# The number of fetches a caller runs at once, recorded in every downloads.csv row. Measured
+# 2026-11-11 (issue #27, spec 002 "Concurrency sweep results"): no failures at up to 40; speed per
+# fetch is set by how many fetches share a node.
 DEFAULT_CONCURRENCY = 20
 FETCH_FIELDS = [
     "run",
