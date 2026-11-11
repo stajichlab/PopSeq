@@ -135,13 +135,22 @@ def catalog_rows(runs) -> dict:
     return found
 
 
-def genome_size(species_taxid) -> Optional[float]:
-    if not species_taxid or not os.path.exists(GENOME_SIZES):
+def genome_size(species_taxid, path: Optional[str] = None) -> Optional[float]:
+    """The species' reference genome size in Mb, or None when it is unknown.
+
+    A species can have a row with an empty size: no NCBI assembly, kept with a reason
+    rather than a guess (catalog/genome_sizes.csv, issue #36). That is unknown, the same
+    as no row. Only the coverage tier needs a size; it then stops with a usage error."""
+    path = path or GENOME_SIZES
+    if not species_taxid or not os.path.exists(path):
         return None
-    with open(GENOME_SIZES, newline="") as fh:
+    with open(path, newline="") as fh:
         for row in csv.DictReader(fh):
             if row["species_taxid"] == str(species_taxid):
-                return float(row["genome_mb"])
+                try:
+                    return float(row["genome_mb"])
+                except (TypeError, ValueError):
+                    return None
     return None
 
 
