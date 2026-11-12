@@ -11,6 +11,48 @@ an 8 GB limit (PopSeq PR #43: two *Puccinia triticina* runs, genome about 120 Mb
 (25x of 120 Mb is about 4 GB decompressed per mate), not measured on those runs. It does not explain the memory
 of the GmG phase 1 species run (a 20 GiB peak with 4 fetches, kept output about 1 GB), where something else
 uses memory; which is not known. 3 new tests, one of which fails on the old code.
+## 2026-11-11 (measurement: can a cheap probe tell when stride sampling is needed?)
+
+No behaviour changed. `popseq fetch` is untouched; this measures a proposed `--sampling auto`.
+
+- **New `scripts/popseq_sortcheck.py`** (with `tests/test_sortcheck.py`). It scores whether a
+  run's reads are in genome-position order from about 4,000 mate-1 reads. The score is the
+  fraction of reads that share a 25-mer with one of the 50 reads before them. It probes both
+  archive copies: the head of the ENA FASTQ, and the SRA copy at the start, 1/3 and 2/3
+  (`fastq-dump -N/-X`, remote). Median 26 s per run.
+- **The order belongs to the archive copy, not the run.** NCBI holds ERR12543635 in genome
+  order (SRA 0.995 to 0.999), but its ENA FASTQ is not (0.004). It is the only one of 209
+  runs with both copies where the two disagree. The GmG pilot fetched it from AWS, which is
+  why windows were biased.
+- **Both biased pilot runs score at least 0.99** in the copy that was fetched. The 8 sound
+  pilot runs score at most 0.2.
+- **In 200 random runs of `pop_sra_ge10_cap300`, taking the highest SRA score per run:**
+  144 score below 0.1, 35 from 0.1 to 0.3, 9 from 0.3 to 0.5, 1 from 0.5 to 0.7, 2 from
+  0.7 to 0.9, and 9 at 0.9 or above (`benchmarks/2026-11-11_sortcheck_summary.csv`).
+  - Two runs are sorted at some positions and not at others (SRR1062948, SRR29057166).
+  - Whether windows are biased for scores of 0.3 to 0.9 is UNMEASURED.
+- **ENA `submitted_format` cannot be the rule.** It is empty for 173 of the 200 runs, and
+  it called ERR12543635 FASTQ.
+- **Ground truth: windows against stride.** For 32 runs (`scripts/sortcheck_truth.slurm`),
+  each run was fetched both ways with the same number of spots. `mash sketch -r -m 2` then
+  estimated the genome size of each sample (`benchmarks/2026-11-11_sortcheck_truth_summary.csv`).
+  A ratio well below 1 (windows over stride) means the windows reached only part of the genome.
+  30 runs finished.
+  - Controls scoring under 0.3 (n = 9): ratio 0.979 to 1.032.
+  - Runs scoring 0.9 or more at all three positions: ratio 0.21 to 0.39, except Boletus
+    SRR10346195 at 0.74 (about 5x coverage). One tiny Lophodermium run (SRR5241364, 6x)
+    gave 1.05.
+  - Puccinia graminis SRR640960 (0.82 to 0.86 at all three positions): ratio 0.61.
+  - Runs scoring 0.3 to 0.55: ratio 0.95 to 1.03, except Diaporthe SRR32416523 (0.35 to
+    0.48) at 0.87.
+  - SRR1062948, sorted at the start only (0.85, 0.02, 0.01): ratio 0.98.
+- **A candidate rule: stride when the median of the three SRA positions is 0.8 or more.**
+  On the 30 runs it catches 9 of the 10 runs with a ratio under 0.9. It misses SRR32416523,
+  whose genome comes out 13% short. Its one false positive is SRR5241364, which only costs
+  time. In the random 200, it would send 10 runs (5%) to stride.
+- **Stride's memory grows with run size.** The two Puccinia triticina runs (10.6 and 16.1
+  million spots) were killed for exceeding 8 GB in the stride step. The next largest peak
+  was 5.9 GB. PR #42 measured 3.1 GB on C. auris (`benchmarks/2026-11-11_sortcheck_truth_sacct.tsv`).
 
 ## 2026-11-11 (later): the coverage tier samples by stride, with a fallback from windows
 
