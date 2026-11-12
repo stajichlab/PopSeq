@@ -1,0 +1,5 @@
+run	route	sampling	order_scores	order_median	order_seconds	bases_kept	coverage_reached	seconds	verified	mash_genome	mash_cov
+ERR2300774	aws_odp	stride	0.997;0.999;0.9911	0.997	10.53	306250000	25.000	411.6	true	1.22218e+07	20.864
+ERR12543635	aws_odp	stride	0.9949;0.998;0.9985	0.998	5.37	306250000	25.000	391.2	true	1.26837e+07	19.658
+DRR129824	aws_odp	windows	0.0073;0.0081;0.0081	0.0081	11.26	306295976	25.004	220.3	true	1.34829e+07	20.977
+SRR1062948	aws_odp	windows	0.8537;0.0175;0.0147	0.0175	9.34	459251040	25.000	206.1	true	1.91678e+07	15.983

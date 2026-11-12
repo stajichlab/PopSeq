@@ -48,47 +48,9 @@ sys.path.insert(0, HERE)
 FIELDS = ["run", "submitted_format", "ena_reads", "read_len", "ena_score", "ena_status",
           "sra_spots", "sra_scores", "sra_score_max", "sra_status", "seconds"]
 SRA_POSITIONS = (0.0, 1 / 3, 2 / 3)
-_COMP = bytes.maketrans(b"ACGTN", b"TGCAN")
-
-
-def canonical_kmers(seq: bytes, k: int, step: int = 1) -> set[bytes]:
-    """Canonical k-mers (the smaller of a k-mer and its reverse complement), skipping N."""
-    seq = seq.upper()
-    rc = seq.translate(_COMP)[::-1]
-    n = len(seq)
-    out = set()
-    for i in range(0, n - k + 1, step):
-        f = seq[i:i + k]
-        if b"N" in f:
-            continue
-        r = rc[n - i - k:n - i]
-        out.add(f if f < r else r)
-    return out
-
-
-def neighbour_score(seqs: list[bytes], k: int = 25, window: int = 50, step: int = 5) -> float:
-    """Fraction of reads, after the first `window`, that share a canonical k-mer with one of
-    the `window` reads before them.
-
-    The previous reads contribute every k-mer; the current read is tested on every `step`-th
-    k-mer, which is enough to find an overlap of more than about k + step bases."""
-    held: Counter = Counter()
-    recent: deque = deque()
-    hits = tested = 0
-    for i, s in enumerate(seqs):
-        if i >= window:
-            tested += 1
-            if any(km in held for km in canonical_kmers(s, k, step)):
-                hits += 1
-        ks = canonical_kmers(s, k)
-        recent.append(ks)
-        held.update(ks)
-        if len(recent) > window:
-            for km in recent.popleft():
-                held[km] -= 1
-                if held[km] == 0:
-                    del held[km]
-    return hits / tested if tested else float("nan")
+# The scorer lives in the package, so `popseq fetch --sampling auto` and this measurement use
+# the same code.
+from popseq.readorder import canonical_kmers, neighbour_score, read_seqs  # noqa: E402,F401
 
 
 class _Counted(io.RawIOBase):
@@ -114,17 +76,6 @@ def head_reads(url: str, n: int, timeout: int = 120) -> tuple[list[bytes], int]:
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = _Counted(resp)
         return read_seqs(gzip.GzipFile(fileobj=io.BufferedReader(raw)), n), raw.n
-
-
-def read_seqs(handle, n: int) -> list[bytes]:
-    """Sequence lines of the first n records of a FASTQ handle (bytes lines)."""
-    seqs = []
-    while len(seqs) < n:
-        rec = [handle.readline() for _ in range(4)]
-        if not rec[3]:
-            break
-        seqs.append(rec[1].rstrip(b"\r\n"))
-    return seqs
 
 
 def ena_meta(runs: list[str]) -> dict[str, dict]:

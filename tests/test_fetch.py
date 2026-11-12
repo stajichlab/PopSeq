@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import gzip
 import hashlib
+import io
 import json
 import os
 
@@ -744,10 +745,10 @@ def spot_numbers(path):
     return [int(n.replace("spot", "")) for n in names]
 
 
-def test_coverage_tier_is_evenly_spaced_from_the_verified_full_run_by_default(env):
+def test_coverage_tier_stride_is_evenly_spaced_from_the_verified_full_run(env):
     plan = plan_for(spots=10_000, genome=0.03)  # no base_count needed: bases per spot are measured
     be = Fake(sra_spots=10_000)
-    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0)
+    r = run_fetch(env, be, plan, tier="coverage", coverage=10.0, sampling="stride")
     assert (r.outcome, r.sampling, r.fallback_from) == ("ok", "stride", "")
     assert r.reads_kept == 3000 and r.bases_kept == 300_000
     assert r.coverage_reached == pytest.approx(10.0)
@@ -1023,3 +1024,115 @@ def test_first_last_names_refuses_what_it_cannot_read(tmp_path):
     for p in (empty, notgz, short, tmp_path / "missing.fq.gz"):
         with pytest.raises((RuntimeError, OSError)):
             fx.first_last_names(str(p))
+
+
+# ------------------------------------------------------------- --sampling auto (read order)
+import random as _random  # noqa: E402
+
+
+class OrderFake(Fake):
+    """Reads from a random genome, either sorted by position (`sorted_`) or in random order.
+
+    Mate 1 of spot i is the read at position pos[i]; mate 2 is the next 50 bases, so mates
+    overlap as fragments do. Spot names stay `spot{i}`, so every count check still applies."""
+
+    def __init__(self, sorted_, spots=12_000, **kw):
+        super().__init__(sra_spots=spots, ena_reads=spots, **kw)
+        rng = _random.Random(7)
+        glen = 2_000_000
+        self.genome = "".join(rng.choice("ACGT") for _ in range(glen))
+        if sorted_:
+            span = spots * 100 // 20          # 20x over the first part of the genome
+            self.pos = sorted(rng.randrange(span) for _ in range(spots))
+        else:
+            self.pos = [rng.randrange(glen - 200) for _ in range(spots)]
+
+    def _write(self, path, start, n, mate):
+        # mtime=0: the same reads give the same bytes, so a stored MD5 matches
+        with gzip.GzipFile(path, "wb", mtime=0) as gz, io.TextIOWrapper(gz) as fh:
+            for i in range(start, start + n):
+                p = self.pos[i] + (50 if mate == 2 else 0)
+                fh.write(f"@spot{i}/{mate}\n{self.genome[p:p + 100]}\n+\n{'I' * 100}\n")
+
+    def convert_sra(self, sra, wd, threads):
+        self.calls.append(("convert", sra))
+        run = os.path.basename(sra).split(".")[0]
+        for k in (1, 2):
+            self._write(os.path.join(wd, f"{run}_{k}.fastq.gz"), 0, self.sra_spots, k)
+        return 0, 0.5, ""
+
+    def window(self, sra, start, count, outdir, tmpdir):
+        self.calls.append(("window", start, count))
+        run = os.path.basename(sra).split(".")[0]
+        for k in (1, 2):
+            self._write(os.path.join(outdir, f"{run}_{k}.fastq.gz"), start, count, k)
+        return 0, 0.1, ""
+
+    def transfer(self, plan, route, wd, timeout, aspera_key=None):
+        res = super().transfer(plan, route, wd, timeout, aspera_key)
+        if route == "ena_https" and res["rc"] == 0:
+            for k, f in enumerate(sorted(res["files"]), 1):
+                self._write(f, 0, self.ena_reads, k)
+            res["bytes"] = sum(os.path.getsize(f) for f in res["files"])
+        return res
+
+
+def _cov_plan(spots=12_000):
+    # 12,000 spots of 200 bases; 5x of a 0.1 Mb genome is 2,500 spots, under the run
+    return plan_for(spots=spots, base_count=spots * 200, genome=0.1)
+
+
+def test_auto_is_the_default_and_takes_windows_for_an_unsorted_sra_run(env):
+    be = OrderFake(sorted_=False)
+    r = run_fetch(env, be, _cov_plan(), tier="coverage", coverage=5.0)
+    assert (r.outcome, r.route, r.sampling) == ("ok", "aws_odp", "windows")
+    assert not any(c[0] == "convert" for c in be.calls)   # no whole-run conversion
+    s = json.load(open(os.path.join(env["out"], "SRR1.json")))
+    ro = s["read_order"]
+    assert ro["chose"] == "windows" and ro["median"] < 0.3 and len(ro["scores"]) == 3
+    assert ro["blocks"] == [[0, 4000], [4000, 4000], [8000, 4000]]
+
+
+def test_auto_takes_stride_for_a_sorted_sra_run(env):
+    be = OrderFake(sorted_=True)
+    r = run_fetch(env, be, _cov_plan(), tier="coverage", coverage=5.0)
+    assert (r.outcome, r.sampling) == ("ok", "stride")
+    assert any(c[0] == "convert" for c in be.calls)   # the whole run was converted
+    s = json.load(open(os.path.join(env["out"], "SRR1.json")))
+    assert s["read_order"]["chose"] == "stride" and s["read_order"]["median"] > 0.9
+
+
+def test_auto_scores_the_ena_copy_on_the_ena_route(env):
+    for sorted_, want in ((True, "stride"), (False, "windows")):
+        be = OrderFake(sorted_=sorted_, behave={"aws_odp": "404", "ncbi_prefetch": "404"})
+        plan = _cov_plan()
+        plan.ncbi_status = "absent"
+        d = os.path.join(str(env["tmp"]), f"md5_{want}")
+        os.makedirs(d, exist_ok=True)
+        for k, u in enumerate(plan.fastq_ftp.split(";"), 1):
+            nm = os.path.basename(u)
+            be._write(os.path.join(d, nm), 0, be.ena_reads, k)
+            plan.ena_md5[nm] = md5(os.path.join(d, nm))
+        env["opt"].out = os.path.join(str(env["tmp"]), f"out_{want}")
+        r = run_fetch(env, be, plan, tier="coverage", coverage=5.0)
+        assert (r.outcome, r.route, r.sampling) == ("ok", "ena_https", want)
+
+
+def test_explicit_sampling_skips_the_read_order_check(env):
+    be = OrderFake(sorted_=True)
+    r = run_fetch(env, be, _cov_plan(), tier="coverage", coverage=5.0, sampling="windows")
+    assert r.sampling == "windows"
+    assert not any(c[0] == "window" and c[2] == 4000 for c in be.calls)
+    s = json.load(open(os.path.join(env["out"], "SRR1.json")))
+    assert s["read_order"] is None
+
+
+def test_auto_windows_then_hook_75_resamples_by_stride_and_keeps_the_record(env, tmp_path):
+    hook = tmp_path / "hook.sh"
+    hook.write_text('#!/bin/sh\n[ "$POPSEQ_SAMPLING" = windows ] && exit 75\nexit 0\n')
+    hook.chmod(0o755)
+    be = OrderFake(sorted_=False)
+    r = run_fetch(env, be, _cov_plan(), tier="coverage", coverage=5.0, exec_cmd=str(hook))
+    assert (r.outcome, r.sampling, r.fallback_from) == ("ok", "stride", "windows")
+    s = json.load(open(os.path.join(env["out"], "SRR1.json")))
+    assert s["read_order"]["chose"] == "windows"

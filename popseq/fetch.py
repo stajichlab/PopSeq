@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from popseq import downloads as dl
-from popseq import lookup, profile, routes, subsample
+from popseq import lookup, profile, readorder, routes, subsample
 from popseq.query import ROOT, RUNS_TABLE, ena_layout, fastq_mates
 
 TIERS = dl.TIERS
@@ -56,6 +56,7 @@ HOOK_RESAMPLE = 75
 # 2026-11-11 (issue #27, spec 002 "Concurrency sweep results"): no failures at up to 40; speed per
 # fetch is set by how many fetches share a node.
 DEFAULT_CONCURRENCY = 20
+SAMPLINGS = ("auto", "stride", "windows")
 FETCH_FIELDS = [
     "run",
     "tier",
@@ -370,9 +371,11 @@ class Result:
 @dataclass
 class Options:
     tier: str = "windows"
-    # tier coverage: `stride` (evenly spaced reads from the verified full run, the default) or
-    # `windows` (contiguous windows: cheaper, but biased on runs sorted by genome position)
-    sampling: str = "stride"
+    # tier coverage: `auto` (the default: score the read order of the fetched bytes, then
+    # stride for a sorted run and windows otherwise; popseq/readorder.py), `stride` (evenly
+    # spaced reads from the verified full run) or `windows` (contiguous windows: cheaper, but
+    # biased on runs sorted by genome position)
+    sampling: str = "auto"
     out: Optional[str] = None
     coverage: Optional[float] = None
     genome_mb: Optional[float] = None
@@ -444,8 +447,8 @@ class Fetcher:
         t0 = time.monotonic()
         if opt.tier not in TIERS:
             raise Usage(f"tier must be one of {TIERS}")
-        if opt.sampling not in ("stride", "windows"):
-            raise Usage("--sampling must be stride or windows")
+        if opt.sampling not in SAMPLINGS:
+            raise Usage(f"--sampling must be one of {SAMPLINGS}")
         scratch = os.environ.get("SCRATCH")
         if not scratch:
             raise Usage(
@@ -640,7 +643,9 @@ class Fetcher:
             a.error = res["error"] or f"exit {res['rc']}"
             return a
         sra = res["files"][0]
-        by_stride = opt.tier == "coverage" and opt.sampling == "stride"
+        if opt.tier == "coverage" and opt.sampling == "auto":
+            self._order_sra(plan, a, sra, wd)
+        by_stride = self._stride(opt, a)
         a.layout = lay
         a.scope = "full" if (opt.tier in ("full", "stride") or by_stride) else "subsample"
         a.extra["sra"] = sra
@@ -651,6 +656,61 @@ class Fetcher:
         except (RuntimeError, OSError, ValueError) as exc:
             a.outcome, a.error, a.verified = "verify_failed", str(exc)[:400], False
             return a
+
+    @staticmethod
+    def _stride(opt, a) -> bool:
+        """Tier coverage cut evenly spaced: `--sampling stride`, or `auto` that chose stride."""
+        if opt.tier != "coverage":
+            return False
+        if opt.sampling == "auto":
+            return (a.extra.get("read_order") or {}).get("chose") == "stride"
+        return opt.sampling == "stride"
+
+    @staticmethod
+    def _record_order(a, scores, blocks, t0):
+        chose, med = readorder.decide(scores)
+        a.extra["read_order"] = {
+            "chose": chose,
+            "median": None if med is None else round(med, 4),
+            "scores": [None if x != x else round(x, 4) for x in scores],
+            "blocks": blocks,
+            "threshold": readorder.THRESHOLD,
+            "seconds": round(time.monotonic() - t0, 2),
+        }
+
+    def _order_sra(self, plan, a, sra, wd):
+        """`--sampling auto`, SRA route: score mate 1 of three blocks of the fetched `.sra`.
+
+        Reads the local file (`fastq-dump -N/-X` through the backend), so it scores the copy that
+        will be cut, not another archive's: read order can differ between NCBI and ENA."""
+        t0 = time.monotonic()
+        blocks = readorder.block_starts(plan.ncbi_spots or 0)
+        scores = []
+        for i, (start, count) in enumerate(blocks):
+            pdir = os.path.join(wd, f"order{i}")
+            os.makedirs(pdir, exist_ok=True)
+            try:
+                rc, _sec, _err = self.backend.window(sra, start, count, pdir, wd)
+                m1, _m2 = _classify(
+                    [os.path.join(pdir, f) for f in os.listdir(pdir) if f.endswith(".fastq.gz")]
+                )
+                seqs = readorder.file_seqs(m1, count) if rc == 0 and m1 else []
+            except (OSError, ValueError):
+                seqs = []
+            finally:
+                shutil.rmtree(pdir, ignore_errors=True)
+            scores.append(readorder.neighbour_score(seqs))
+        self._record_order(a, scores, blocks, t0)
+
+    def _order_files(self, a, mate1, total):
+        """`--sampling auto`, ENA route: score three blocks of the verified local mate-1 file."""
+        t0 = time.monotonic()
+        blocks = readorder.block_starts(total or 0)
+        try:
+            got = readorder.blocks_from_file(mate1, blocks)
+        except (OSError, ValueError):
+            got = [[] for _ in blocks]
+        self._record_order(a, [readorder.neighbour_score(x) for x in got], blocks, t0)
 
     def _sra_full(self, plan, opt, a, sra, wd):
         be = self.backend
@@ -687,7 +747,7 @@ class Fetcher:
                 kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Every(step))
             with self._st("postcut"):
                 return self._after_cut(a, outs, kept, f"stride {step}")
-        if opt.tier == "coverage" and opt.sampling == "stride":
+        if self._stride(opt, a):
             return self._cut_even(plan, opt, a, wd)
         return a
 
@@ -934,7 +994,9 @@ class Fetcher:
         total = a.reads_kept
         # keep the verified full files: a fallback resamples them without a second download
         a.extra.update(full_files=list(a.files), full_reads=a.reads_kept, full_bases=a.bases_kept)
-        if opt.tier == "coverage" and opt.sampling == "stride":
+        if opt.tier == "coverage" and opt.sampling == "auto":
+            self._order_files(a, a.files[0], a.reads_kept)
+        if self._stride(opt, a):
             return self._cut_even(plan, opt, a, wd)
         if opt.tier == "stride":
             a.extra["sampling"] = "stride"
@@ -1010,6 +1072,7 @@ class Fetcher:
             "tier": opt.tier,
             "sampling": sampling,
             "fallback_from": fallback_from or None,
+            "read_order": a.extra.get("read_order"),
             "hook_exit": hook_rc,
             "params": self._params(plan, opt),
             "fetched_utc": dl.utc_now(),
@@ -1104,7 +1167,12 @@ class Fetcher:
                     "windows sampling failed the sketch check (hook exit 75); "
                     "resampled evenly spaced from the same transfer"
                 )
-            return self._cut_even(plan, opt, b, wd2)
+            b = self._cut_even(plan, opt, b, wd2)
+            # keep the record of why windows were chosen (set after the cut, not before:
+            # with it, _sra_full would cut a second time)
+            if a.extra.get("read_order"):
+                b.extra["read_order"] = a.extra["read_order"]
+            return b
         except (RuntimeError, OSError, ValueError, KeyError) as exc:
             b.outcome, b.error, b.verified = (
                 "verify_failed",
