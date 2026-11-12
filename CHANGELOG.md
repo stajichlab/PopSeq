@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-12: release v0.2.0, schema 1.1.0
+
+The first tagged release. Owner decision 2026-11-12. Nothing moved and nothing was removed.
+
+- **Package version 0.1.0 to 0.2.0** (`pyproject.toml`, `uv.lock`, `popseq.__version__`).
+  `popseq.__version__` said `1.0.0`, which was the schema version, not the package version. A
+  new test, `test_versions_agree`, holds the three places together.
+- **Schema 1.0.0 to 1.1.0.** Every change since 1.0.0 (2026-11-06) adds a column, a table or a
+  key, so this is a minor bump: a reader of 1.0.0 still works. Spec 007 now has a "Schema
+  version" section with the bump rule and the list of what 1.1.0 added.
+  `catalog/index.json` and `catalog/api/` are regenerated to carry the new number.
+- **What v0.2.0 holds since the start:** the catalog with BGISEQ/DNBSEQ runs (2026-11-09),
+  genome sizes for 459 species, the `pop_sra_ge10_cap300` panel, and `popseq fetch` with tiers
+  `head`, `windows`, `stride`, `full` and `coverage`, `--profile`, and `--sampling auto`. The
+  entries below have the details.
+
 ## 2026-11-12: tier `coverage` chooses its sampling from the read order (`--sampling auto`, the new default)
 
 Owner decision 2026-11-12, option (b): keep windows cheap and use stride only for a run sorted by

@@ -1,6 +1,6 @@
 {
-  "popseq_schema": "1.0.0",
-  "generated": "2026-11-09",
+  "popseq_schema": "1.1.0",
+  "generated": "2026-11-11",
   "archive_snapshot": "2026-11-06",
   "archive_snapshots": [
     {
@@ -990,7 +990,7 @@
         "isolates"
       ],
       "bytes": 101183,
-      "sha256": "a919ab94d05cf6837eaf552afa62b98b595cf1b3a44378c233fb91965bebcf73"
+      "sha256": "96911ccc6233f76f9c200bf105ce1425349629bea02406707adad641aa9bc46c"
     },
     "summary_clonality": {
       "path": "catalog/summary/clonality.csv.gz",
@@ -1006,7 +1006,7 @@
         "largest_study"
       ],
       "bytes": 92427,
-      "sha256": "d1964bcbd455418fd8659b7b3c9c43d6b71378345d6862051dc6e548245e3ba2"
+      "sha256": "4bfabc1dea52ef17354b79c141b3763374f93c3059ca20bf0b87b3f96a7891a7"
     },
     "summary_coverage": {
       "path": "catalog/summary/coverage.csv.gz",
@@ -1038,7 +1038,7 @@
         "isolates"
       ],
       "bytes": 89665,
-      "sha256": "c3f3025458644baa1a6cc5dfeef4dccdc698e1619041adcc2bb52d22326fe33c"
+      "sha256": "b792d687312e36b4f1b4947c62cae6be1ffd96ec08ebf00eebaefb6bf697dcca"
     },
     "summary_host_source": {
       "path": "catalog/summary/host_source.csv.gz",
@@ -1053,7 +1053,7 @@
         "isolates"
       ],
       "bytes": 118437,
-      "sha256": "6810bf00766d2070d7585c9cdc2163c3d3fb2df21b0ef15acbc0751830ef3c07"
+      "sha256": "9929d8a35e46288ae85c4e20b005cb9442dec8894f2d6230ecf5e5f0d952e735"
     },
     "vocab_country_aliases": {
       "path": "catalog/vocab/country_aliases.csv",

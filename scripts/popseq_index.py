@@ -18,7 +18,7 @@ from datetime import date
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "catalog", "index.json")
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 SNAPSHOT = "2026-11-06"  # the full snapshot; kept a single date for existing readers
 SNAPSHOTS = [
     {"date": "2026-11-06", "file": "cache/fungi_runs_ena_2026-11-06.tsv.gz",
