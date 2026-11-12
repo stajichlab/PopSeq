@@ -45,6 +45,17 @@ def test_tree_rss_adds_the_process_and_all_its_descendants(tmp_path):
     assert profile.tree_rss_mib(12, str(tmp_path)) == pytest.approx(4.0)
 
 
+def test_the_children_files_are_used_when_the_kernel_has_them(tmp_path):
+    fake_proc(tmp_path, {10: (1, 1024), 11: (10, 2048), 99: (1, 999999)})
+    for pid, kids in ((10, "11"), (11, "")):
+        t = tmp_path / str(pid) / "task" / str(pid)
+        t.mkdir(parents=True)
+        (t / "children").write_text(kids + (" " if kids else ""))
+    # 99 is never read: only this tree is walked
+    os.remove(tmp_path / "99" / "stat")
+    assert profile.tree_rss_mib(10, str(tmp_path)) == pytest.approx(3.0)
+
+
 def test_tree_rss_is_none_without_a_process_table(tmp_path):
     assert profile.tree_rss_mib(1, str(tmp_path / "nope")) is None
 

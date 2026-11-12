@@ -64,11 +64,34 @@ def _read(path: str) -> str:
         return fh.read()
 
 
-def tree_rss_mib(root_pid: int, proc_root: str = "/proc") -> Optional[float]:
-    """Resident size, in MiB, of `root_pid` and all its descendants added together, from `proc_root`.
+def _descendants_fast(root_pid: int, proc_root: str) -> Optional[list[int]]:
+    """Descendants by `/proc/<pid>/task/<tid>/children`: reads only this tree, not every process on
+    the node (a full scan of a busy 256-core node costs tens of milliseconds). None if the kernel
+    does not offer `children` (CONFIG_PROC_CHILDREN)."""
+    out, stack, first = [], [root_pid], True
+    while stack:
+        pid = stack.pop()
+        out.append(pid)
+        try:
+            tids = os.listdir(os.path.join(proc_root, str(pid), "task"))
+        except OSError:
+            if first:
+                return None
+            continue  # vanished
+        for tid in tids:
+            try:
+                kids = _read(os.path.join(proc_root, str(pid), "task", tid, "children")).split()
+            except OSError:
+                if first:
+                    return None
+                continue
+            stack.extend(int(k) for k in kids)
+        first = False
+    return out
 
-    None if `proc_root` has no process table (macOS). A process that vanishes while being read is skipped.
-    """
+
+def _descendants_scan(root_pid: int, proc_root: str) -> Optional[list[int]]:
+    """Descendants by reading every process's parent: works everywhere, but scans the whole node."""
     try:
         pids = [p for p in os.listdir(proc_root) if p.isdigit()]
     except OSError:
@@ -82,13 +105,28 @@ def tree_rss_mib(root_pid: int, proc_root: str = "/proc") -> Optional[float]:
         except (OSError, ValueError, IndexError):
             continue
         children.setdefault(ppid, []).append(int(p))
-    seen, stack, total_kb = set(), [root_pid], 0
+    seen, stack = [], [root_pid]
     while stack:
         pid = stack.pop()
         if pid in seen:
             continue
-        seen.add(pid)
+        seen.append(pid)
         stack.extend(children.get(pid, []))
+    return seen
+
+
+def tree_rss_mib(root_pid: int, proc_root: str = "/proc") -> Optional[float]:
+    """Resident size, in MiB, of `root_pid` and all its descendants added together, from `proc_root`.
+
+    None if `proc_root` has no process table (macOS). A process that vanishes while being read is skipped.
+    """
+    pids = _descendants_fast(root_pid, proc_root)
+    if pids is None:
+        pids = _descendants_scan(root_pid, proc_root)
+    if pids is None:
+        return None
+    total_kb = 0
+    for pid in pids:
         try:
             for line in _read(os.path.join(proc_root, str(pid), "status")).splitlines():
                 if line.startswith("VmRSS:"):
