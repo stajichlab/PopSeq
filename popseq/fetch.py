@@ -18,6 +18,7 @@ with fakes (tests/test_fetch.py).
 from __future__ import annotations
 
 import collections
+import contextlib
 import csv
 import json
 import os
@@ -30,7 +31,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from popseq import downloads as dl
-from popseq import lookup, routes, subsample
+from popseq import lookup, profile, routes, subsample
 from popseq.query import ROOT, RUNS_TABLE, ena_layout, fastq_mates
 
 TIERS = dl.TIERS
@@ -340,6 +341,7 @@ class Result:
     resumed: bool = False
     sampling: str = ""
     fallback_from: str = ""
+    profile: Optional[dict] = None  # seconds per stage and memory (popseq.profile), not in the row
 
     def row(self) -> list:
         def f(x):
@@ -414,9 +416,29 @@ class Fetcher:
     def __init__(self, backend: Optional[Backend] = None, lookups: Optional[Lookups] = None):
         self.backend = backend or Backend()
         self.lookups = lookups or Lookups()
+        self._prof: Optional[profile.Profiler] = None
 
     # -- public entry
     def fetch(
+        self, run: str, opt: Options, *, plan: Optional[Plan] = None, plan_row=None, crow=None
+    ) -> Result:
+        """Fetch one run; `Result.profile` says where the time and memory went (every return path)."""
+        prof = profile.Profiler().start()
+        self._prof, real = prof, self.backend
+        self.backend = profile.TimedBackend(real, prof)
+        try:
+            res = self._fetch(run, opt, plan=plan, plan_row=plan_row, crow=crow)
+            res.profile = prof.stop()
+            return res
+        finally:
+            prof.stop()
+            self.backend, self._prof = real, None
+
+    def _st(self, name):
+        """The timer for stage `name` (a no-op outside `fetch`)."""
+        return self._prof.stage(name) if self._prof else contextlib.nullcontext()
+
+    def _fetch(
         self, run: str, opt: Options, *, plan: Optional[Plan] = None, plan_row=None, crow=None
     ) -> Result:
         t0 = time.monotonic()
@@ -435,9 +457,10 @@ class Fetcher:
         if opt.tier == "coverage" and not opt.coverage:
             raise Usage("--coverage is required for tier coverage")
         if plan is None:
-            if crow is None:
-                crow = catalog_rows([run]).get(run)
-            plan = build_plan(run, crow, lookups=self.lookups, plan_row=plan_row)
+            with self._st("plan"):
+                if crow is None:
+                    crow = catalog_rows([run]).get(run)
+                plan = build_plan(run, crow, lookups=self.lookups, plan_row=plan_row)
         if opt.tier == "coverage" and not (opt.genome_mb or plan.genome_mb):
             raise Usage(f"{run}: no genome size for species taxid {plan.taxid}; give --genome-mb")
 
@@ -660,8 +683,10 @@ class Fetcher:
             a.extra["sampling"] = "stride"
             step = subsample.stride(a.reads_kept, opt.spots or DEFAULT_SPOTS["windows"])
             outs = [os.path.join(wd, "stride_" + os.path.basename(f)) for f in a.files]
-            kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Every(step))
-            return self._after_cut(a, outs, kept, f"stride {step}")
+            with self._st("cut"):
+                kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Every(step))
+            with self._st("postcut"):
+                return self._after_cut(a, outs, kept, f"stride {step}")
         if opt.tier == "coverage" and opt.sampling == "stride":
             return self._cut_even(plan, opt, a, wd)
         return a
@@ -685,8 +710,10 @@ class Fetcher:
             a.extra["cut"] = "whole run: it is not longer than the target"
             return a
         outs = [os.path.join(wd, "even_" + os.path.basename(f)) for f in a.files]
-        kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Evenly(total, n))
-        return self._after_cut(a, outs, kept, f"evenly spaced {n} of {total}")
+        with self._st("cut"):
+            kept, _read, _b = subsample.select_spots(a.files, outs, subsample.Evenly(total, n))
+        with self._st("postcut"):
+            return self._after_cut(a, outs, kept, f"evenly spaced {n} of {total}")
 
     def _after_cut(self, a, outs, kept, note):
         """Check what a cutter wrote: counts equal the request, and the mates' names pair up."""
@@ -788,7 +815,8 @@ class Fetcher:
         outs = []
         for suffix, key in zip(["_1", "_2"] if a.layout == "PAIRED" else [""], ("m1", "m2")):
             dest = os.path.join(wd, f"{plan.run}{suffix}.fastq.gz")
-            _concat(parts[key], dest)
+            with self._st("cut"):
+                _concat(parts[key], dest)
             outs.append(dest)
         stats = [be.read_stats(f) for f in outs]
         a.files, a.reads_kept, a.bases_kept = outs, stats[0][0], sum(s[1] for s in stats)
@@ -820,11 +848,12 @@ class Fetcher:
             return self._ena_head(plan, opt, a, wd, [u for u in (m1u, m2u) if u])
         sub = dict(plan.as_route_plan())
         sub["fastq_ftp"] = ";".join(u for u in (m1u, m2u) if u)
-        res = (
-            be.transfer(sub, "ena_https", wd, opt.timeout)
-            if m2u
-            else self._transfer_single(sub, wd, opt)
-        )
+        with self._st("transfer"):
+            res = (
+                be.transfer(sub, "ena_https", wd, opt.timeout)
+                if m2u
+                else self._transfer_single(sub, wd, opt)
+            )
         a.bytes, a.seconds_fetch, a.scope = res["bytes"], res["seconds"], "full"
         if res["rc"] != 0:
             a.outcome, a.error = "transfer_failed", res["error"] or f"exit {res['rc']}"
@@ -881,7 +910,8 @@ class Fetcher:
             return a
         a.verified = True
         a.expected = reads[0]
-        return self._after_cut(a, outs, reads[0], f"head {n}")
+        with self._st("postcut"):
+            return self._after_cut(a, outs, reads[0], f"head {n}")
 
     @staticmethod
     def _transfer_single(sub, wd, opt):
@@ -917,8 +947,10 @@ class Fetcher:
             keep, note = subsample.Window(spans), "windows"
         names = ["_1", "_2"] if len(a.files) == 2 else [""]
         outs = [os.path.join(wd, f"cut_{plan.run}{s}.fastq.gz") for s in names]
-        kept, _read, _b = subsample.select_spots(a.files, outs, keep)
-        return self._after_cut(a, outs, kept, note)
+        with self._st("cut"):
+            kept, _read, _b = subsample.select_spots(a.files, outs, keep)
+        with self._st("postcut"):
+            return self._after_cut(a, outs, kept, note)
 
     # -- success: run the hook (resampling by stride if its check fails), place outputs, write
     # -- the sidecar last
@@ -928,7 +960,8 @@ class Fetcher:
         fallback_from, hook_rc, hook_note = "", None, ""
         if opt.exec_cmd:
             env = self._hook_env(plan, opt, a, genome, sampling)
-            hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
+            with self._st("hook"):
+                hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
             if hook_rc == HOOK_RESAMPLE and sampling == "windows":
                 # The hook's check says contiguous windows missed part of the genome (a run sorted
                 # by genome position). Resample the transfer already held, evenly spaced, and run
@@ -952,7 +985,8 @@ class Fetcher:
                     )
                 fallback_from, a, sampling = "windows", b, "stride"
                 env = self._hook_env(plan, opt, a, genome, sampling)
-                hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
+                with self._st("hook"):
+                    hook_rc = self._hook(opt.exec_cmd, plan.run, a.files, env)
             if hook_rc == HOOK_RESAMPLE:
                 hook_note = (
                     "the sketch check failed even with evenly spaced sampling"
@@ -1005,18 +1039,20 @@ class Fetcher:
             "reads_on_disk": keep_reads,
             "files": names if keep_reads else [],
             "tools": self.backend.tool_versions(),
+            "profile": self._prof.summary() if self._prof else None,
         }
-        os.makedirs(dest, exist_ok=True)
-        if keep_reads:
-            for src, name in zip(a.files, names):
-                tmp = os.path.join(dest, f".{name}.part")
-                shutil.move(src, tmp)
-                os.replace(tmp, os.path.join(dest, name))
-        tmp = os.path.join(dest, f".{plan.run}.json.part")
-        with open(tmp, "w") as fh:
-            json.dump(side, fh, indent=2, default=str)
-            fh.write("\n")
-        os.replace(tmp, sidecar)  # the sidecar goes last: it marks a complete run
+        with self._st("finish"):
+            os.makedirs(dest, exist_ok=True)
+            if keep_reads:
+                for src, name in zip(a.files, names):
+                    tmp = os.path.join(dest, f".{name}.part")
+                    shutil.move(src, tmp)
+                    os.replace(tmp, os.path.join(dest, name))
+            tmp = os.path.join(dest, f".{plan.run}.json.part")
+            with open(tmp, "w") as fh:
+                json.dump(side, fh, indent=2, default=str)
+                fh.write("\n")
+            os.replace(tmp, sidecar)  # the sidecar goes last: it marks a complete run
         r = Result(
             plan.run,
             opt.tier,
