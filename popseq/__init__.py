@@ -36,4 +36,4 @@ __all__ = [
     "species", "runs", "panel", "describe", "resolve_species", "index",
     "preload", "preload_clear", "to_sample_sheet",
 ]
-__version__ = "1.0.0"
+__version__ = "0.2.0"

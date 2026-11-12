@@ -213,3 +213,18 @@ def test_layout_filter_uses_ena_layout():
     assert [r["run_accession"] for r in f(rows, layout="PAIRED")] == ["A"]
     assert [r["run_accession"] for r in f(rows, layout="SINGLE")] == ["B"]
     assert len(f(rows, layout="")) == 2
+
+
+def test_versions_agree():
+    """One package version and one schema version, wherever they are written."""
+    import importlib.util
+    import pathlib
+    import tomllib
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    pyproject = tomllib.loads((root / "pyproject.toml").read_text())
+    assert popseq.__version__ == pyproject["project"]["version"]
+    spec = importlib.util.spec_from_file_location("popseq_index", root / "scripts" / "popseq_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.SCHEMA_VERSION == popseq.SCHEMA_VERSION

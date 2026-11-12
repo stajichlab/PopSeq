@@ -22,7 +22,7 @@ import re
 from collections import defaultdict
 from typing import Any, Iterable, Iterator, Optional
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 
 ROOT = os.environ.get("POPSEQ_ROOT") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))

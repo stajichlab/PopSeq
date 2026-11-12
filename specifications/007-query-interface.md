@@ -1,6 +1,6 @@
 # 007: The query interface
 
-**Status:** implemented, schema 1.0.0
+**Status:** implemented, schema 1.1.0
 **Supersedes:** nothing. Extends 001 (catalog schema) and 003 (sample sheets).
 
 ## Why this exists
@@ -39,6 +39,28 @@ A caller branches on the exit code without parsing anything.
 the schema version, the snapshot date, every table with its grain, key, columns,
 size and SHA-256, the column notes that matter, and the caveats. A consumer reads
 that file first and needs no other documentation.
+
+### Schema version
+
+`popseq_schema` (in `catalog/index.json`, every `catalog/api/` file and every JSON
+answer) is `popseq.SCHEMA_VERSION`. It versions the contract above, not the data.
+
+| change | bump |
+|---|---|
+| a verb, flag, function, JSON key or exit code removed, renamed or changed in meaning | major |
+| a table, column, JSON key or verb added | minor |
+| a fix that leaves every name and meaning alone | patch |
+
+A refresh that only changes counts does not change the version. A consumer that
+checks the major number keeps working across minor bumps.
+
+| version | date | what changed |
+|---|---|---|
+| 1.0.0 | 2026-11-06 | first contract |
+| 1.1.0 | 2026-11-12 | added only. Run table: `country_iso`, `country_name`, `country_status`, `host`, `host_taxid`, `host_name`, `host_status`, `ena_layout`. New tables: `catalog/species_layout.csv.gz`, `catalog/vocab/{country_aliases,host_overrides}.csv`, `catalog/vocab/host_taxa.csv.gz`, `catalog/kingdom/fungi_assemblies.csv.gz`, `catalog/labels/{assembly_labels,run_labels}.csv.gz`, `catalog/labels/sources.csv`. Index key `archive_snapshots`. 15 new BioSample attribute columns |
+
+The package version (`popseq.__version__`, `pyproject.toml`) is separate. It tracks
+the code, and a git tag `v<version>` marks each release.
 
 ### Formats
 
