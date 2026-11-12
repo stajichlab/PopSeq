@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-12: `popseq fetch` holds a constant amount of memory when it checks a cut
+
+`fetch.first_last_names` (the check that the two mates' read names agree at the first and last read) captured
+the whole decompressed output and split it into a list of lines, so its peak memory was 3 to 4 times the
+decompressed size (measured on synthetic FASTQ: 669, 1,300 and 2,049 MB for 160, 320 and 650 MB decompressed).
+It now streams the file once and keeps the first line and the last four: 37 to 40 MB at any size, and faster
+(0.8 s against 1.9 s on the largest). For a large genome this is the likely cause of the stride step running out of
+an 8 GB limit (PopSeq PR #43: two *Puccinia triticina* runs, genome about 120 Mb, OOM-killed); that link is arithmetic
+(25x of 120 Mb is about 4 GB decompressed per mate), not measured on those runs. It does not explain the memory
+of the GmG phase 1 species run (a 20 GiB peak with 4 fetches, kept output about 1 GB), where something else
+uses memory; which is not known. 3 new tests, one of which fails on the old code.
 ## 2026-11-11 (measurement: can a cheap probe tell when stride sampling is needed?)
 
 No behaviour changed. `popseq fetch` is untouched; this measures a proposed `--sampling auto`.
