@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-11 (`popseq fetch --profile`: where the time and memory go)
+
+No result changes. Behaviour is the same; a fetch now measures itself.
+
+- **New `popseq/profile.py`.** Every fetch times its stages (`plan`, `transfer`, `convert`, `count`,
+  `md5`, `cut`, `postcut`, `check`, `hook`, `finish`; `other` is what no stage names) and records the
+  peak memory of this Python process, of its largest child, and on Linux of the whole process tree
+  (read from `/proc` every 2 s, with the stage it was seen in). Stages do not nest, so no second is
+  counted twice. A spike shorter than 2 s can be missed: the tree peak is a lower bound.
+- **`Result.profile`** (every return path, failures too) and a `profile` object in the sidecar.
+  The result row's columns are unchanged.
+- **New `--profile FILE`** appends one TSV line per fetch (header written once, one write per line so
+  parallel fetches can share a file).
+- Why: the phase 1 run of 299 *B. bruxellensis* runs found 80 percent of fetch time unnamed by the
+  sidecar timers and one job at 20.0 of 20 GiB, with no way to say which step held the memory.
+- Tests: `tests/test_profile.py` (fake `/proc`, stage nesting, peak attribution, backend proxy,
+  fetch with success and failure, the profile file; a real allocating child on Linux only).
+
 ## 2026-11-11 (measurement: can a cheap probe tell when stride sampling is needed?)
 
 No behaviour changed. `popseq fetch` is untouched; this measures a proposed `--sampling auto`.

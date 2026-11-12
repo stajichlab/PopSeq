@@ -93,6 +93,7 @@ def _filters(a):
 def _cmd_fetch(a) -> int:
     """popseq fetch. Imported here so the query commands do not load the download code."""
     from popseq import fetch as fx
+    from popseq import profile as prof
     from popseq.lookup import open_table
 
     try:
@@ -139,6 +140,8 @@ def _cmd_fetch(a) -> int:
                 print(f"popseq fetch: {run}: {exc}", file=sys.stderr)
                 worst = max(worst, fx.EXIT["usage"])
                 continue
+            if a.profile and res.profile:
+                prof.append_profile(a.profile, res, res.profile, a.threads)
             line = "\t".join(res.row())
             print(line)
             if results_fh:
@@ -281,6 +284,12 @@ def main(argv=None) -> int:
         "ncbi_spots_with_mates, fastq_md5, ...) instead of live lookups",
     )
     f.add_argument("--results", help="append the result line(s) to this TSV")
+    f.add_argument(
+        "--profile",
+        help="append one line per fetch to this TSV: seconds per stage (plan, transfer, convert, "
+        "count, md5, cut, postcut, check, hook, finish, other) and peak memory of this process, "
+        "of its largest child and, on Linux, of the whole process tree",
+    )
     f.add_argument("--threads", type=int, default=4)
     f.add_argument(
         "--concurrency",
