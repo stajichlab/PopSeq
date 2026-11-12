@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-11-12: tier `coverage` chooses its sampling from the read order (`--sampling auto`, the new default)
+
+Owner decision 2026-11-12, option (b): keep windows cheap and use stride only for a run sorted by
+genome position. Nothing moved; the sidecar gains `read_order`.
+
+- **`--sampling auto`** is the default for tier `coverage`. After the transfer, `popseq fetch` scores
+  mate 1 of three blocks of 4,000 spots of the bytes it fetched: the local `.sra` for an SRA route,
+  the verified file for ENA. It takes `stride` when the median score is 0.8 or more and `windows`
+  otherwise. `--sampling stride` and `--sampling windows` still force a choice. The hook-75
+  fallback applies when `auto` chose windows. Spec 002 has the rule and its calibration.
+- **New `popseq/readorder.py`** holds the score. `scripts/popseq_sortcheck.py` now imports it, so
+  the measurement and the fetch use the same code. Tests: `tests/test_readorder.py`, plus five
+  `auto` tests in `tests/test_fetch.py`: unsorted and sorted SRA runs, the ENA copy, explicit
+  sampling skipping the check, and the hook fallback keeping the record.
+- **Calibration (PR #43):** on 30 runs fetched both ways, the rule caught 9 of the 10 runs whose
+  windows were biased. The one miss, SRR32416523, came out 13% short. In 200 random panel runs,
+  5% go to stride.
+- **Acceptance on real runs** (`benchmarks/2026-11-12_sampling_auto_acceptance.tsv`): tier
+  `coverage --coverage 25` on the HPCC, with a `mash sketch -r -m 2` hook. All four were verified,
+  and the check took 5 to 11 s per run.
+
+  | Run | Scores | Chose | Genome size from the sample |
+  |---|---|---|---|
+  | ERR2300774 | 0.997, 0.999, 0.991 | stride | 12.2 Mb (windows gave 2.6 Mb) |
+  | ERR12543635 | 0.995, 0.998, 0.999 | stride | 12.7 Mb (windows gave 2.9 Mb) |
+  | DRR129824 | 0.007, 0.008, 0.008 | windows | 13.5 Mb |
+  | SRR1062948 | 0.854, 0.018, 0.015 | windows | 19.2 Mb (*C. gattii*, 18.4 Mb) |
+
+  SRR1062948 is sorted at the start only. The ground truth gave a windows/stride ratio of 0.98 for
+  it, so windows is the right choice there.
+- The one existing test that assumed stride was the default now asks for `--sampling stride`.
+
 ## 2026-11-12: `popseq fetch` holds a constant amount of memory when it checks a cut
 
 `fetch.first_last_names` (the check that the two mates' read names agree at the first and last read) captured

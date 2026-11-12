@@ -246,13 +246,15 @@ def main(argv=None) -> int:
     f.add_argument("--coverage", type=float, help="tier coverage: target x of the genome size")
     f.add_argument(
         "--sampling",
-        choices=["stride", "windows"],
-        default="stride",
-        help="tier coverage: `stride` (default) keeps evenly spaced reads of the verified full run "
-        "and reaches every part of the genome even if the run is sorted by genome position; "
-        "`windows` cuts contiguous windows (cheaper, but covers only 25/depth of the genome on a "
-        "position-sorted run). With --exec, a hook that exits 75 after a windowed sample makes "
-        "fetch resample the same transfer by stride",
+        choices=["auto", "stride", "windows"],
+        default="auto",
+        help="tier coverage: `auto` (default) scores the read order of the fetched bytes (three "
+        "blocks of 4,000 reads) and takes `stride` for a run sorted by genome position, `windows` "
+        "otherwise (popseq/readorder.py; calibration in spec 002). `stride` keeps evenly spaced "
+        "reads of the verified full run and reaches every part of the genome even if the run is "
+        "sorted; `windows` cuts contiguous windows (about 4 times cheaper, but covers only "
+        "25/depth of the genome on a sorted run). With --exec, a hook that exits 75 after a "
+        "windowed sample makes fetch resample the same transfer by stride",
     )
     f.add_argument(
         "--genome-mb",

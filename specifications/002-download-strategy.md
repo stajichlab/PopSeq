@@ -15,7 +15,7 @@ A caller states what it needs. The fetcher never guesses.
 | `windows` | N spots drawn from W evenly spaced windows, default 2,000,000 in 8 | ~1 GB | no | `$SCRATCH` |
 | `stride` | every Nth read pair | ~1 Gb of bases | no | `$SCRATCH` |
 | `full` | the entire run | 0.5-15 GB | yes | `cache/<taxid>/<RUN>/` |
-| `coverage` | bases = genome size x target coverage, as evenly spaced reads of the verified full run (default) or from contiguous windows | the kept bases are small; the whole run is transferred | no | `$SCRATCH` or `--out` |
+| `coverage` | bases = genome size x target coverage; by default (`auto`) evenly spaced reads of the verified full run for a run sorted by genome position, contiguous windows otherwise | the kept bases are small; the whole run is transferred | no | `$SCRATCH` or `--out` |
 
 Only `full` is cached. The subsampled tiers cost less to refetch than to index and manage.
 
@@ -55,15 +55,40 @@ popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
 `catalog/genome_sizes.csv` by `species_taxid` (113 species have one). A species with no size
 needs `--genome-mb`; without either the fetch fails before any download, with a usage error.
 
-**Spots needed.** `n_spots = ceil(target_bases / bases_per_spot)`. With `--sampling stride`
-(the default) `bases_per_spot` is measured on the verified full files (bases / spots, both mates
-counted). With `--sampling windows`, `bases_per_spot = base_count / spots` for an SRA route (NCBI's
+**Spots needed.** `n_spots = ceil(target_bases / bases_per_spot)`. When the sampling is stride,
+`bases_per_spot` is measured on the verified full files (bases / spots, both mates
+counted). When it is windows, `bases_per_spot = base_count / spots` for an SRA route (NCBI's
 count), and for ENA it is measured on the downloaded file, because ENA `read_count` does not count
 pairs for most ERR runs (see below).
 
-### Sampling: `stride` (default) or `windows` (changed 2026-11-11)
+### Sampling: `auto` (default), `stride` or `windows` (changed 2026-11-12)
 
-**Why the default changed.** The first version of this tier cut contiguous windows. In a run that
+**`auto` (default since 2026-11-12, owner decision).** After the transfer and before any cut,
+`popseq fetch` scores the read order of the bytes it fetched (`popseq/readorder.py`). It takes mate 1
+of three blocks of 4,000 spots, at the start, 1/3 and 2/3 of the run. The SRA route reads the local
+`.sra` with `fastq-dump -N/-X`; the ENA route reads the verified local file. A block's score is the
+fraction of its reads that share a canonical 25-mer with one of the 50 reads before them. A sorted
+run scores near 1 and a run in random order near 0. When the median of the three scores is **0.8**
+or more, the run is cut by `stride`; otherwise by `windows`. If no block can be scored, the run is
+cut by `stride`, because a wrong windows sample is a biased sample. The scores, the median and the
+choice are in the sidecar as `read_order`. The result row's `sampling` says which cut was made. The
+fallback below applies when `auto` chose windows.
+
+Why the fetched bytes, not the archive's metadata: read order belongs to an archive's copy, not to
+the run. NCBI holds ERR12543635 in genome order (scores 0.995 to 0.999), but its ENA FASTQ is not
+(0.004). ENA `submitted_format` is empty for 173 of 200 sampled runs.
+
+Calibration (PR #43, `benchmarks/2026-11-11_sortcheck_*`):
+- 30 runs were fetched both ways with the same number of spots, and `mash sketch -r -m 2`
+  estimated the genome size of each sample.
+- The 10 runs whose windows sample reached under 0.9 of the stride sample's size all had a median
+  of 0.8 or more, except one: SRR32416523, median 0.40, whose windows came out 13% short. That run
+  is a known miss of the rule.
+- The 9 controls scoring under 0.3 gave ratios of 0.979 to 1.032.
+- In 200 random runs of `pop_sra_ge10_cap300`, 10 have a median of 0.8 or more.
+- The threshold comes from 30 runs. Its error rate beyond them is UNMEASURED.
+
+**Why stride became the default on 2026-11-11.** The first version of this tier cut contiguous windows. In a run that
 is sorted by genome position (old SRA files often are), contiguous reads come from one region, so
 `k` kept spots reach only `kept bases / depth` of the genome, at a far higher coverage than the
 target, however many windows there are. The phase 1 pilot (GmG PR #183, 10 isolates of one species,
@@ -72,7 +97,7 @@ at 12 to 20x for the other eight. The prediction `25 / depth x genome` (2.3 and 
 5% of the sketch's estimate. That the two runs are sorted was inferred from this match; the read
 order of the `.sra` was not inspected. n = 10 runs of one species.
 
-**`stride` (default).** The whole run is converted and verified first (the full check below), then
+**`stride`.** The whole run is converted and verified first (the full check below), then
 exactly `n_spots` spots are kept, evenly spaced over the whole file: spot `i` is kept when
 `floor((i + 1) * n / S) > floor(i * n / S)`. This reaches every part of the genome whatever the read
 order, and the kept count is exact. It costs the full conversion: on the acceptance run
@@ -85,7 +110,8 @@ UNMEASURED. A run with `n_spots >= S` is kept whole.
 evenly spaced and the first and last touch the ends of the run. Cheaper, and right for runs in
 random order; biased on a run sorted by genome position. Use it with a hook that checks the sample.
 
-**The fallback.** With `--sampling windows` (and the `windows` tier) and `--exec`, a hook that exits
+**The fallback.** With windows sampling (`--sampling windows`, `auto` that chose windows, or the
+`windows` tier) and `--exec`, a hook that exits
 with code **75** says: this sample failed my check. `popseq fetch` then resamples the transfer it
 already holds, evenly spaced, with no second download, and runs the hook again. A second 75 ends the
 task as `hook_failed` (exit 14, "the sketch check failed even with evenly spaced sampling"). A 75
@@ -139,7 +165,7 @@ conversion, so it keeps the full check before it subsamples.
 
 ```
 popseq fetch RUN|MANIFEST --tier head|windows|stride|full|coverage --out DIR
-    [--coverage X] [--sampling stride|windows] [--genome-mb MB] [--windows W] [--spots N]
+    [--coverage X] [--sampling auto|stride|windows] [--genome-mb MB] [--windows W] [--spots N]
     [--require-pairs] [--exec CMD] [--plan FILE] [--results FILE]
 ```
 
@@ -643,3 +669,7 @@ logs: a Slurm kill is invisible in the log, and the `resume` step shows only the
   `fallback_from` result columns. The first version of this tier, which I wrote on 2026-11-09 from
   the MATPredict `windows` pattern, was wrong for sorted runs; GmG's original every-Nth-pair
   sampler had avoided this for that reason.
+- 2026-11-12: tier `coverage` defaults to `--sampling auto` (owner decision). It scores the read order
+  of the fetched bytes (three blocks of 4,000 spots) and takes `stride` when the median score is 0.8
+  or more, `windows` otherwise. The sidecar records `read_order`. Calibrated on 30 runs (PR #43); one
+  known miss (SRR32416523, 13% short).

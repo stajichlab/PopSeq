@@ -39,8 +39,9 @@ Exit 0 on success, 2 when the species is not found or the name is ambiguous,
 in `$SCRATCH`; every download is verified against the archive that served it):
 
 ```bash
-# 30x of the genome size as evenly spaced reads of the verified full run, kept in a directory
-# (--sampling windows is cheaper but biased on runs sorted by genome position; see spec 002)
+# 30x of the genome size, kept in a directory. --sampling auto (the default) scores the read
+# order of the fetched bytes: evenly spaced reads of the full run for a run sorted by genome
+# position, cheaper contiguous windows otherwise (--sampling stride|windows forces one; spec 002)
 uv run popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
 
 # sketch a run without keeping its reads: the hook sees the verified FASTQ, then it is deleted
