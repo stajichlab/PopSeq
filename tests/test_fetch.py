@@ -978,3 +978,48 @@ def test_the_sampling_option_is_validated_and_in_the_result_row_and_the_cli(env,
     with pytest.raises(SystemExit):
         cli.main(["fetch", "--help"])
     assert "--sampling" in capsys.readouterr().out
+
+
+# ------------------------------------------------ first_last_names: constant memory (PopSeq PR #43 finding)
+def write_named_fastq(path, names, read_len=150):
+    seq, qual = ("ACGT" * 60)[:read_len], "I" * read_len
+    with gzip.open(path, "wb", compresslevel=1) as fh:
+        for n in names:
+            fh.write(f"@{n}\n{seq}\n+\n{qual}\n".encode())
+
+
+def test_first_last_names_returns_the_first_and_last_read_without_suffix_or_description(tmp_path):
+    p = str(tmp_path / "a.fq.gz")
+    write_named_fastq(p, ["r1/1 extra words", "r2/1", "r3/1", "r4/1 last one"])
+    assert fx.first_last_names(p) == ("r1", "r4")
+    q = str(tmp_path / "b.fq.gz")
+    write_named_fastq(q, ["only/2"] * 1)  # one record is one record
+    assert fx.first_last_names(q) == ("only", "only")
+
+
+def test_first_last_names_uses_constant_memory_however_large_the_file(tmp_path):
+    """The first version held the whole decompressed file: about 3 to 4 times its size (measured 669 MB for 160 MB)."""
+    import tracemalloc
+
+    p = str(tmp_path / "big.fq.gz")
+    write_named_fastq(p, [f"spot{i}/1" for i in range(300_000)])  # about 100 MB decompressed
+    tracemalloc.start()
+    names = fx.first_last_names(p)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    assert names == ("spot0", "spot299999")
+    assert peak < 5_000_000, f"peak {peak / 1e6:.0f} MB for a file of 100 MB decompressed"
+
+
+def test_first_last_names_refuses_what_it_cannot_read(tmp_path):
+    empty = tmp_path / "empty.fq.gz"
+    with gzip.open(empty, "wb"):
+        pass
+    notgz = tmp_path / "plain.fq.gz"
+    notgz.write_text("@r\nACGT\n+\nIIII\n")
+    short = tmp_path / "short.fq.gz"
+    with gzip.open(short, "wb") as fh:
+        fh.write(b"@r\nACGT\n")
+    for p in (empty, notgz, short, tmp_path / "missing.fq.gz"):
+        with pytest.raises((RuntimeError, OSError)):
+            fx.first_last_names(str(p))

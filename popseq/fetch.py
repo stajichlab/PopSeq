@@ -17,6 +17,7 @@ with fakes (tests/test_fetch.py).
 
 from __future__ import annotations
 
+import collections
 import contextlib
 import csv
 import json
@@ -269,15 +270,26 @@ class Backend:
 
 
 def first_last_names(path: str):
-    p = subprocess.run(
-        routes._decompress_cmd(path), stdin=subprocess.DEVNULL, capture_output=True, check=False
+    """(first read name, last read name) of a gzip FASTQ, in constant memory.
+
+    The file is streamed once and only the first line and the last four are kept. The first version
+    captured the whole decompressed output (and split it into a list of lines), so its peak memory
+    was about 3 to 4 times the decompressed size: a 25x cut of a 120 Mb genome is several GB per
+    mate, which ran the stride step out of an 8 GB limit (PopSeq PR #43 measurement).
+    """
+    p = subprocess.Popen(
+        routes._decompress_cmd(path), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE
     )
-    lines = p.stdout.split(b"\n")
-    while lines and not lines[-1]:
-        lines.pop()
-    if p.returncode != 0 or len(lines) < 4:
+    first, last4, n = None, collections.deque(maxlen=4), 0
+    for line in p.stdout:
+        if first is None:
+            first = line
+        last4.append(line)
+        n += 1
+    p.stdout.close()
+    if p.wait() != 0 or n < 4:
         raise RuntimeError(f"cannot read {path}")
-    return _name(lines[0]), _name(lines[-4])
+    return _name(first.rstrip(b"\n")), _name(last4[0].rstrip(b"\n"))
 
 
 def _name(header: bytes) -> str:
