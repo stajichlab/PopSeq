@@ -39,6 +39,7 @@ COVERAGE_TABLE = os.path.join(ROOT, "catalog", "summary", "coverage.csv.gz")
 INDEX_FILE = os.path.join(ROOT, "catalog", "index.json")
 QC_DIR = os.path.join(ROOT, "catalog", "qc")
 RUN_LABELS_TABLE = os.path.join(ROOT, "catalog", "labels", "run_labels.csv.gz")
+RUN_CURATION_TABLE = os.path.join(ROOT, "catalog", "labels", "run_curation.csv")
 
 SPECIES_FIELDS = ["species_taxid", "species_name", "runs", "isolates", "studies",
                   "est_download_tb", "first_year", "last_year"]
@@ -254,13 +255,27 @@ def _labels() -> dict[str, dict]:
     return _LABELS_CACHE[path]
 
 
+_CURATION_CACHE: dict[str, dict[str, dict]] = {}
+
+
+def _curation() -> dict[str, dict]:
+    """Run-level curator corrections (spec 009, run_curation.csv) by run accession; empty when the file is absent."""
+    path = RUN_CURATION_TABLE
+    if path not in _CURATION_CACHE:
+        _CURATION_CACHE[path] = {r["run_accession"]: r for r in _rows(path)} if os.path.exists(path) else {}
+    return _CURATION_CACHE[path]
+
+
 def effective_species(r: dict, labels: Optional[dict] = None) -> str:
-    """The species name to use for a run: the curator's, else the authority's label, else NCBI's (spec 009).
+    """The species name to use for a run: the curator's run-level correction, else the curator's assembly-level one, else the
+    authority's label, else NCBI's (spec 009).
 
     A label tie keeps every name, ';'-joined, as the labels table does.
     """
-    lab = (labels if labels is not None else _labels()).get(r["run_accession"], {})
-    return lab.get("curated_species") or lab.get("label_species") or r.get("species_name", "")
+    run = r["run_accession"]
+    cur = _curation().get(run, {}).get("curated_species", "")
+    lab = (labels if labels is not None else _labels()).get(run, {})
+    return cur or lab.get("curated_species") or lab.get("label_species") or r.get("species_name", "")
 
 
 def _qc_sources() -> dict[str, set[str]]:

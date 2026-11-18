@@ -45,6 +45,7 @@ def world(tmp_path, monkeypatch):
         {"run_accession": "R_stale", "label_species": "", "curated_species": "Fusarium oxysporum f. sp. relabelled"}])
     rows = [_run("R_ok", "SAMa"), _run("R_bad", "SAMb"), _run("R_mixed", "SAMc"), _run("R_fp", "SAMd"), _run("R_stale", "SAMe"), _run("R_other", "SAMf")]
     monkeypatch.setattr(q, "QC_DIR", str(qc)); monkeypatch.setattr(q, "RUN_LABELS_TABLE", str(labels)); q._LABELS_CACHE.clear()
+    monkeypatch.setattr(q, "RUN_CURATION_TABLE", str(tmp_path / "run_curation.csv")); q._CURATION_CACHE.clear()      # no curation file
     monkeypatch.setattr(q, "resolve_species", lambda name=None, taxid=None: {"species_taxid": str(TX), "species_name": "Fusarium oxysporum"})
     monkeypatch.setattr(q, "_species_runs", lambda tx: iter(rows))
     return rows
@@ -102,3 +103,21 @@ def test_no_qc_dir_and_no_labels_change_nothing(world, monkeypatch, tmp_path):
 
 def test_the_new_fields_are_in_the_run_contract():
     assert q.RUN_FIELDS[-2:] == ["effective_species", "qc_status"]
+
+
+def test_a_run_level_curation_wins_and_makes_an_older_verdict_stale(world, monkeypatch, tmp_path):
+    cur = tmp_path / "run_curation.csv"
+    cur.write_text("run_accession,curated_species,curated_note,curator,date\nR_bad,Aspergillus fumigatus,reads are Aspergillus,owner,2026-11-19\nR_stale,Fusarium oxysporum f. sp. y,newer,owner,2026-11-19\n")
+    monkeypatch.setattr(q, "RUN_CURATION_TABLE", str(cur)); q._CURATION_CACHE.clear()
+    res = q.runs(taxid=TX)
+    by = {r["run_accession"]: r for r in res["runs"]}
+    # R_bad was filed Fusarium oxysporum and flagged mismatch; the curator has corrected the species, so the verdict is stale and skips nothing
+    assert "R_bad" in by and by["R_bad"]["effective_species"] == "Aspergillus fumigatus"
+    assert by["R_bad"]["qc_status"] == "species_match:mismatch:stale"
+    # the run-level curation beats the assembly-level one (R_stale has both)
+    assert by["R_stale"]["effective_species"] == "Fusarium oxysporum f. sp. y"
+    assert res["qc_skipped"] == 0
+
+
+def test_a_missing_curation_file_changes_nothing(world):
+    assert q._curation() == {}
