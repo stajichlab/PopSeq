@@ -1242,6 +1242,21 @@
       "bytes": 1116,
       "sha256": "bcae0599de96ba5904206dc0a9e21d2a3e60dd2e9accb3c951437127fc763385"
     },
+    "run_curation": {
+      "path": "catalog/labels/run_curation.csv",
+      "grain": "one row per run whose species a curator corrected by hand, for runs whose BioSample has no assembly to carry an assembly-level curated_species (spec 009)",
+      "key": "run_accession",
+      "built_by": "hand-edited by the curator; never rewritten by an import",
+      "columns": [
+        "run_accession",
+        "curated_species",
+        "curated_note",
+        "curator",
+        "date"
+      ],
+      "bytes": 394,
+      "sha256": "446190d70e36806efa0696aa6c107516729420c08ff6db3823e27fb4ec4d779b"
+    },
     "qc_sources": {
       "path": "catalog/qc/sources.csv",
       "grain": "one row per run-QC source: tool, method, detection limit, and the status words that make runs and panel skip a run by default (exclude_statuses; spec 008). The findings themselves are one catalog/qc/<species_taxid>.<Genus_species>.qc.csv.gz file per species",
@@ -1272,7 +1287,7 @@
     "ncbi_status": "in_ncbi, ena_only, or not_checked. Only the 113 species with 100 or more isolates were reconciled against NCBI.",
     "fastq_ftp": "';'-joined ENA FTP paths, no scheme. Prepend https://.",
     "fastq_aspera": "';'-joined Aspera paths for the ENA fasp endpoint.",
-    "effective_species": "The species name to use for a run: the curator's (curated_species), else the authority's label (label_species), else the NCBI name (spec 009). Added to runs and panel answers in 1.2.0.",
+    "effective_species": "The species name to use for a run: the curator's (curated_species), else the authority's label (label_species), else the NCBI name (spec 009), after a run-level correction in catalog/labels/run_curation.csv. Added to runs and panel answers in 1.2.0.",
     "qc_status": "';'-joined check:status findings of run QC for the run (spec 008), for example species_match:mismatch; ':stale' is appended when the finding was made for another filed name than the run's effective_species now. Runs whose finding the source lists in exclude_statuses are skipped by runs and panel unless --include-flagged / include_flagged. Added in 1.2.0.",
     "country": "Exactly as the submitter wrote it. Free text. Use country_iso to group.",
     "country_iso": "ISO 3166-1 alpha-2 (XK for Kosovo). Blank unless country_status is ok. Parsed from country by popseq/normalise.py (issue #23).",
