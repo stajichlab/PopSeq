@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-19 (draft): run QC can skip runs by default; the `species_match` check (issue #52)
+
+Owner decisions 2026-11-18 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.
+
+- **Spec 008 rule amended.** The catalog never removes a run; `popseq runs` and `popseq panel` skip, by default, runs whose
+  finding the source lists in `exclude_statuses` (new column of `catalog/qc/sources.csv`), report `qc_skipped`, and
+  `--include-flagged` keeps them. A curated `false_positive` and a stale verdict (the run's effective species changed since)
+  skip nothing. This follows the existing `exclusion` / `--include-excluded` pattern.
+- **New `species_match` check** and importer format `gmg_species_match` (GmG `popsketch species-match`). QC columns added:
+  `filed_name`, `detected_species`, `purity`, `best_share`. Existing QC files are rewritten with the new empty columns on the next import.
+- **New run fields** `effective_species` (curated, else label, else NCBI: spec 009) and `qc_status` (`check:status`, `:stale`).
+- **Not done here:** no import was run on the real catalog; `catalog/index.json`, `catalog/api/` and `SCHEMA_VERSION` are not changed
+  (new run fields and a new QC column set are additive, so a minor bump 1.2.0 would follow at release, but the default skip changes what
+  `runs` returns, which spec 007's table could read as a meaning change: owner's call). Existing panels are not rebuilt.
+
 ## 2026-11-12: release v0.2.0, schema 1.1.0
 
 The first tagged release. Owner decision 2026-11-12. Nothing moved and nothing was removed.

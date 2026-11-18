@@ -48,6 +48,8 @@ def _emit_runs(result, fmt):
     for k, v in result.items():
         if k == "runs":
             continue
+        if k == "qc_skipped_runs":
+            continue            # the count is enough on stderr; --format json carries the accessions
         if k == "caveats":
             # One line each, not a repr of the list.
             for c in v:
@@ -87,6 +89,7 @@ def _filters(a):
         include_excluded=a.include_excluded,
         only_exclusion=a.only_exclusion,
         require_fastq=a.require_fastq,
+        include_flagged=a.include_flagged,
     )
 
 
@@ -199,6 +202,11 @@ def main(argv=None) -> int:
         sp.add_argument("--since", help="first_public on or after, YYYY-MM-DD")
         sp.add_argument(
             "--include-excluded", action="store_true", help="keep mutant/evolved/cross/non-WGS rows"
+        )
+        sp.add_argument(
+            "--include-flagged",
+            action="store_true",
+            help="keep runs that run QC (spec 008) skips by default, e.g. reads of another genus than the filed species",
         )
         sp.add_argument(
             "--only-exclusion",

@@ -6,6 +6,10 @@
         --project MATPredict --tool "GmG 2026.10.5 + screen_reads.py" --check contamination \\
         --method "..." --detection-limit "..." --reference "..." --date 2026-11-08
 
+    uv run python scripts/popseq_qc_import.py --source-id gmg_species_match_2026-11-18 --format gmg_species_match \\
+        --input species_match.tsv --runs cache/fungi_runs_ena_2026-11-06.tsv.gz --project GmG --tool "popsketch species-match 0.3.2" \\
+        --check species_match --method "..." --date 2026-11-18
+
 Each run is resolved through the PopSeq kingdom run table (run -> sample, tax_id) and catalog/taxonomy_species_map.csv.gz
 (tax_id -> species). The rows of --source-id are replaced; rows of other sources and every curated_* column are kept.
 Input may be CSV or TSV, plain, .gz or .zst. Standard library only (zstd through the `zstd` binary).
@@ -24,8 +28,8 @@ from collections import Counter, defaultdict
 
 QC_COLS = ["run_accession", "sample_accession", "tax_id", "species_taxid", "species_name", "source_id", "check", "status",
            "detected_genus", "second_taxon", "second_hashes", "second_share", "deeper_check", "subsample", "strain",
-           "source_note", "curated_status", "curated_note"]
-SOURCE_COLS = ["source_id", "project", "tool", "check", "method", "detection_limit", "reference", "date", "rows", "notes"]
+           "source_note", "filed_name", "detected_species", "purity", "best_share", "curated_status", "curated_note"]
+SOURCE_COLS = ["source_id", "project", "tool", "check", "method", "detection_limit", "reference", "date", "exclude_statuses", "rows", "notes"]
 CURATED = ("curated_status", "curated_note")
 
 # producer format -> {qc column: producer column}; a value that is a constant is written as given when prefixed with "="
@@ -34,6 +38,9 @@ FORMATS = {
                           "second_hashes": "second_hashes", "second_share": "second_share", "deeper_check": "deeper_screen",
                           "strain": "strain", "subsample": "=2000000 spots, 8 windows (6000000 when deeper_check=yes)",
                           "source_note": "species"},
+    # GmG `popsketch species-match` verdict file (spec 008, check species_match): the reads against the species the run is filed under
+    "gmg_species_match": {"run_accession": "id", "status": "status", "detected_genus": "detected_genus", "detected_species": "detected_species",
+                          "filed_name": "filed_name", "purity": "purity", "best_share": "best_share", "source_note": "reason"},
 }
 
 
@@ -80,10 +87,17 @@ def main(argv=None) -> int:
     ap.add_argument("--project", required=True); ap.add_argument("--tool", required=True); ap.add_argument("--check", default="contamination")
     ap.add_argument("--method", default=""); ap.add_argument("--detection-limit", default=""); ap.add_argument("--reference", default="")
     ap.add_argument("--date", required=True); ap.add_argument("--notes", default="")
+    ap.add_argument("--exclude-statuses", default=None,
+                    help="status words of this source that `popseq runs` and `popseq panel` skip by default, ';'-separated (spec 008). "
+                         "For gmg_species_match the default is the statuses with exclude_default=yes in the input file")
     a = ap.parse_args(argv)
 
     fmt = FORMATS[a.format]
-    want = {r[fmt["run_accession"]] for r in read_table(a.input)}
+    table = read_table(a.input)
+    exclude = a.exclude_statuses
+    if exclude is None:
+        exclude = ";".join(sorted({r["status"] for r in table if r.get("exclude_default") == "yes"})) if a.format == "gmg_species_match" else ""
+    want = {r[fmt["run_accession"]] for r in table}
     runinfo = {}
     with open_text(a.runs) as fh:
         first = fh.readline(); delim = "\t" if first.count("\t") > first.count(",") else ","
@@ -93,7 +107,7 @@ def main(argv=None) -> int:
                 runinfo[r["run_accession"]] = (r.get("sample_accession", ""), r.get("tax_id", ""))
     sp = {r["taxid"]: (r["species_taxid"], r["species_name"]) for r in read_table(a.taxonomy)}
     new = defaultdict(list); unresolved = 0
-    for r in read_table(a.input):
+    for r in table:
         run = r[fmt["run_accession"]]
         sample, taxid = runinfo.get(run, ("", ""))
         st, sn = sp.get(taxid, ("", ""))
@@ -126,7 +140,8 @@ def main(argv=None) -> int:
     sp_path = os.path.join(a.qc_dir, "sources.csv")
     srcs = [r for r in (read_table(sp_path) if os.path.exists(sp_path) else []) if r["source_id"] != a.source_id]
     srcs.append({"source_id": a.source_id, "project": a.project, "tool": a.tool, "check": a.check, "method": a.method,
-                 "detection_limit": a.detection_limit, "reference": a.reference, "date": a.date, "rows": "", "notes": a.notes})
+                 "detection_limit": a.detection_limit, "reference": a.reference, "date": a.date, "exclude_statuses": exclude,
+                 "rows": "", "notes": a.notes})
     for s in srcs: s["rows"] = str(total.get(s["source_id"], 0))
     with open(sp_path, "w", newline="") as fh:
         w = csv.DictWriter(fh, SOURCE_COLS, extrasaction="ignore", lineterminator="\n"); w.writeheader(); w.writerows(sorted(srcs, key=lambda s: s["source_id"]))

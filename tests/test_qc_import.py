@@ -69,3 +69,64 @@ def test_reimport_replaces_only_its_own_rows_and_keeps_curated_columns(tmp_path)
     assert [r["source_id"] for r in af] == ["src_b"]                                     # src_a's old row for R3 is gone
     src = {s["source_id"]: s["rows"] for s in csv.DictReader(open(tmp_path / "qc" / "sources.csv"))}
     assert src == {"src_a": "1", "src_b": "3"}
+
+
+# ---- the GmG species_match verdict format (spec 008, check species_match)
+
+def _verdicts(tmp_path):
+    hdr = ["id", "filed_name", "status", "exclude_default", "detected_genus", "detected_species", "best_shared_hashes", "best_share", "purity", "reason"]
+    _write(tmp_path / "verdicts.tsv", hdr,
+           [["R1", "Fusarium oxysporum", "match", "no", "Fusarium", "Fusarium oxysporum", "20000", "0.66", "0.70", ""],
+            ["R2", "Fusarium oxysporum", "mismatch", "yes", "Aspergillus", "Aspergillus fumigatus", "25000", "0.33", "0.002", "reads are Aspergillus, filed Fusarium oxysporum"],
+            ["R3", "Aspergillus fumigatus", "host_dominated", "yes", "", "", "400", "0.01", "0.012", "no confident call"]], "\t")
+
+
+def _species_match(tmp_path, source="gm_a", **extra):
+    args = ["--source-id", source, "--format", "gmg_species_match", "--input", str(tmp_path / "verdicts.tsv"), "--runs", str(tmp_path / "runs.tsv"),
+            "--taxonomy", str(tmp_path / "tax.csv.gz"), "--qc-dir", str(tmp_path / "qc"), "--project", "GmG", "--tool", "popsketch species-match",
+            "--check", "species_match", "--date", "2026-11-18"]
+    for k, v in extra.items():
+        args += [f"--{k.replace('_', '-')}", v]
+    return qi.main(args)
+
+
+def test_species_match_rows_keep_the_evidence_columns_and_the_exclusion_statuses_come_from_the_file(tmp_path):
+    _setup(tmp_path); _verdicts(tmp_path); _species_match(tmp_path)
+    fo = {r["run_accession"]: r for r in _qc(tmp_path / "qc" / "5507.Fusarium_oxysporum.qc.csv.gz")}
+    assert fo["R2"]["status"] == "mismatch" and fo["R2"]["check"] == "species_match"
+    assert (fo["R2"]["filed_name"], fo["R2"]["detected_species"], fo["R2"]["purity"], fo["R2"]["best_share"]) == ("Fusarium oxysporum", "Aspergillus fumigatus", "0.002", "0.33")
+    assert fo["R2"]["source_note"].startswith("reads are Aspergillus")
+    src = list(csv.DictReader(open(tmp_path / "qc" / "sources.csv")))
+    assert src[0]["exclude_statuses"] == "host_dominated;mismatch"        # statuses with exclude_default=yes, sorted
+
+
+def test_exclude_statuses_can_be_set_by_hand_and_other_sources_keep_theirs(tmp_path):
+    _setup(tmp_path); _verdicts(tmp_path)
+    _run(tmp_path, source="screen_a")                                       # the MATPredict screen: no exclude_statuses
+    _species_match(tmp_path, source="gm_a", exclude_statuses="mismatch")
+    src = {r["source_id"]: r for r in csv.DictReader(open(tmp_path / "qc" / "sources.csv"))}
+    assert src["gm_a"]["exclude_statuses"] == "mismatch" and src["screen_a"]["exclude_statuses"] == ""
+
+
+def test_a_species_match_reimport_keeps_the_curators_verdict(tmp_path):
+    _setup(tmp_path); _verdicts(tmp_path); _species_match(tmp_path)
+    path = tmp_path / "qc" / "5507.Fusarium_oxysporum.qc.csv.gz"
+    rows = _qc(path)
+    for r in rows:
+        if r["run_accession"] == "R2": r["curated_status"] = "false_positive"
+    with gzip.open(path, "wt", newline="") as fh:
+        w = csv.DictWriter(fh, qi.QC_COLS, lineterminator="\n"); w.writeheader(); w.writerows(rows)
+    _species_match(tmp_path)
+    assert {r["run_accession"]: r["curated_status"] for r in _qc(path)}["R2"] == "false_positive"
+
+
+def test_old_qc_files_without_the_new_columns_are_read_and_rewritten(tmp_path):
+    _setup(tmp_path); _run(tmp_path, source="screen_a")                      # written with today's columns
+    path = tmp_path / "qc" / "5507.Fusarium_oxysporum.qc.csv.gz"
+    old_cols = [c for c in qi.QC_COLS if c not in ("filed_name", "detected_species", "purity", "best_share")]
+    rows = _qc(path)
+    with gzip.open(path, "wt", newline="") as fh:                           # a file from before this change
+        w = csv.DictWriter(fh, old_cols, extrasaction="ignore", lineterminator="\n"); w.writeheader(); w.writerows(rows)
+    _verdicts(tmp_path); _species_match(tmp_path)
+    got = _qc(path)
+    assert {r["source_id"] for r in got} == {"screen_a", "gm_a"} and "purity" in got[0]

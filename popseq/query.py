@@ -9,6 +9,11 @@ Design notes that matter to a caller:
 * Nothing is deleted from the tables. `exclusion` labels mutant, evolved, cross
   and non-WGS material; the default filters drop it, `include_excluded=True`
   keeps it, and `only_exclusion=...` selects just that material.
+* The same holds for run QC (spec 008): a finding a source marks as excluding by
+  default (`exclude_statuses` in `catalog/qc/sources.csv`) makes `runs` and `panel`
+  skip the run, say how many they skipped, and `include_flagged=True` keeps them.
+  A curator's `curated_status=false_positive` lifts the skip, and a verdict made for
+  another species name than the run's effective one (a relabel since) is stale and skips nothing.
 * Everything returns plain dicts and lists, JSON-serialisable as they stand.
 """
 from __future__ import annotations
@@ -32,6 +37,8 @@ SUMMARY_TABLE = os.path.join(ROOT, "catalog", "kingdom", "fungi_species_summary.
 CLONALITY_TABLE = os.path.join(ROOT, "catalog", "summary", "clonality.csv.gz")
 COVERAGE_TABLE = os.path.join(ROOT, "catalog", "summary", "coverage.csv.gz")
 INDEX_FILE = os.path.join(ROOT, "catalog", "index.json")
+QC_DIR = os.path.join(ROOT, "catalog", "qc")
+RUN_LABELS_TABLE = os.path.join(ROOT, "catalog", "labels", "run_labels.csv.gz")
 
 SPECIES_FIELDS = ["species_taxid", "species_name", "runs", "isolates", "studies",
                   "est_download_tb", "first_year", "last_year"]
@@ -40,7 +47,7 @@ RUN_FIELDS = ["run_accession", "sample_accession", "study_accession",
               "read_count", "base_count", "est_depth_x", "country",
               "country_iso", "country_status", "host", "host_taxid", "host_name",
               "host_status", "collection_date", "first_public", "exclusion", "ncbi_status",
-              "fastq_ftp", "fastq_aspera"]
+              "fastq_ftp", "fastq_aspera", "effective_species", "qc_status"]
 
 CAVEATS = [
     "Every count is a floor. ENA holds runs with an empty tax_id that no taxonomy "
@@ -236,20 +243,97 @@ def _filter(rows: Iterable[dict], *, platform="ILLUMINA", layout="PAIRED",
     return out
 
 
+_LABELS_CACHE: dict[str, dict[str, dict]] = {}
+
+
+def _labels() -> dict[str, dict]:
+    """Run labels (spec 009) by run accession; empty when the table is absent."""
+    path = RUN_LABELS_TABLE
+    if path not in _LABELS_CACHE:
+        _LABELS_CACHE[path] = {r["run_accession"]: r for r in _rows(path)} if os.path.exists(path) else {}
+    return _LABELS_CACHE[path]
+
+
+def effective_species(r: dict, labels: Optional[dict] = None) -> str:
+    """The species name to use for a run: the curator's, else the authority's label, else NCBI's (spec 009).
+
+    A label tie keeps every name, ';'-joined, as the labels table does.
+    """
+    lab = (labels if labels is not None else _labels()).get(r["run_accession"], {})
+    return lab.get("curated_species") or lab.get("label_species") or r.get("species_name", "")
+
+
+def _qc_sources() -> dict[str, set[str]]:
+    """source_id -> the status words that skip a run by default (`exclude_statuses`, ';'-separated)."""
+    path = os.path.join(QC_DIR, "sources.csv")
+    if not os.path.exists(path):
+        return {}
+    return {r["source_id"]: {w for w in (r.get("exclude_statuses") or "").split(";") if w} for r in _rows(path)}
+
+
+def _qc_rows(tx: int) -> dict[str, list[dict]]:
+    """The QC rows of one species by run accession (resolved runs only)."""
+    out: dict[str, list[dict]] = defaultdict(list)
+    if not os.path.isdir(QC_DIR):
+        return out
+    for f in sorted(os.listdir(QC_DIR)):
+        if f.startswith(f"{tx}.") and f.endswith(".qc.csv.gz"):
+            for q in _rows(os.path.join(QC_DIR, f)):
+                out[q["run_accession"]].append(q)
+    return out
+
+
+def _qc_view(qc_rows: list[dict], sources: dict[str, set[str]], eff: str) -> tuple[str, bool]:
+    """(`check:status` words, skipped by default) for one run.
+
+    A row skips the run when its status is one its source lists in `exclude_statuses`, unless a curator marked it
+    `false_positive` or it is stale: it was made for a filed name (`filed_name`) other than the run's effective species now.
+    """
+    words, skip = [], False
+    for q in qc_rows:
+        stale = bool(q.get("filed_name")) and q["filed_name"] != eff
+        words.append(f'{q.get("check", "")}:{q.get("status", "")}' + (":stale" if stale else ""))
+        if (not stale and q.get("curated_status") != "false_positive"
+                and q.get("status", "") in sources.get(q.get("source_id", ""), set())):
+            skip = True
+    return ";".join(words), skip
+
+
+def _apply_qc(hits: list[dict], tx: int, include_flagged: bool) -> tuple[list[dict], list[dict]]:
+    """Annotate each run with `effective_species` and `qc_status`; split off the runs QC skips by default."""
+    qc, sources, labels = _qc_rows(tx), _qc_sources(), _labels()
+    kept, skipped = [], []
+    for r in hits:
+        eff = effective_species(r, labels)
+        words, skip = _qc_view(qc.get(r["run_accession"], []), sources, eff)
+        r = dict(r, effective_species=eff, qc_status=words)
+        (skipped if skip and not include_flagged else kept).append(r)
+    return kept, skipped
+
+
+def _qc_note(n: int) -> str:
+    return f"{n} run(s) that pass the filters are flagged by run QC (spec 008) and skipped; --include-flagged keeps them"
+
+
 def runs(taxid: Optional[int] = None, name: Optional[str] = None,
-         limit: Optional[int] = None, **filters: Any) -> dict:
-    """Every run of one species that passes the filters."""
+         limit: Optional[int] = None, include_flagged: bool = False, **filters: Any) -> dict:
+    """Every run of one species that passes the filters (and, by default, is not skipped by run QC)."""
     row = resolve_species(name=name, taxid=taxid)
     tx = int(row["species_taxid"])
     hits = _filter(_species_runs(tx), **filters)
     if not hits:
         raise EmptyResult(f'{row["species_name"]}: no runs pass the filters')
+    hits, skipped = _apply_qc(hits, tx, include_flagged)
+    if not hits:
+        raise EmptyResult(f'{row["species_name"]}: {_qc_note(len(skipped))}, and nothing else passes')
     if limit:
         hits = hits[:limit]
     return {
         "popseq_schema": SCHEMA_VERSION,
         "species_taxid": tx, "species_name": row["species_name"],
         "selected": len(hits),
+        "qc_skipped": len(skipped),
+        "qc_skipped_runs": [r["run_accession"] for r in skipped],
         "runs": [{k: r.get(k, "") for k in RUN_FIELDS} for r in hits],
         "caveats": CAVEATS,
     }
@@ -257,7 +341,7 @@ def runs(taxid: Optional[int] = None, name: Optional[str] = None,
 
 def panel(taxid: Optional[int] = None, name: Optional[str] = None, n: int = 100,
           max_per_study: Optional[int] = None, seed: int = 0,
-          **filters: Any) -> dict:
+          include_flagged: bool = False, **filters: Any) -> dict:
     """Select n strains: one run per isolate, spread across studies.
 
     Within an isolate the deepest run wins. Across studies the selection takes
@@ -272,6 +356,10 @@ def panel(taxid: Optional[int] = None, name: Optional[str] = None, n: int = 100,
     hits = _filter(_species_runs(tx), **filters)
     if not hits:
         raise EmptyResult(f'{row["species_name"]}: no runs pass the filters')
+    # run QC first, so a skipped run cannot take the place of an isolate's other run or a slot in the panel
+    hits, skipped = _apply_qc(hits, tx, include_flagged)
+    if not hits:
+        raise EmptyResult(f'{row["species_name"]}: {_qc_note(len(skipped))}, and nothing else passes')
 
     best: dict[str, dict] = {}
     for r in hits:
@@ -311,6 +399,8 @@ def panel(taxid: Optional[int] = None, name: Optional[str] = None, n: int = 100,
         "species_taxid": tx, "species_name": row["species_name"],
         "requested": n, "selected": len(picked),
         "runs_passing_filters": len(hits),
+        "qc_skipped": len(skipped),
+        "qc_skipped_runs": [r["run_accession"] for r in skipped],
         "isolates_available": len(best), "studies_available": len(by_study),
         "studies_in_panel": len({r["study_accession"] for r in picked}),
         "selection_rule": ("one run per isolate, deepest wins; then round-robin "

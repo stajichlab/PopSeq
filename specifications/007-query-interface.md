@@ -123,6 +123,12 @@ keeps them. `--only-exclusion mutant` selects *just* that material, because
 TE_fungi_copy wants the mutant and evolved panels that the other two projects
 discard. One table serves both.
 
+**Run QC is the same kind of label** (spec 008). A finding that its source lists in `exclude_statuses` (for example
+`species_match:mismatch`, reads of another genus than the filed species) makes `runs` and `panel` skip the run by default;
+the result says how many were skipped (`qc_skipped`, with the accessions in `--format json`), and `--include-flagged` keeps
+them. `qc_status` on every returned run lists its findings (`check:status`, `:stale` when the filed name has changed since),
+and `effective_species` is the name to use: curated, else label, else NCBI (spec 009).
+
 **The panel rule is explicit and stated in the output.** One run per isolate
 (deepest wins), then round-robin across studies. The metadata block that comes
 back names the rule and says how many studies the panel touched. It does not claim
