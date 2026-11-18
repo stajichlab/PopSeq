@@ -58,6 +58,7 @@ checks the major number keeps working across minor bumps.
 |---|---|---|
 | 1.0.0 | 2026-11-06 | first contract |
 | 1.1.0 | 2026-11-12 | added only. Run table: `country_iso`, `country_name`, `country_status`, `host`, `host_taxid`, `host_name`, `host_status`, `ena_layout`. New tables: `catalog/species_layout.csv.gz`, `catalog/vocab/{country_aliases,host_overrides}.csv`, `catalog/vocab/host_taxa.csv.gz`, `catalog/kingdom/fungi_assemblies.csv.gz`, `catalog/labels/{assembly_labels,run_labels}.csv.gz`, `catalog/labels/sources.csv`. Index key `archive_snapshots`. 15 new BioSample attribute columns |
+| 1.2.0 | 2026-11-19 | added only (owner decision: minor). Run fields `effective_species` and `qc_status` in `runs` and `panel` answers (and the static API panels); flag `--include-flagged` / argument `include_flagged`; JSON keys `qc_skipped` and `qc_skipped_runs`; table `catalog/qc/sources.csv` (index table `qc_sources`) with the column `exclude_statuses`; QC columns `filed_name`, `detected_species`, `purity`, `best_share`. **Behaviour with imported data:** `runs` and `panel` skip, by default, runs whose QC finding the source lists in `exclude_statuses`, as they already skip `exclusion` rows; `--include-flagged` restores them. Until a source with `exclude_statuses` is imported the answers are unchanged |
 
 The package version (`popseq.__version__`, `pyproject.toml`) is separate. It tracks
 the code, and a git tag `v<version>` marks each release.

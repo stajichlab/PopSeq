@@ -18,7 +18,7 @@ from datetime import date
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "catalog", "index.json")
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 SNAPSHOT = "2026-11-06"  # the full snapshot; kept a single date for existing readers
 SNAPSHOTS = [
     {"date": "2026-11-06", "file": "cache/fungi_runs_ena_2026-11-06.tsv.gz",
@@ -113,6 +113,13 @@ TABLES = {
                           grain="one row per label source: authority, release, method, rule",
                           key="source_id",
                           built_by="scripts/popseq_labels_import.py"),
+    "qc_sources": dict(path="catalog/qc/sources.csv",
+                       grain="one row per run-QC source: tool, method, detection limit, and the "
+                             "status words that make runs and panel skip a run by default "
+                             "(exclude_statuses; spec 008). The findings themselves are one "
+                             "catalog/qc/<species_taxid>.<Genus_species>.qc.csv.gz file per species",
+                       key="source_id",
+                       built_by="scripts/popseq_qc_import.py"),
 }
 
 COLUMNS = {
@@ -131,6 +138,14 @@ COLUMNS = {
                    "100 or more isolates were reconciled against NCBI.",
     "fastq_ftp": "';'-joined ENA FTP paths, no scheme. Prepend https://.",
     "fastq_aspera": "';'-joined Aspera paths for the ENA fasp endpoint.",
+    "effective_species": "The species name to use for a run: the curator's (curated_species), "
+                         "else the authority's label (label_species), else the NCBI name "
+                         "(spec 009). Added to runs and panel answers in 1.2.0.",
+    "qc_status": "';'-joined check:status findings of run QC for the run (spec 008), for "
+                 "example species_match:mismatch; ':stale' is appended when the finding was "
+                 "made for another filed name than the run's effective_species now. Runs whose "
+                 "finding the source lists in exclude_statuses are skipped by runs and panel "
+                 "unless --include-flagged / include_flagged. Added in 1.2.0.",
     "country": "Exactly as the submitter wrote it. Free text. Use country_iso to group.",
     "country_iso": "ISO 3166-1 alpha-2 (XK for Kosovo). Blank unless country_status "
                    "is ok. Parsed from country by popseq/normalise.py (issue #23).",

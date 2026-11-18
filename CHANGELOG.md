@@ -1,8 +1,8 @@
 # Changelog
 
-## 2026-11-19 (draft): run QC can skip runs by default; the `species_match` check (issue #52)
+## 2026-11-19: run QC can skip runs by default; the `species_match` check; schema 1.2.0 (issue #52)
 
-Owner decisions 2026-11-18 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.
+Owner decisions 2026-11-18 and 2026-11-19 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.
 
 - **Spec 008 rule amended.** The catalog never removes a run; `popseq runs` and `popseq panel` skip, by default, runs whose
   finding the source lists in `exclude_statuses` (new column of `catalog/qc/sources.csv`), report `qc_skipped`, and
@@ -11,9 +11,8 @@ Owner decisions 2026-11-18 (made in a GmG session; spec 008 is amended to match)
 - **New `species_match` check** and importer format `gmg_species_match` (GmG `popsketch species-match`). QC columns added:
   `filed_name`, `detected_species`, `purity`, `best_share`. Existing QC files are rewritten with the new empty columns on the next import.
 - **New run fields** `effective_species` (curated, else label, else NCBI: spec 009) and `qc_status` (`check:status`, `:stale`).
-- **Not done here:** no import was run on the real catalog; `catalog/index.json`, `catalog/api/` and `SCHEMA_VERSION` are not changed
-  (new run fields and a new QC column set are additive, so a minor bump 1.2.0 would follow at release, but the default skip changes what
-  `runs` returns, which spec 007's table could read as a meaning change: owner's call). Existing panels are not rebuilt.
+- **Schema 1.1.0 to 1.2.0** (owner decision 2026-11-19: minor, because names and meanings of the contract do not change; the default skip applies only to imported QC findings that a source lists in `exclude_statuses`). `SCHEMA_VERSION` in `popseq/query.py` and `scripts/popseq_index.py`; spec 007 has the 1.2.0 row; the index gains the table `qc_sources` and notes for `effective_species` and `qc_status`; `catalog/index.json` and `catalog/api/` are regenerated (`popseq_index.py`, `popseq_api.py`). The package version is not bumped (a release is separate).
+- **Not done here:** no import was run on the catalog (it is its own change); existing panels are not rebuilt.
 
 ## 2026-11-12: release v0.2.0, schema 1.1.0
 
