@@ -1271,11 +1271,12 @@
         "detection_limit",
         "reference",
         "date",
+        "exclude_statuses",
         "rows",
         "notes"
       ],
-      "bytes": 921,
-      "sha256": "6ab64fc279c0d95b06cb7e87442723712a6916c5f2f3fd7280f86cc0d7129f63"
+      "bytes": 2018,
+      "sha256": "0573d9a517eb78d031eca381b71842f8aa50968e81eb6715a032ce3106d92130"
     }
   },
   "column_notes": {
