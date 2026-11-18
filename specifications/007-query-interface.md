@@ -58,6 +58,7 @@ checks the major number keeps working across minor bumps.
 |---|---|---|
 | 1.0.0 | 2026-11-06 | first contract |
 | 1.1.0 | 2026-11-12 | added only. Run table: `country_iso`, `country_name`, `country_status`, `host`, `host_taxid`, `host_name`, `host_status`, `ena_layout`. New tables: `catalog/species_layout.csv.gz`, `catalog/vocab/{country_aliases,host_overrides}.csv`, `catalog/vocab/host_taxa.csv.gz`, `catalog/kingdom/fungi_assemblies.csv.gz`, `catalog/labels/{assembly_labels,run_labels}.csv.gz`, `catalog/labels/sources.csv`. Index key `archive_snapshots`. 15 new BioSample attribute columns |
+| 1.2.0 | 2026-11-19 | added only (owner decision: minor). Run fields `effective_species` and `qc_status` in `runs` and `panel` answers (and the static API panels); flag `--include-flagged` / argument `include_flagged`; JSON keys `qc_skipped` and `qc_skipped_runs`; table `catalog/qc/sources.csv` (index table `qc_sources`) with the column `exclude_statuses`; QC columns `filed_name`, `detected_species`, `purity`, `best_share`. **Behaviour with imported data:** `runs` and `panel` skip, by default, runs whose QC finding the source lists in `exclude_statuses`, as they already skip `exclusion` rows; `--include-flagged` restores them. Until a source with `exclude_statuses` is imported the answers are unchanged |
 
 The package version (`popseq.__version__`, `pyproject.toml`) is separate. It tracks
 the code, and a git tag `v<version>` marks each release.
@@ -122,6 +123,12 @@ non-WGS material. `runs` and `panel` drop those by default and `--include-exclud
 keeps them. `--only-exclusion mutant` selects *just* that material, because
 TE_fungi_copy wants the mutant and evolved panels that the other two projects
 discard. One table serves both.
+
+**Run QC is the same kind of label** (spec 008). A finding that its source lists in `exclude_statuses` (for example
+`species_match:mismatch`, reads of another genus than the filed species) makes `runs` and `panel` skip the run by default;
+the result says how many were skipped (`qc_skipped`, with the accessions in `--format json`), and `--include-flagged` keeps
+them. `qc_status` on every returned run lists its findings (`check:status`, `:stale` when the filed name has changed since),
+and `effective_species` is the name to use: curated, else label, else NCBI (spec 009).
 
 **The panel rule is explicit and stated in the output.** One run per isolate
 (deepest wins), then round-robin across studies. The metadata block that comes
