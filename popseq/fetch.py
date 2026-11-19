@@ -254,8 +254,8 @@ class Backend:
     def window(self, sra: str, start: int, count: int, outdir: str, tmpdir: str):
         return routes.sra_window(sra, start, count, outdir, tmpdir)
 
-    def ena_head(self, url: str, dest: str, n_reads: int, timeout=None):
-        return routes.ena_head(url, dest, n_reads, timeout)
+    def ena_head(self, url: str, dest: str, n_reads: int, timeout=None, stall_seconds=None):
+        return routes.ena_head(url, dest, n_reads, timeout, stall_seconds)
 
     def read_stats(self, path: str):
         return routes.read_stats(path)
@@ -387,7 +387,8 @@ class Options:
     keep: bool = False
     threads: int = 4
     concurrency: int = DEFAULT_CONCURRENCY
-    timeout: Optional[int] = None
+    timeout: Optional[int] = None  # seconds for one transfer command; a cut transfer is resumed
+    stall_seconds: int = routes.STALL_SECONDS  # below 10 kB/s this long: the transfer is cut (#51)
     cache_root: str = CACHE_ROOT
     downloads_csv: str = dl.DOWNLOADS_CSV
 
@@ -916,6 +917,7 @@ class Fetcher:
             return self._ena_head(plan, opt, a, wd, [u for u in (m1u, m2u) if u])
         sub = dict(plan.as_route_plan())
         sub["fastq_ftp"] = ";".join(u for u in (m1u, m2u) if u)
+        sub["stall_seconds"] = opt.stall_seconds
         with self._st("transfer"):
             res = (
                 be.transfer(sub, "ena_https", wd, opt.timeout)
@@ -958,7 +960,9 @@ class Fetcher:
         outs, reads = [], []
         for i, url in enumerate(urls):
             dest = os.path.join(wd, f"head_{plan.run}_{i + 1}.fastq.gz")
-            rc, sec, got, err = be.ena_head("https://" + url, dest, n, opt.timeout)
+            rc, sec, got, err = be.ena_head(
+                "https://" + url, dest, n, opt.timeout, opt.stall_seconds
+            )
             a.seconds_fetch += sec
             if rc != 0:
                 a.outcome, a.error = "transfer_failed", err or f"exit {rc}"
@@ -987,7 +991,9 @@ class Fetcher:
         url = sub["fastq_ftp"]
         dest = os.path.join(wd, os.path.basename(url))
         want = (sub.get("ena_bytes") or {}).get(os.path.basename(url))
-        rc, sec, out, e = routes.curl_resume("https://" + url, dest, want, opt.timeout)
+        rc, sec, out, e = routes.curl_resume(
+            "https://" + url, dest, want, opt.timeout, sub.get("stall_seconds") or routes.STALL_SECONDS
+        )
         files = [dest] if rc == 0 else []
         return {
             "rc": rc,

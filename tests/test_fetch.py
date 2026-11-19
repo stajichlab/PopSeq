@@ -108,7 +108,7 @@ class Fake(Backend):
             write_fastq(os.path.join(outdir, f"{run}_1.fastq.gz"), count, start)
         return 0, 0.1, ""
 
-    def ena_head(self, url, dest, n_reads, timeout=None):
+    def ena_head(self, url, dest, n_reads, timeout=None, stall_seconds=None):
         self.calls.append(("ena_head", url))
         n = min(n_reads, self.ena_reads)
         write_fastq(dest, n)

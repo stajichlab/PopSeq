@@ -237,7 +237,9 @@ def transfer(plan, route, wd, timeout, aspera_key):
                 rc, sec, out, e = _run(cmd, timeout)
             else:
                 want = (plan.get("ena_bytes") or {}).get(os.path.basename(src))
-                rc, sec, out, e = curl_resume("https://" + src, dest, want, timeout)
+                rc, sec, out, e = curl_resume(
+                    "https://" + src, dest, want, timeout, plan.get("stall_seconds") or STALL_SECONDS
+                )
             total += sec
             if rc != 0:
                 err = " ".join((out + e).split())[-500:]
@@ -344,31 +346,36 @@ def sra_window(sra, start, count, outdir, tmpdir=None, timeout=None):
     return rc, sec, " ".join(err.split())[-400:]
 
 
-def ena_head(url, dest, n_reads, timeout=None):
+def ena_head(url, dest, n_reads, timeout=None, stall_seconds=None):
     """The first `n_reads` reads of an ENA gzip FASTQ, streamed and stopped early (tier `head`).
 
     ENA is the only route that can stop early: `curl` is read through a gzip decompressor and
     killed as soon as `n_reads` records are complete. Writes a gzip FASTQ to `dest`.
     Returns `(rc, seconds, reads_written, error)`; `reads_written` is below `n_reads` only if
-    the run is shorter.
+    the run is shorter. A stalled connection (under `STALL_SPEED` bytes/s for `stall_seconds`) makes
+    curl exit 28, which ends the stream; a stream that ends because curl failed is an error, not a
+    short run (issue #51). The stream cannot be resumed, so the caller retries the whole fetch.
     """
     import gzip
     import zlib
 
     t0 = time.monotonic()
     proc = subprocess.Popen(
-        ["curl", "-sS", "-f", "-L", "--retry", "3", url],
+        ["curl", "-sS", "-f", "-L", "--retry", "3", "--connect-timeout", "30",
+         "--speed-limit", str(STALL_SPEED), "--speed-time", str(stall_seconds or STALL_SECONDS),
+         url],  # fmt: skip
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.DEVNULL,
     )
     dec = zlib.decompressobj(16 + zlib.MAX_WBITS)
-    buf, reads, err = b"", 0, ""
+    buf, reads, err, eof = b"", 0, "", False
     try:
         with gzip.open(dest, "wb") as out:
             while reads < n_reads:
                 chunk = proc.stdout.read(1 << 16)
                 if not chunk:
+                    eof = True
                     break
                 try:
                     buf += dec.decompress(chunk)
@@ -385,6 +392,15 @@ def ena_head(url, dest, n_reads, timeout=None):
                 if time.monotonic() - t0 > (timeout or 1e9):
                     err = f"timeout after {timeout}s"
                     break
+        if eof and not err:
+            # the stream ended before n_reads: the run is short, or curl was cut off (stall, reset)
+            try:
+                crc = proc.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                crc = 0
+            if crc != 0:
+                msg = (proc.stderr.read() or b"").decode("utf-8", "replace").strip()
+                err = f"curl exit {crc} after {reads} reads: {msg}"[-500:]
     finally:
         proc.kill()
         proc.wait()

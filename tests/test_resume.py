@@ -154,3 +154,69 @@ def test_a_dead_ena_lookup_is_transient_exit_13_with_a_row_not_a_traceback(env):
     rows = list(csv.DictReader(open(env["opt"].downloads_csv)))
     assert rows[0]["route"] == "ena_https" and rows[0]["outcome"] == "transfer_failed"
     assert rows[0]["error"].startswith("lookup:")
+
+
+# ------------------------------------------------------------------ the head tier and the CLI options
+import gzip  # noqa: E402
+import stat  # noqa: E402
+
+from tests.test_fetch import write_fastq  # noqa: E402
+
+
+def fake_curl(tmp_path, monkeypatch, payload: bytes, exit_code: int):
+    """Put a `curl` first on PATH that prints `payload`, records its arguments and exits `exit_code`."""
+    data = tmp_path / "payload.bin"
+    data.write_bytes(payload)
+    args = tmp_path / "args.txt"
+    exe = tmp_path / "bin" / "curl"
+    exe.parent.mkdir()
+    exe.write_text(f'#!/bin/bash\necho "$@" > {args}\ncat {data}\nexit {exit_code}\n')
+    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("PATH", f"{exe.parent}:{os.environ['PATH']}")
+    return args
+
+
+def gz_reads(tmp_path, n):
+    p = tmp_path / "src.fastq.gz"
+    write_fastq(str(p), n)
+    return p.read_bytes()
+
+
+def test_ena_head_has_a_stall_cutoff_on_its_curl(tmp_path, monkeypatch):
+    args = fake_curl(tmp_path, monkeypatch, gz_reads(tmp_path, 20), 0)
+    rc, _s, reads, err = routes.ena_head(
+        "https://h/f", str(tmp_path / "o.gz"), 10, stall_seconds=45
+    )
+    a = args.read_text()
+    assert rc == 0 and reads == 10 and err == ""
+    assert "--speed-time 45" in a and "--speed-limit" in a and "--connect-timeout" in a
+
+
+def test_a_stream_cut_by_curl_is_an_error_not_a_short_run(tmp_path, monkeypatch):
+    whole = gz_reads(tmp_path, 200)
+    fake_curl(tmp_path, monkeypatch, whole[: len(whole) // 2], 28)  # stalled part way
+    rc, _s, reads, err = routes.ena_head("https://h/f", str(tmp_path / "o.gz"), 1000)
+    assert rc != 0 and "curl exit 28" in err
+
+
+def test_a_run_shorter_than_n_with_a_clean_curl_exit_is_still_a_short_run(tmp_path, monkeypatch):
+    fake_curl(tmp_path, monkeypatch, gz_reads(tmp_path, 30), 0)
+    rc, _s, reads, err = routes.ena_head("https://h/f", str(tmp_path / "o.gz"), 1000)
+    assert rc == 0 and reads == 30 and err == ""
+
+
+def test_the_stall_setting_reaches_the_resumable_transfer(tmp_path, monkeypatch):
+    dest = str(tmp_path / "f.fastq.gz")
+    run, calls = fake_run([(0, 10)], dest)
+    monkeypatch.setattr(routes, "_run", run)
+    routes.curl_resume("https://h/f", dest, 10 + 1, stall_seconds=33, sleep=lambda s: None)
+    assert "33" in calls[0] and "--speed-time" in calls[0]
+
+
+def test_fetch_cli_has_timeout_and_stall_seconds(capsys):
+    from popseq import cli
+
+    with pytest.raises(SystemExit):
+        cli.main(["fetch", "--help"])
+    out = capsys.readouterr().out
+    assert "--timeout" in out and "--stall-seconds" in out
