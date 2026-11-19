@@ -124,6 +124,8 @@ def _cmd_fetch(a) -> int:
             keep=a.keep,
             threads=a.threads,
             concurrency=a.concurrency,
+            timeout=a.timeout,
+            stall_seconds=a.stall_seconds,
         )
         crows = fx.catalog_rows(runs)
         fetcher = fx.Fetcher()
@@ -301,6 +303,21 @@ def main(argv=None) -> int:
         "of its largest child and, on Linux, of the whole process tree",
     )
     f.add_argument("--threads", type=int, default=4)
+    f.add_argument(
+        "--timeout",
+        type=int,
+        default=None,
+        metavar="SECONDS",
+        help="limit for one transfer command (default: none). A transfer cut by it is resumed, "
+        "not restarted; five attempts in a row that add no bytes end it as transient (exit 13)",
+    )
+    f.add_argument(
+        "--stall-seconds",
+        type=int,
+        default=120,
+        metavar="SECONDS",
+        help="a transfer below 10 kB/s for this long is cut and resumed (default 120; issue #51)",
+    )
     f.add_argument(
         "--concurrency",
         type=int,
