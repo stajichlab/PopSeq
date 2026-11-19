@@ -118,6 +118,7 @@ class Plan:
             "fastq_aspera": self.fastq_aspera,
             "ncbi_spots": self.ncbi_spots,
             "ncbi_spots_with_mates": self.ncbi_mates,
+            "ena_bytes": dict(self.ena_bytes),
         }
 
 
@@ -463,7 +464,14 @@ class Fetcher:
             with self._st("plan"):
                 if crow is None:
                     crow = catalog_rows([run]).get(run)
-                plan = build_plan(run, crow, lookups=self.lookups, plan_row=plan_row)
+                try:
+                    plan = build_plan(run, crow, lookups=self.lookups, plan_row=plan_row)
+                except lookup.LookupFailed as exc:
+                    # an archive did not answer: a retry can fix it, so exit 13 with a row, not a traceback
+                    # downloads.csv routes are an enum (spec 002): the portal that failed is ENA's
+                    a = Attempt("ena_https", "transfer_failed", error=f"lookup: {exc}"[:400])
+                    self._log(Plan(run=run), opt, a)
+                    return self._failure(Plan(run=run), opt, [a], t0)
         if opt.tier == "coverage" and not (opt.genome_mb or plan.genome_mb):
             raise Usage(f"{run}: no genome size for species taxid {plan.taxid}; give --genome-mb")
 
@@ -978,9 +986,8 @@ class Fetcher:
         """routes.transfer keeps only `_1`/`_2` files; a single-end run is one bare file."""
         url = sub["fastq_ftp"]
         dest = os.path.join(wd, os.path.basename(url))
-        rc, sec, out, e = routes._run(
-            ["curl", "-sS", "-f", "-L", "--retry", "3", "-o", dest, "https://" + url], opt.timeout
-        )
+        want = (sub.get("ena_bytes") or {}).get(os.path.basename(url))
+        rc, sec, out, e = routes.curl_resume("https://" + url, dest, want, opt.timeout)
         files = [dest] if rc == 0 else []
         return {
             "rc": rc,
