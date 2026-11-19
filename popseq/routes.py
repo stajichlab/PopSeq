@@ -41,6 +41,69 @@ def _run(cmd, timeout=None, **kw):
     return rc, time.monotonic() - t0, out, err
 
 
+# --- resumable curl (issue #51) -------------------------------------------------------------
+#
+# `curl --retry` does not retry a transfer that stops part way (curl exit 18, "transfer closed with N
+# bytes remaining"), and without `-C -` any retry would start the file again. A stalled connection also
+# has no timeout by default. `--retry-all-errors` would help but needs curl 7.71 (the HPCC has 7.61), so
+# the retry loop is here.
+STALL_SECONDS = 120  # a transfer below 10 kB/s for this long is cut and resumed
+STALL_SPEED = 10_000
+MAX_NO_PROGRESS = 5  # consecutive attempts that added no bytes before the transfer is given up
+# curl exits that mean "the connection broke", not "the URL is wrong": resolve (6), connect (7),
+# partial file (18), timeout (28), TLS (35), nothing received (52), send/recv (55, 56), plus our 124.
+RESUMABLE_RC = {6, 7, 18, 28, 35, 52, 55, 56, 124}
+
+
+def curl_resume(
+    url,
+    dest,
+    expected=None,
+    timeout=None,
+    stall_seconds=STALL_SECONDS,
+    max_no_progress=MAX_NO_PROGRESS,
+    sleep=time.sleep,
+):
+    """Download `url` to `dest`, resuming (`-C -`) after a broken or stalled connection.
+
+    Returns (rc, seconds, out, err) like `_run`. `expected` is the byte size ENA reports; with it a
+    finished file is recognised without asking the server (a range request on a complete file is an
+    error for some servers). Gives up after `max_no_progress` attempts in a row that added no bytes,
+    or at once on an error that is not a broken connection (HTTP 404, 403 and so on).
+    """
+    t0 = time.monotonic()
+    size = lambda: os.path.getsize(dest) if os.path.exists(dest) else 0  # noqa: E731
+    cmd = [
+        "curl", "-sS", "-f", "-L", "-C", "-", "--connect-timeout", "30",
+        "--speed-limit", str(STALL_SPEED), "--speed-time", str(stall_seconds),
+        "-o", dest, url,
+    ]  # fmt: skip
+    stuck, last, notes = 0, size(), []
+    while True:
+        if expected and size() == expected:
+            return 0, time.monotonic() - t0, "", ""
+        rc, _sec, out, err = _run(cmd, timeout)
+        now = size()
+        if rc == 0:
+            return 0, time.monotonic() - t0, out, err
+        if expected and now == expected:  # 33 or 22 on a range request for a complete file
+            return 0, time.monotonic() - t0, out, err
+        if rc == 33 or (expected and now > expected):
+            # the server will not resume, or the partial file is wrong: start again, once per loop
+            if os.path.exists(dest):
+                os.remove(dest)
+            now = 0
+        elif rc not in RESUMABLE_RC:
+            return rc, time.monotonic() - t0, out, err
+        notes.append(f"curl {rc} at {now} bytes")
+        stuck = 0 if now > last else stuck + 1
+        last = now
+        if stuck >= max_no_progress:
+            msg = f"gave up after {len(notes)} attempts ({'; '.join(notes[-3:])}): {err.strip()}"
+            return rc, time.monotonic() - t0, out, msg[-500:]
+        sleep(min(5 * 2 ** (stuck), 60))
+
+
 def _version(cmd):
     try:
         p = subprocess.run(
@@ -171,9 +234,10 @@ def transfer(plan, route, wd, timeout, aspera_key):
                     f"era-fasp@{host}:{path}",
                     wd,
                 ]
+                rc, sec, out, e = _run(cmd, timeout)
             else:
-                cmd = ["curl", "-sS", "-f", "-L", "--retry", "3", "-o", dest, "https://" + src]
-            rc, sec, out, e = _run(cmd, timeout)
+                want = (plan.get("ena_bytes") or {}).get(os.path.basename(src))
+                rc, sec, out, e = curl_resume("https://" + src, dest, want, timeout)
             total += sec
             if rc != 0:
                 err = " ".join((out + e).split())[-500:]
