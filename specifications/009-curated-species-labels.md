@@ -123,3 +123,13 @@ UNMEASURED: how many labels change between FusariumID releases.
 ## Changes
 
 - 2026-11-09: first draft, with the assembly table and the FusariumID labels from GmG bench F1 as the first source.
+
+## Run-level curation (added 2026-11-19)
+
+`curated_species` above is keyed by assembly and reaches a run only through a shared BioSample, so a run whose BioSample has no assembly
+could not be corrected (found with SRR34066269, filed *Cryptococcus neoformans*, reads of *C. deneoformans*, PopSeq #52). `catalog/labels/run_curation.csv` holds
+such corrections by hand: `run_accession, curated_species, curated_note, curator, date`. It is curator-only and **no import rewrites it**
+(`popseq_labels_import.py` rebuilds `run_labels.csv.gz` from the assembly labels and does not touch this file). `popseq.effective_species`
+takes a run's `run_curation` name first, then the assembly-level `curated_species`, then `label_species`, then the NCBI name. A correction here
+makes a run-QC finding made for the old filed name stale (spec 008 rule 5). Every row's `curated_note` names its evidence.
+

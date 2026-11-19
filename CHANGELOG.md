@@ -12,6 +12,7 @@ Owner decisions 2026-11-18 and 2026-11-19 (made in a GmG session; spec 008 is am
   `filed_name`, `detected_species`, `purity`, `best_share`. Existing QC files are rewritten with the new empty columns on the next import.
 - **New run fields** `effective_species` (curated, else label, else NCBI: spec 009) and `qc_status` (`check:status`, `:stale`).
 - **Schema 1.1.0 to 1.2.0** (owner decision 2026-11-19: minor, because names and meanings of the contract do not change; the default skip applies only to imported QC findings that a source lists in `exclude_statuses`). `SCHEMA_VERSION` in `popseq/query.py` and `scripts/popseq_index.py`; spec 007 has the 1.2.0 row; the index gains the table `qc_sources` and notes for `effective_species` and `qc_status`; `catalog/index.json` and `catalog/api/` are regenerated (`popseq_index.py`, `popseq_api.py`). The package version is not bumped (a release is separate).
+- **Run-level curation** (owner decision 2026-11-19: apply the relabel). `catalog/labels/run_curation.csv` (new, hand-edited, no import rewrites it; index table `run_curation`) holds corrections for runs whose BioSample has no assembly; `effective_species` reads it first. One row: SRR34066269 -> *Cryptococcus deneoformans*. SRR34066268 is not corrected (no clear parent). Spec 009 has the new section.
 - **Not done here:** no import was run on the catalog (it is its own change); existing panels are not rebuilt.
 
 ## 2026-11-12: release v0.2.0, schema 1.1.0

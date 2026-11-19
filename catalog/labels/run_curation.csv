@@ -1,0 +1,2 @@
+run_accession,curated_species,curated_note,curator,date
+SRR34066269,Cryptococcus deneoformans,"PopSeq#52: GmG species_match calls C. deneoformans (94% of the hashes in the genus); 96.6% of reads map to JEC21 and 58.5% to H99 (clean C. neoformans controls: 97-98% to H99, 58-60% to JEC21); strain CBS7748, study PRJNA1279655; evidence in GmG analysis/popgen_sra/species_match/",owner,2026-11-19

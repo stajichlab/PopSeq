@@ -1,5 +1,5 @@
 {
- "popseq_schema": "1.1.0",
+ "popseq_schema": "1.2.0",
  "species_taxid": 122368,
  "species_name": "Cercospora beticola",
  "summary": {
@@ -58,7 +58,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 746,
+  "isolates_available": 744,
   "studies_in_panel": 6,
   "runs": [
    {
