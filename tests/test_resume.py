@@ -77,12 +77,12 @@ def test_a_complete_file_is_not_requested_again(tmp_path, monkeypatch):
     assert routes.curl_resume("https://h/f", dest, 1000)[0] == 0
 
 
-def test_a_range_error_on_a_file_that_turns_out_complete_is_success(tmp_path, monkeypatch):
+def test_a_range_error_on_a_file_that_is_already_complete_is_success(tmp_path, monkeypatch):
     dest = str(tmp_path / "f.fastq.gz")
-    run, calls = fake_run([(18, 1000), (33, 1000)], dest)
+    run, calls = fake_run([(33, 1000)], dest)
     monkeypatch.setattr(routes, "_run", run)
-    rc, *_ = routes.curl_resume("https://h/f", dest, 1001, sleep=lambda s: None)
-    assert rc != 0 or os.path.getsize(dest) == 1000  # 1001 expected: not complete, so not success
+    rc, *_ = routes.curl_resume("https://h/f", dest, 1000, sleep=lambda s: None)
+    assert rc == 0 and len(calls) == 1
 
 
 def test_a_server_that_will_not_resume_restarts_the_file(tmp_path, monkeypatch):
@@ -152,4 +152,5 @@ def test_a_dead_ena_lookup_is_transient_exit_13_with_a_row_not_a_traceback(env):
     assert (r.outcome, r.exit_code) == ("transient", 13)
     assert "504" in r.message
     rows = list(csv.DictReader(open(env["opt"].downloads_csv)))
-    assert rows[0]["route"] == "lookup" and rows[0]["outcome"] == "transfer_failed"
+    assert rows[0]["route"] == "ena_https" and rows[0]["outcome"] == "transfer_failed"
+    assert rows[0]["error"].startswith("lookup:")

@@ -468,7 +468,8 @@ class Fetcher:
                     plan = build_plan(run, crow, lookups=self.lookups, plan_row=plan_row)
                 except lookup.LookupFailed as exc:
                     # an archive did not answer: a retry can fix it, so exit 13 with a row, not a traceback
-                    a = Attempt("lookup", "transfer_failed", error=str(exc)[:400])
+                    # downloads.csv routes are an enum (spec 002): the portal that failed is ENA's
+                    a = Attempt("ena_https", "transfer_failed", error=f"lookup: {exc}"[:400])
                     self._log(Plan(run=run), opt, a)
                     return self._failure(Plan(run=run), opt, [a], t0)
         if opt.tier == "coverage" and not (opt.genome_mb or plan.genome_mb):
