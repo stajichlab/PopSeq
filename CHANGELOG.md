@@ -1,14 +1,13 @@
 # Changelog
 
-## 2026-11-21: panel `metadata.csv` gains `read_state` (issue #5)
+## Unreleased: panel `metadata.csv` gains `read_state` (issue #5)
 
 - **New column `read_state`** in the `metadata.csv` that `scripts/popseq_inventory.py` writes: `raw`, `trimmed` or
   `unknown`, per sample. `trimmed` when every file's basename carries `_val_`, `_trimmed` or `.trim.`; anything else
   is `unknown`. The converter never writes `raw`. Spec 003 has the definition; spec 005 section 6 points to it.
 - The converter's per-panel summary line adds `read_state_trimmed=` and `read_state_unknown=` counts.
-- **No schema version bump.** `SCHEMA_VERSION` versions the catalog query contract (spec 007), and panel `metadata.csv`
-  from the inventory converter is not a table in `catalog/index.json`. Whether a spec 003 column counts is left to the
-  owner; a bump would be minor (a column added).
+- `read_state` is an additive inventory column of the panel `metadata.csv`; it is not part of the catalog query contract and
+  makes no schema version change.
 - **Not done here:** no panel was regenerated; `popseq_panel_set.py` panels (archive URLs) do not carry the column yet.
 
 ## 2026-11-19: run QC can skip runs by default; the `species_match` check; schema 1.2.0 (issue #52)
