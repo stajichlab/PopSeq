@@ -1,0 +1,2 @@
+run_accession,archive_bytes,archive_note
+SRR065689,51460000000,"the .sra object at the SRA AWS bucket, 51.46 GB as GmG P6 saw it (GB taken as 10^9 bytes; whether it was GiB is UNMEASURED and does not change the call) (47 min transfer); about 1 KB per spot, 15 times the 0.4 bytes per base of the other runs of this species, of which three were profiled at 0.7-3.5 GB; Illumina Genome Analyzer II, first public 2010-09-16; cause not established (PopSeq#49)"

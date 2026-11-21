@@ -1,6 +1,6 @@
 {
   "popseq_schema": "1.2.0",
-  "generated": "2026-11-18",
+  "generated": "2026-11-21",
   "archive_snapshot": "2026-11-06",
   "archive_snapshots": [
     {
@@ -1275,8 +1275,8 @@
         "rows",
         "notes"
       ],
-      "bytes": 2018,
-      "sha256": "0573d9a517eb78d031eca381b71842f8aa50968e81eb6715a032ce3106d92130"
+      "bytes": 5217,
+      "sha256": "e63c86762e006f6c1f3703ddb0f1569351390634af90fee976a536bed9e81140"
     }
   },
   "column_notes": {

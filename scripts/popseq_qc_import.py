@@ -41,6 +41,11 @@ FORMATS = {
     # GmG `popsketch species-match` verdict file (spec 008, check species_match): the reads against the species the run is filed under
     "gmg_species_match": {"run_accession": "id", "status": "status", "detected_genus": "detected_genus", "detected_species": "detected_species",
                           "filed_name": "filed_name", "purity": "purity", "best_share": "best_share", "source_note": "reason"},
+    # a findings table in the QC column names: a hand-entered table (catalog/qc/findings/<source_id>.csv) or the output of
+    # scripts/popseq_qc_checks.py (checks evaluated from catalog data). Columns absent from the table are written empty.
+    "popseq_findings": {"run_accession": "run_accession", "status": "status", "detected_genus": "detected_genus",
+                        "detected_species": "detected_species", "filed_name": "filed_name", "subsample": "subsample",
+                        "strain": "strain", "source_note": "source_note"},
 }
 
 
@@ -72,9 +77,19 @@ def load_qc(path: str) -> list[dict]:
 
 
 def write_qc(path: str, rows: list[dict]) -> None:
+    """Write one species file, sorted. A file whose content would not change is left as it is (no byte churn in git);
+    a written file has a gzip header with no name and mtime 0, so the same rows give the same bytes."""
     rows = sorted(rows, key=lambda r: (r["run_accession"], r["source_id"], r["check"]))
-    with gzip.open(path, "wt", newline="") as fh:     # gzip header without a name and with mtime 0 would be nicer, but readers do not care
-        w = csv.DictWriter(fh, QC_COLS, extrasaction="ignore", lineterminator="\n"); w.writeheader(); w.writerows(rows)
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, QC_COLS, extrasaction="ignore", lineterminator="\n"); w.writeheader()
+    w.writerows([{k: r.get(k, "") for k in QC_COLS} for r in rows])
+    text = buf.getvalue()
+    if os.path.exists(path):
+        with gzip.open(path, "rt", newline="") as fh:
+            if fh.read() == text:
+                return
+    with open(path, "wb") as raw, gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as gz:
+        gz.write(text.encode())
 
 
 def main(argv=None) -> int:
