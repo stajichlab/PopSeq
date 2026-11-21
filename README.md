@@ -30,6 +30,9 @@ uv run popseq species --min-isolates 100 --format tsv
 uv run popseq panel --taxid 746128 --n 100 --min-depth 30 --format samples > samples.csv
 
 uv run popseq describe --taxid 1047171
+
+# runs whose taxid gives no species (a genus, 'Fungi', several taxids): in no species row
+uv run popseq unplaced --placement above_species --rank genus
 ```
 
 Exit 0 on success, 2 when the species is not found or the name is ambiguous,
