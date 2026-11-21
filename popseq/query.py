@@ -27,7 +27,7 @@ import re
 from collections import defaultdict
 from typing import Any, Iterable, Iterator, Optional
 
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
 
 ROOT = os.environ.get("POPSEQ_ROOT") or os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
@@ -36,6 +36,7 @@ RUNS_TABLE = os.path.join(ROOT, "catalog", "runs", "fungi_all_runs.csv.gz")
 SUMMARY_TABLE = os.path.join(ROOT, "catalog", "kingdom", "fungi_species_summary.csv.gz")
 CLONALITY_TABLE = os.path.join(ROOT, "catalog", "summary", "clonality.csv.gz")
 COVERAGE_TABLE = os.path.join(ROOT, "catalog", "summary", "coverage.csv.gz")
+UNPLACED_TABLE = os.path.join(ROOT, "catalog", "summary", "unplaced_runs.csv.gz")
 INDEX_FILE = os.path.join(ROOT, "catalog", "index.json")
 QC_DIR = os.path.join(ROOT, "catalog", "qc")
 RUN_LABELS_TABLE = os.path.join(ROOT, "catalog", "labels", "run_labels.csv.gz")
@@ -43,6 +44,9 @@ RUN_CURATION_TABLE = os.path.join(ROOT, "catalog", "labels", "run_curation.csv")
 
 SPECIES_FIELDS = ["species_taxid", "species_name", "runs", "isolates", "studies",
                   "est_download_tb", "first_year", "last_year"]
+UNPLACED_FIELDS = ["run_accession", "study_accession", "sample_accession", "scientific_name",
+                   "tax_id", "instrument_platform", "first_public", "placement",
+                   "resolved_rank", "ranked_taxid", "ranked_name", "part_species_taxids"]
 RUN_FIELDS = ["run_accession", "sample_accession", "study_accession",
               "species_taxid", "species_name", "strain", "library_layout", "ena_layout",
               "read_count", "base_count", "est_depth_x", "country",
@@ -102,6 +106,35 @@ def species(min_isolates: int = 1, contains: Optional[str] = None,
     if limit:
         out = out[:limit]
     return [{k: r[k] for k in SPECIES_FIELDS} for r in out]
+
+
+def unplaced(placement: Optional[str] = None, rank: Optional[str] = None,
+             contains: Optional[str] = None, limit: Optional[int] = None) -> list[dict]:
+    """Runs with no species taxid, which `species`, `runs` and `panel` cannot reach.
+
+    One row per run whose tax_id resolves above species rank, to several taxids, or
+    to nothing (issue #22). `placement` and `rank` filter on the columns of the same
+    name; `contains` matches the deposited scientific_name, case-insensitively. These
+    runs are listed, never rolled up to an ancestor: a run filed as a genus is not
+    evidence for any one species of it.
+    """
+    out = list(_rows(UNPLACED_TABLE))
+    if placement:
+        out = [r for r in out if r["placement"] == placement]
+    if rank:
+        out = [r for r in out if r["resolved_rank"] == rank]
+    if contains:
+        out = [r for r in out if contains.lower() in r["scientific_name"].lower()]
+    if limit:
+        out = out[:limit]
+    return [{k: r.get(k, "") for k in UNPLACED_FIELDS} for r in out]
+
+
+def unplaced_count() -> int:
+    """How many runs have no species taxid; 0 when the table is absent."""
+    if not os.path.exists(UNPLACED_TABLE):
+        return 0
+    return sum(1 for _ in _rows(UNPLACED_TABLE))
 
 
 def resolve_species(name: Optional[str] = None,
