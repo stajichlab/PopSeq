@@ -25,11 +25,12 @@ uv run python scripts/popseq_qc_import.py --source-id matpredict_afum_read_sets_
     --method "runs of the MATPredict A. fumigatus store with too few reads for a genome-wide call (hundreds to 136k reads per run); study titles suggest targeted sequencing registered as library_strategy WGS" \
     --detection-limit "the A. fumigatus store only (one run per BioSample); found by MATPredict and transcribed from the issue, not re-measured by PopSeq" \
     --reference "$MP_REF" --date 2026-11-10 --exclude-statuses "tiny_read_set" \
-    --notes "transcribed from PopSeq#37 (54 runs of 5 studies); 53 of them are also below_1x in popseq_low_coverage, SRR33550994 is 1.016x there"
+    --notes "transcribed from PopSeq#37 (54 runs of 5 studies); 53 of them are also below_1x in popseq_low_coverage (run list of the issues), SRR33550994 is 1.016x there"
 
-# 3. Issue #37: base_count / genome size below 1x, for every run of a species with a genome size.
-uv run python scripts/popseq_qc_checks.py low-coverage --runs "$RUNS" --below 1 --date 2026-11-21 \
-    --notes "evaluated by PopSeq from catalog data (stajichlab/PopSeq#37); est_depth_x and the runs/panel --min-depth filter use the same ratio"
+# 3. Issues #37 and #49: base_count / genome size below 1x, for the runs those issues name ONLY (owner decision: no catalog-wide
+#    pass; add --catalog-wide instead of --run-list for one, which is not committed).
+uv run python scripts/popseq_qc_checks.py low-coverage --runs "$RUNS" --run-list catalog/qc/findings/issue_named_runs.csv --below 1 --date 2026-11-21 \
+    --notes "evaluated by PopSeq from catalog data for the runs named in stajichlab/PopSeq#37 and #49 only (no catalog-wide pass); est_depth_x and the runs/panel --min-depth filter use the same ratio"
 
 # 4. Issue #49: archive bytes per base. The threshold 2.0 is a placeholder; only SRR065689 is examined (no catalog-wide archive sizes).
 uv run python scripts/popseq_qc_checks.py archive-size --sizes catalog/qc/findings/archive_sizes.csv \

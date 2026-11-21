@@ -4,8 +4,9 @@
 Each subcommand writes a findings table (format `popseq_findings`) and imports it with scripts/popseq_qc_import.py, so the
 rules of spec 008 hold: the source replaces only its own rows and curated_* columns survive.
 
-    # base_count / genome size below a threshold (issue #37). Genome sizes from catalog/genome_sizes.csv.
-    uv run python scripts/popseq_qc_checks.py low-coverage --date 2026-11-21
+    # base_count / genome size below a threshold, for the runs named in an issue (#37, #49). Genome sizes from
+    # catalog/genome_sizes.csv. The run list is required; the check does not sweep the catalog unless --catalog-wide is given.
+    uv run python scripts/popseq_qc_checks.py low-coverage --run-list catalog/qc/findings/issue_named_runs.csv --date 2026-11-21
 
     # archive bytes per base above a threshold (issue #49). The archive sizes are measured by a consumer and kept in a table
     # (run_accession, archive_bytes, archive_note); the catalog does not hold archive sizes.
@@ -53,12 +54,25 @@ def iter_runs(path: str):
         yield from csv.DictReader(fh, fieldnames=cols, delimiter=delim)
 
 
-def low_coverage(runs: str, sizes: dict[str, float], below: float) -> tuple[list[dict], dict]:
-    """Runs whose base_count / genome size is below `below`. A run with no genome size for its species, or no positive
+def read_run_list(path: str) -> set[str]:
+    """Run accessions of an explicit list: a table with a run_accession column, or one accession per line."""
+    with qi.open_text(path) as fh:
+        lines = [l.strip() for l in fh if l.strip() and not l.startswith("#")]
+    if lines and "run_accession" in lines[0]:
+        first = lines[0]; delim = "\t" if first.count("\t") > first.count(",") else ","
+        return {r["run_accession"].strip() for r in csv.DictReader(lines, delimiter=delim) if r.get("run_accession", "").strip()}
+    return {l.split(",")[0].split("\t")[0].strip() for l in lines}
+
+
+def low_coverage(runs, sizes: dict[str, float], below: float, only: set[str] | None = None) -> tuple[list[dict], dict]:
+    """Runs whose base_count / genome size is below `below`. With `only` (the runs an issue names), no other run is
+    examined or flagged; `only=None` is the catalog-wide pass. A run with no genome size for its species, or no positive
     base_count, is not examined (counted, not flagged)."""
     status = f"below_{_fmt_x(below)}x"
     rows, n = [], {"examined": 0, "no_genome_size": 0, "no_base_count": 0, "flagged": 0}
     for r in runs:
+        if only is not None and r["run_accession"] not in only:
+            continue
         g = sizes.get(r.get("species_taxid", ""))
         if not g:
             n["no_genome_size"] += 1; continue
@@ -129,6 +143,11 @@ def main(argv=None) -> int:
         p.add_argument("--no-exclude", action="store_true", help="record the findings without making runs and panel skip them")
     lc = sub.choices["low-coverage"]
     lc.add_argument("--genome-sizes", default="catalog/genome_sizes.csv")
+    grp = lc.add_mutually_exclusive_group(required=True)
+    grp.add_argument("--run-list", help="examine only the runs in this file (a table with run_accession, or one accession per line): "
+                     "the runs named in the linked issues. The default way to run the check")
+    grp.add_argument("--catalog-wide", action="store_true", help="opt in: examine every run of the catalog (not done by default; "
+                     "the owner limited below_1x to the runs named in issues #37 and #49)")
     lc.add_argument("--below", type=float, default=1.0, help="flag runs below this depth (x); default 1")
     lc.add_argument("--source-id", default="popseq_low_coverage"); lc.add_argument("--project", default="PopSeq")
     asz = sub.choices["archive-size"]
@@ -138,12 +157,18 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     if a.cmd == "low-coverage":
-        rows, n = low_coverage(iter_runs(a.runs), genome_sizes(a.genome_sizes), a.below)
+        only = None if a.catalog_wide else read_run_list(a.run_list)
+        rows, n = low_coverage(iter_runs(a.runs), genome_sizes(a.genome_sizes), a.below, only)
+        if only is not None:
+            n["listed"] = len(only)
         status = f"below_{_fmt_x(a.below)}x"
         method = (f"depth = base_count (run table) / genome_mb (catalog/genome_sizes.csv) of the run's species_taxid; "
                   f"{status} when depth < {_fmt_x(a.below)}")
+        scope = "every run of the catalog (--catalog-wide)" if only is None else f"only the {len(only)} runs of --run-list (named in the linked issues)"
+        method += f"; examined: {scope}"
         limit = ("metadata only, not the reads: base_count as the archive reports it; runs of a species with no genome size, "
-                 "or with no positive base_count, are not examined")
+                 "or with no positive base_count, are not examined; "
+                 + ("" if only is None else "no run outside the list is examined, so other low-depth runs are UNMEASURED"))
     else:
         rows, n = archive_size(iter_runs(a.runs), qi.read_table(a.sizes), a.max_bytes_per_base)
         status = "oversized"
