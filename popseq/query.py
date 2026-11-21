@@ -378,7 +378,7 @@ def panel(taxid: Optional[int] = None, name: Optional[str] = None, n: int = 100,
 
     best: dict[str, dict] = {}
     for r in hits:
-        key = r["sample_accession"] or r["run_accession"]
+        key = isolate_key(r)
         if key not in best or _depth(r) > _depth(best[key]):
             best[key] = r
 
@@ -489,11 +489,34 @@ def ena_layout(fastq_ftp: str) -> str:
     return ""
 
 
+def split_samples(value: Optional[str]) -> list[str]:
+    """The BioSamples in one sample_accession value.
+
+    The field is multi-valued: a run that pools several BioSamples carries them
+    ';'-joined (spec 001, issue #3). Split it before using it as an accession.
+    """
+    return [s.strip() for s in (value or "").split(";") if s.strip()]
+
+
+def isolate_key(run: dict) -> str:
+    """The unit panel() keeps one run of.
+
+    The run's BioSamples, split, de-duplicated and sorted, so 'S2;S1' and 'S1;S2' are
+    one unit. A run that pools several BioSamples is its own unit: it is not any one
+    of those isolates. A run with no BioSample stands for itself.
+    """
+    return (";".join(sorted(set(split_samples(run.get("sample_accession")))))
+            or run["run_accession"])
+
+
 def to_sample_sheet(result: dict) -> list[dict]:
     """nf-core sample,fastq_1,fastq_2 rows from a runs() or panel() result.
 
     The FASTQ columns are ENA URLs. A run that has not been fetched has no local
     path, and inventing one would be a lie. Rewrite them after fetching.
+
+    `sample` is the BioSample, or the run accession when the run names none or pools
+    several.
 
     Mates come from `fastq_mates`. A file that is neither mate (the unpaired file of a
     three-file run) is left out of the sheet. It is still in the run's `fastq_ftp`, and
@@ -502,8 +525,10 @@ def to_sample_sheet(result: dict) -> list[dict]:
     out = []
     for r in result["runs"]:
         m1, m2, _ = fastq_mates(r.get("fastq_ftp") or "")
+        # A ';'-joined value is several BioSamples, not a usable sample name.
+        samples = split_samples(r.get("sample_accession"))
         out.append({
-            "sample": r.get("sample_accession") or r["run_accession"],
+            "sample": samples[0] if len(samples) == 1 else r["run_accession"],
             "fastq_1": "https://" + m1 if m1 else "",
             "fastq_2": "https://" + m2 if m2 else "",
         })
