@@ -220,3 +220,101 @@ def test_fetch_cli_has_timeout_and_stall_seconds(capsys):
         cli.main(["fetch", "--help"])
     out = capsys.readouterr().out
     assert "--timeout" in out and "--stall-seconds" in out
+
+
+# ------------------------------------------------ resume trace on stderr (PopSeq #57)
+def test_a_resumed_transfer_says_so_on_stderr(tmp_path, monkeypatch, capsys):
+    dest = str(tmp_path / "ERR9_2.fastq.gz")
+    run, _ = fake_run([(18, 400), (52, 400), (0, 1000)], dest)
+    monkeypatch.setattr(routes, "_run", run)
+    assert routes.curl_resume("https://h/x/ERR9_2.fastq.gz", dest, None, sleep=lambda s: None)[0] == 0
+    err = capsys.readouterr().err
+    assert "curl_resume ERR9_2.fastq.gz: 2 resume(s)" in err
+    assert "curl 18 at 400 bytes" in err and "curl 52 at 400 bytes" in err and "done at 1000 bytes" in err
+
+
+def test_a_transfer_that_needed_no_resume_is_silent(tmp_path, monkeypatch, capsys):
+    dest = str(tmp_path / "f.fastq.gz")
+    run, _ = fake_run([(0, 1000)], dest)
+    monkeypatch.setattr(routes, "_run", run)
+    routes.curl_resume("https://h/f", dest, 1000, sleep=lambda s: None)
+    assert capsys.readouterr().err == ""
+
+
+# ------------------------------------------------ aws_odp route: what the curl does with each outcome
+def aws_curl(tmp_path, monkeypatch, code: str, exit_code: int, body: bytes = b"SRA"):
+    """A `curl` on PATH that writes `body` to the -o file, prints `code` (the -w http code) and exits."""
+    args = tmp_path / "args.txt"
+    exe = tmp_path / "bin" / "curl"
+    exe.parent.mkdir(exist_ok=True)
+    exe.write_text(
+        '#!/bin/bash\necho "$@" > ' + str(args) + '\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done\n'
+        f'printf %s {body.decode()!r} > "$out"\nprintf %s {code}\nexit {exit_code}\n'
+    )
+    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("PATH", f"{exe.parent}:{os.environ['PATH']}")
+    return args
+
+
+def aws_transfer(tmp_path):
+    return routes.transfer({"run": "SRR9"}, "aws_odp", str(tmp_path), None, None)
+
+
+def test_aws_odp_ok_returns_the_sra_file(tmp_path, monkeypatch):
+    args = aws_curl(tmp_path, monkeypatch, "200", 0)
+    r = aws_transfer(tmp_path)
+    assert r["rc"] == 0 and r["files"] == [str(tmp_path / "SRR9.sra")] and r["file_kind"] == "sra"
+    assert "--retry" in args.read_text()
+
+
+@pytest.mark.parametrize("code", ["403", "404"])
+def test_aws_odp_403_and_404_are_unavailable_and_leave_no_file(tmp_path, monkeypatch, code):
+    aws_curl(tmp_path, monkeypatch, code, 0)
+    r = aws_transfer(tmp_path)
+    assert r["unavailable"] and r["rc"] != 0 and r["files"] == []
+    assert not (tmp_path / "SRR9.sra").exists()
+
+
+def test_aws_odp_a_cut_transfer_is_a_failure_not_unavailable_and_not_a_file(tmp_path, monkeypatch):
+    # curl 18 (partial transfer): today this route has no resume (UNMEASURED how often S3 cuts); it must not look like success
+    aws_curl(tmp_path, monkeypatch, "200", 18)
+    r = aws_transfer(tmp_path)
+    assert r["rc"] == 18 and not r["unavailable"] and r["files"] == []
+
+
+# ------------------------------------------------ offline end-to-end smoke test (issue #19): real Backend, fake curl, no network
+FLAKY_CURL = r"""#!/bin/bash
+# serves $PAYLOAD/<basename of url>; the first request for each file is cut halfway (exit 18), a resume (-C -) sends the rest
+while [ $# -gt 0 ]; do case "$1" in -o) out=$2; shift 2;; --connect-timeout|--speed-limit|--speed-time|-C) shift 2;; -*) shift;; *) url=$1; shift;; esac; done
+name=$(basename "$url"); src="$PAYLOAD/$name"; total=$(wc -c < "$src")
+if [ ! -e "$STATE/$name" ]; then : > "$STATE/$name"; head -c $((total / 2)) "$src" > "$out"; echo "curl: (18) transfer closed" >&2; exit 18; fi
+have=0; [ -e "$out" ] && have=$(wc -c < "$out")
+tail -c +$((have + 1)) "$src" >> "$out"
+"""
+
+
+# (the real back-off sleeps 5 s after each cut: about 10 s for the two files)
+def test_offline_full_fetch_over_a_flaky_ena_resumes_verifies_and_records(env, monkeypatch, tmp_path):
+    from popseq.fetch import Backend, Fetcher
+    from tests.test_fetch import md5, plan_for, rows
+
+    payload, state, bindir = tmp_path / "payload", tmp_path / "state", tmp_path / "bin"
+    for d in (payload, state, bindir):
+        d.mkdir()
+    plan = plan_for(ncbi_status="absent", genome=0.01)
+    for u in plan.fastq_ftp.split(";"):
+        nm = os.path.basename(u)
+        write_fastq(str(payload / nm), 500)
+        plan.ena_md5[nm] = md5(str(payload / nm))
+        plan.ena_bytes[nm] = (payload / nm).stat().st_size
+    exe = bindir / "curl"
+    exe.write_text(FLAKY_CURL)
+    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("PATH", f"{bindir}:{os.environ['PATH']}")
+    monkeypatch.setenv("PAYLOAD", str(payload))
+    monkeypatch.setenv("STATE", str(state))
+    opt = env["opt"]
+    r = Fetcher(Backend(), None).fetch(plan.run, opt, plan=plan)
+    assert (r.outcome, r.exit_code, r.route, r.reads_kept) == ("ok", 0, "ena_https", 500)
+    assert [x["outcome"] for x in rows(env)] == ["ok"]
+    assert sorted(os.listdir(os.path.join(opt.cache_root, "5141", "SRR1")))[-1] == "SRR1_2.fastq.gz"
