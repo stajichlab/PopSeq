@@ -59,7 +59,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 125,
+  "isolates_available": 124,
   "studies_in_panel": 8,
   "runs": [
    {
@@ -1435,20 +1435,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR879/002/SRR8799662/SRR8799662_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR879/002/SRR8799662/SRR8799662_2.fastq.gz"
    },
    {
-    "run_accession": "ERR5709865",
-    "sample_accession": "SAMEA8563613",
-    "study_accession": "PRJEB44105",
-    "strain": "",
-    "read_count": "14772",
-    "base_count": "3707772",
-    "est_depth_x": "0.2",
-    "country": "",
-    "collection_date": "",
-    "first_public": "2021-05-17",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR570/005/ERR5709865/ERR5709865_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR570/005/ERR5709865/ERR5709865_2.fastq.gz"
-   },
-   {
     "run_accession": "SRR10047154",
     "sample_accession": "SAMN10973800",
     "study_accession": "PRJNA522928",
@@ -1461,6 +1447,20 @@
     "first_public": "2019-09-01",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR100/054/SRR10047154/SRR10047154_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR100/054/SRR10047154/SRR10047154_2.fastq.gz"
+   },
+   {
+    "run_accession": "SRR8799637",
+    "sample_accession": "SAMN11266895",
+    "study_accession": "PRJNA516557",
+    "strain": "GSY509",
+    "read_count": "8667976",
+    "base_count": "1292531553",
+    "est_depth_x": "56.2",
+    "country": "",
+    "collection_date": "NA",
+    "first_public": "2019-09-28",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR879/007/SRR8799637/SRR8799637_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR879/007/SRR8799637/SRR8799637_2.fastq.gz"
    }
   ],
   "run_fields": [
