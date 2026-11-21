@@ -25,7 +25,9 @@ from popseq.fetch import EXIT, Backend, Fetcher, Options, Plan, Usage
 def write_fastq(path, n, start=0, read_len=50):
     """`n` reads named by spot index `start`..`start+n-1`, so mates and windows can be checked."""
     seq, qual = ("ACGT" * 40)[:read_len], "I" * read_len
-    with gzip.open(path, "wt") as fh:
+    # mtime=0: the gzip header holds the time in whole seconds, so two writes of the same reads that straddle
+    # a second would differ in MD5 (the flake of test_coverage_by_stride_from_ena_...: `with_md5` writes first)
+    with gzip.GzipFile(path, "wb", mtime=0) as raw, io.TextIOWrapper(raw, encoding="utf-8") as fh:
         for i in range(start, start + n):
             fh.write(f"@spot{i}/1\n{seq}\n+\n{qual}\n")
 
@@ -764,6 +766,20 @@ def test_coverage_tier_stride_is_evenly_spaced_from_the_verified_full_run(env):
         max(b - a for a, b in zip(nums, nums[1:])) - min(b - a for a, b in zip(nums, nums[1:])) <= 1
     )
     assert_scratch_clean(env)
+
+
+def test_write_fastq_is_byte_identical_across_a_clock_tick(tmp_path, monkeypatch):
+    """Regression for the flaky ENA coverage test: the same reads written a second apart had different MD5s."""
+    import time
+
+    (tmp_path / "x").mkdir()
+    (tmp_path / "y").mkdir()
+    a, b = str(tmp_path / "x" / "r.gz"), str(tmp_path / "y" / "r.gz")  # the header also holds the file name
+    monkeypatch.setattr(time, "time", lambda: 1_000_000.0)
+    write_fastq(a, 50)
+    monkeypatch.setattr(time, "time", lambda: 1_000_001.0)
+    write_fastq(b, 50)
+    assert md5(a) == md5(b)
 
 
 def test_the_full_run_check_comes_before_the_cut_for_coverage_by_stride(env):
