@@ -41,7 +41,7 @@
    "studies": 1177,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/4932.json",
-   "bytes": 55736
+   "bytes": 55585
   },
   {
    "species_taxid": 498019,
@@ -61,7 +61,7 @@
    "studies": 421,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5207.json",
-   "bytes": 53710
+   "bytes": 53750
   },
   {
    "species_taxid": 746128,
@@ -121,7 +121,7 @@
    "studies": 78,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5478.json",
-   "bytes": 55905
+   "bytes": 55882
   },
   {
    "species_taxid": 318829,
@@ -151,7 +151,7 @@
    "studies": 50,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5482.json",
-   "bytes": 55798
+   "bytes": 55767
   },
   {
    "species_taxid": 27291,
@@ -1011,7 +1011,7 @@
    "studies": 8,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/1684324.json",
-   "bytes": 55469
+   "bytes": 55454
   },
   {
    "species_taxid": 2447956,

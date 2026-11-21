@@ -125,7 +125,7 @@ rules above hold. `scripts/popseq_qc_sources_2026-11-21.sh` holds the exact comm
 
 | check | subcommand | status | rule | input |
 |---|---|---|---|---|
-| `low_coverage` | `low-coverage` | `below_1x` (from `--below`, default 1) | `base_count` / `genome_mb` of the run's species < threshold | run table, `catalog/genome_sizes.csv` |
+| `low_coverage` | `low-coverage` | `below_1x` (from `--below`, default 1) | `base_count` / `genome_mb` of the run's species < threshold, for the runs of `--run-list` (the runs named in the linked issues); `--catalog-wide` (opt-in, not committed) examines every run | run table, `catalog/genome_sizes.csv`, `catalog/qc/findings/issue_named_runs.csv` |
 | `oversized_archive_object` | `archive-size` | `oversized` | archive bytes / `base_count` > `--max-bytes-per-base` (default 2.0) | a sizes table (`run_accession, archive_bytes, archive_note`) |
 
 A run whose species has no genome size, or whose `base_count` is empty or 0, is not examined by `low_coverage`. The
@@ -136,9 +136,9 @@ lists its status in `exclude_statuses` unless `--no-exclude` is given.
 
 | source_id | check | runs | statuses (all skip by default) | evidence |
 |---|---|---|---|---|
-| `popseq_low_coverage` | `low_coverage` | 8,502 of 66 species | `below_1x` | evaluated here from catalog data: 240,309 runs examined, 15,260 with no genome size and 520 with no positive `base_count` not examined |
+| `popseq_low_coverage` | `low_coverage` | 53 *A. fumigatus* | `below_1x` | evaluated here from catalog data for the 55 runs named in issues #37 and #49 only (owner decision: no catalog-wide `below_1x`); runs outside the list are UNMEASURED |
 | `matpredict_afum_species_id_2026-11-10` | `species_match` | 6 *A. fumigatus* | `mismatch` (4), `unverified_species` (2) | MATPredict, transcribed from issue #37; not re-measured here |
-| `matpredict_afum_read_sets_2026-11-10` | `low_coverage` | 54 *A. fumigatus* | `tiny_read_set` | MATPredict, transcribed from issue #37; 53 of them are also `below_1x` here, SRR33550994 is 1.016x |
+| `matpredict_afum_read_sets_2026-11-10` | `low_coverage` | 54 *A. fumigatus* | `tiny_read_set` | MATPredict, transcribed from issue #37; 53 of them are also `below_1x` here (the same run list), SRR33550994 is 1.016x |
 | `gmg_archive_size_2026-11-21` | `oversized_archive_object` | 1 (SRR065689) | `oversized` | GmG P6 transfer, from issue #49: 51.46 GB `.sra`, 7,589,121,360 bases (run table agrees), 6.78 bytes per base |
 
 UNMEASURED: whether any other run exceeds 2.0 archive bytes per base. A catalog-wide pass over archive sizes would say;
@@ -156,3 +156,4 @@ goes in `catalog/labels/run_curation.csv` and is the curator's decision (spec 00
 - 2026-11-21: checks `low_coverage` and `oversized_archive_object` evaluated by `scripts/popseq_qc_checks.py`; importer format
   `popseq_findings` and hand-entered inputs in `catalog/qc/findings/`; four sources (issues #37, #49). The importer no longer
   rewrites a species file whose rows did not change.
+  `low-coverage` takes only the runs of an issue-named `--run-list` by default; the catalog-wide `below_1x` pass is opt-in (`--catalog-wide`) and not committed.

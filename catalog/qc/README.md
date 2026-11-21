@@ -15,4 +15,4 @@ runs whose status the source lists in `exclude_statuses`, and `--include-flagged
 `curated_status` and `curated_note` columns are for the curator and are never overwritten by an import.
 
 Add or refresh a source with `scripts/popseq_qc_import.py` (see its `--help`). Checks PopSeq evaluates from catalog
-data (`low_coverage`, `oversized_archive_object`) run through `scripts/popseq_qc_checks.py`.
+data (`low_coverage`, `oversized_archive_object`) run through `scripts/popseq_qc_checks.py`; `low_coverage` covers the runs named in issues #37 and #49 only (`findings/issue_named_runs.csv`).

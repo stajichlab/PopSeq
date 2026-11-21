@@ -6,7 +6,10 @@ Nothing was removed from the catalog. All new statuses are in their source's `ex
 `popseq panel` skip these runs by default; `--include-flagged` keeps them. Pending owner review (PR, not merged).
 
 - **`low_coverage`** (`scripts/popseq_qc_checks.py low-coverage`, source `popseq_low_coverage`): base_count / genome size
-  below 1x, evaluated from catalog data. 8,502 runs of 66 species (7,860 *S. cerevisiae*); 240,309 runs examined.
+  below 1x, evaluated from catalog data for the runs the linked issues name only (`catalog/qc/findings/issue_named_runs.csv`:
+  the 54 runs of #37 and SRR065689 of #49): 55 examined, 53 `below_1x`. Owner decision: no catalog-wide pass. The check
+  requires `--run-list`; `--catalog-wide` is the opt-in for a full sweep and is not committed. UNMEASURED: depth of every
+  run outside the list.
 - **Issue #37**: 4 *A. fumigatus* runs `species_match:mismatch` and 2 `species_match:unverified_species`
   (`matpredict_afum_species_id_2026-11-10`), and 54 tiny read sets `low_coverage:tiny_read_set`
   (`matpredict_afum_read_sets_2026-11-10`). MATPredict's evidence, transcribed from the issue; the runs are not relabelled.
