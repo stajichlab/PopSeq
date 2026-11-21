@@ -772,7 +772,9 @@ def test_write_fastq_is_byte_identical_across_a_clock_tick(tmp_path, monkeypatch
     """Regression for the flaky ENA coverage test: the same reads written a second apart had different MD5s."""
     import time
 
-    a, b = str(tmp_path / "a.gz"), str(tmp_path / "b.gz")
+    (tmp_path / "x").mkdir()
+    (tmp_path / "y").mkdir()
+    a, b = str(tmp_path / "x" / "r.gz"), str(tmp_path / "y" / "r.gz")  # the header also holds the file name
     monkeypatch.setattr(time, "time", lambda: 1_000_000.0)
     write_fastq(a, 50)
     monkeypatch.setattr(time, "time", lambda: 1_000_001.0)

@@ -316,5 +316,6 @@ def test_offline_full_fetch_over_a_flaky_ena_resumes_verifies_and_records(env, m
     opt = env["opt"]
     r = Fetcher(Backend(), None).fetch(plan.run, opt, plan=plan)
     assert (r.outcome, r.exit_code, r.route, r.reads_kept) == ("ok", 0, "ena_https", 500)
-    assert [x["outcome"] for x in rows(env)] == ["ok"]
+    last = rows(env)[-1]  # earlier rows are the SRA routes tried first (the fake curl serves no .sra)
+    assert (last["outcome"], last["route"], last["verified"]) == ("ok", "ena_https", "true")
     assert sorted(os.listdir(os.path.join(opt.cache_root, "5141", "SRR1")))[-1] == "SRR1_2.fastq.gz"
