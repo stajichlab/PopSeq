@@ -74,7 +74,7 @@ API is obvious.
 | Column | Source | Notes |
 |---|---|---|
 | `run_accession` | ENA | primary key, `SRR`/`ERR`/`DRR` |
-| `sample_accession` | ENA | the BioSample. **Runs are not isolates; collapse on this.** |
+| `sample_accession` | ENA | the BioSample. **Runs are not isolates; collapse on this.** **Multi-valued:** a run that pools several BioSamples carries them `;`-separated. Split on `;` before using it as an accession (see "Multi-valued fields") |
 | `secondary_sample_accession` | ENA | `SRS`/`ERS` |
 | `study_accession` | ENA | `PRJ…` |
 | `scientific_name` | ENA | as recorded, not corrected |
@@ -170,6 +170,38 @@ The most common error with this table is counting rows. A re-sequenced isolate h
 runs; a mutant panel has one isolate per run. **Collapse on `sample_accession` before
 reporting a strain count.** When one run per isolate is needed, take the smallest run that
 still passes the coverage filter, so the download is as small as the question allows.
+
+### Multi-valued fields (issue #3)
+
+ENA joins several values into one field with `;` and no other marker. A consumer that
+takes such a value as one accession gets a plausible wrong answer: the BioSample harvest
+sent 97 joined `sample_accession` values to NCBI as single accessions, and every batch
+that held one failed.
+
+**`sample_accession` is multi-valued and `;`-separated.** Split it, strip each part and
+drop empty parts before using it as an accession or counting isolates. A run that names
+several BioSamples counts for each of them in an isolate count. In a panel it is one unit
+of its own (the sorted, de-duplicated set), not any one of those isolates, and it gets
+the run accession as its sample name.
+
+Audit of `catalog/runs/fungi_all_runs.csv.gz` as committed on 2026-11-21 (256,089 rows),
+every column, counting values that contain `;`:
+
+| Column | Rows with `;` | What the parts are |
+|---|---|---|
+| `fastq_ftp`, `fastq_aspera` | 245,338 | one path per file. Known; split by `fastq_mates` |
+| `center_name` | 63,007 | free text: one centre per part. Not an accession |
+| `country` | 187 | several values, for example `missing;USA`. `country_iso` is the normalised field |
+| `sample_accession` | 97 | BioSamples: 2,111 parts, 128 distinct, 79 of those also a run's sole BioSample elsewhere |
+| `scientific_name`, `tax_id` | 88 each | one name or taxid per pooled BioSample. All 88 have an empty `species_taxid`, so they reach no species and no panel |
+| `strain` 86, `sample_title` 86, `collection_date` 68, `isolate` 53, `host` 21 | | several values in one field. Free text, not used as a key |
+
+No other column holds a `;`. `fastq_md5` (one value per file, already split by the fetch
+code) and `secondary_sample_accession` are not columns of the combined table, so this audit
+does not cover them. 9 of the 97 joined `sample_accession` rows have a species
+(7 *Saccharomyces cerevisiae*, 2 *S. paradoxus*); the other 88 have an empty
+`species_taxid`. The joined `tax_id` is not handled: those rows map to no species today.
+UNMEASURED: whether they should map to the species of their parts.
 
 ### Normalised country and host (issue #23)
 
@@ -306,5 +338,7 @@ A drop almost always means the query changed, not the archive.
 - 2026-11-09: BGISEQ and DNBSEQ WGS runs added from a supplementary snapshot (owner
   decision 2026-11-08). The default platform filter stays ILLUMINA. New derived table
   `catalog/species_layout.csv.gz`.
+- 2026-11-21: `sample_accession` is documented as multi-valued and `;`-separated, with an
+  audit of every column of the combined run table for joined values (issue #3).
 - 2026-11-21: runs with no species taxid are listed in `catalog/summary/unplaced_runs.csv.gz`,
   not rolled up (issue #22). Schema 1.3.0.

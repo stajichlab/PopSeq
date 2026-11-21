@@ -18,6 +18,12 @@ handful of genomes, not a population, and 6,373 nearly-empty files would make th
 directory useless.
 
     uv run python scripts/popseq_api.py
+    uv run python scripts/popseq_api.py --out /some/dir   # render elsewhere
+
+tests/test_api_fresh.py renders into a temporary directory and fails when the
+result differs from the committed catalog/api/ (issue #21). After any change to
+catalog/runs/, catalog/summary/, catalog/qc/, catalog/labels/ or the query code,
+rerun this script and commit catalog/api/ with the change.
 """
 from __future__ import annotations
 
@@ -45,14 +51,16 @@ PANEL_FILTERS = dict(platform="ILLUMINA", layout="PAIRED", strategy="WGS",
                      include_excluded=False, require_fastq=True)
 
 
-def main():
+def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--min-isolates", type=int, default=100)
     p.add_argument("--panel-n", type=int, default=PANEL_N)
-    a = p.parse_args()
+    p.add_argument("--out", default=OUT, help=f"output directory (default {OUT})")
+    a = p.parse_args(argv)
+    out = a.out
 
-    os.makedirs(OUT, exist_ok=True)
+    os.makedirs(out, exist_ok=True)
     sp = popseq.species(min_isolates=a.min_isolates)
     taxids = [int(r["species_taxid"]) for r in sp]
     held = popseq.preload(taxids)
@@ -80,7 +88,7 @@ def main():
                      "is the same path against fasp.sra.ebi.ac.uk."),
         }
         doc["self"] = f"{RAW}/{tx}.json"
-        path = os.path.join(OUT, f"{tx}.json")
+        path = os.path.join(out, f"{tx}.json")
         with open(path, "w") as fh:
             json.dump(doc, fh, indent=1, default=str)
             fh.write("\n")
@@ -109,7 +117,7 @@ def main():
         "species_count": len(listing),
         "species": sorted(listing, key=lambda d: -d["isolates"]),
     }
-    with open(os.path.join(OUT, "index.json"), "w") as fh:
+    with open(os.path.join(out, "index.json"), "w") as fh:
         json.dump(idx, fh, indent=1)
         fh.write("\n")
     print(f"wrote {written} species files + index.json, "

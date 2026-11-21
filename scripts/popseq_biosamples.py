@@ -77,22 +77,35 @@ def write_table(path, rows, columns):
     os.replace(tmp, path)
 
 
+def split_accessions(value):
+    """One sample_accession value -> its BioSamples.
+
+    The field is multi-valued: a run that pools several BioSamples carries them
+    ';'-joined (spec 001). Sent to NCBI as one string, a joined value matches nothing,
+    and every batch that held one failed: 97 joined values held 131 real accessions
+    (issue #3).
+    """
+    return [s.strip() for s in (value or "").split(";") if s.strip()]
+
+
 def read_accessions(args):
-    """Accessions from --sample, --input, --from-runs, or stdin."""
+    """Accessions from --sample, --input, --from-runs, or stdin. Every form is split on ';'."""
     acc = []
     if args.sample:
-        acc = list(args.sample)
+        values = list(args.sample)
     elif args.from_runs:
         with open_maybe_gzip(args.from_runs, "rt") as fh:
-            for row in csv.DictReader(fh):
-                # ENA calls it sample_accession; it holds the BioSample.
-                value = row.get("sample_accession") or row.get("biosample") or ""
-                if value:
-                    acc.append(value.strip())
+            if not fh.readline().startswith("#"):  # optional provenance comment line
+                fh.seek(0)
+            # ENA calls it sample_accession; it holds the BioSample.
+            values = [row.get("sample_accession") or row.get("biosample") or ""
+                      for row in csv.DictReader(fh)]
     else:
         handle = open(args.input, "rt") if args.input else sys.stdin
         with handle as fh:
-            acc = [line.strip() for line in fh if line.strip()]
+            values = list(fh)
+    for value in values:
+        acc.extend(split_accessions(value))
     # Preserve order, drop duplicates.
     return list(dict.fromkeys(acc))
 
