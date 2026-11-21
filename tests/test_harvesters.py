@@ -244,8 +244,8 @@ def test_query_isolate_key_and_sample_sheet_with_a_joined_value():
 
 
 def test_panel_takes_one_run_of_a_joined_sample_set_whatever_its_order(monkeypatch):
-    base = dict(species_taxid="1", species_name="Aus bus", study_accession="P1",
-                fastq_ftp="a_1.fastq.gz;a_2.fastq.gz")
+    base = {"species_taxid": "1", "species_name": "Aus bus", "study_accession": "P1",
+            "fastq_ftp": "a_1.fastq.gz;a_2.fastq.gz"}
     runs = [dict(base, run_accession="R1", sample_accession="S1;S2", est_depth_x="10"),
             dict(base, run_accession="R2", sample_accession="S2;S1", est_depth_x="30"),
             dict(base, run_accession="R3", sample_accession="S1", est_depth_x="20")]
