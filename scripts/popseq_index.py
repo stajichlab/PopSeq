@@ -18,7 +18,7 @@ from datetime import date
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "catalog", "index.json")
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
 SNAPSHOT = "2026-11-06"  # the full snapshot; kept a single date for existing readers
 SNAPSHOTS = [
     {"date": "2026-11-06", "file": "cache/fungi_runs_ena_2026-11-06.tsv.gz",
@@ -78,6 +78,12 @@ TABLES = {
                                 grain="species x field x value",
                                 key="species_taxid,field,value",
                                 built_by="scripts/popseq_summarize.py"),
+    "unplaced_runs": dict(path="catalog/summary/unplaced_runs.csv.gz",
+                          grain="one row per run with an empty species_taxid: tax_id above "
+                                "species rank, several taxids, or none in the taxonomy map "
+                                "(issue #22). Every such run of the run table is here",
+                          key="run_accession",
+                          built_by="scripts/popseq_unplaced.py"),
     "vocab_country_aliases": dict(path="catalog/vocab/country_aliases.csv",
                                   grain="one row per curated country spelling",
                                   key="alias", built_by="curated by hand"),
@@ -188,6 +194,13 @@ COLUMNS = {
                     "deposited organism name when the taxid is not in the taxonomy map.",
     "curated_species": "A curator's species for this assembly. Ours, entered by hand, "
                        "never overwritten by an import. When set it wins over label_species.",
+    "placement": "unplaced_runs only. Why the run has no species_taxid: above_species, "
+                 "multiple_taxids (a ';'-joined tax_id), not_in_taxonomy_map, "
+                 "unresolved_in_map, no_taxid, or species_in_map (the run table is older "
+                 "than the map). Added in 1.3.0.",
+    "resolved_rank": "unplaced_runs only. The rank tax_id resolved to (genus, section, "
+                     "subphylum, kingdom, ...) or unresolved. These runs are listed, not "
+                     "rolled up to an ancestor (issue #22). Added in 1.3.0.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes "
                         "';'-joined for multi-sample runs (issue #3).",
 }
@@ -203,6 +216,10 @@ CAVEATS = [
     "Only 113 species were reconciled against NCBI. For every other species "
     "ncbi_status is not_checked, which is not the same as absent.",
     "Nothing here has been downloaded or verified. These are archive records.",
+    "Runs whose tax_id gives no species (filed as a genus, a section or 'Fungi', with "
+    "several taxids, or with a taxid outside the fungal taxonomy map) are in no species "
+    "row and no species query. They are listed in catalog/summary/unplaced_runs.csv.gz "
+    "(`popseq unplaced`; issue #22).",
     "Scope: the run table holds only ENA runs with library_strategy=WGS and "
     "library_source=GENOMIC, on instrument_platform ILLUMINA (snapshot 2026-11-06) or "
     "BGISEQ/DNBSEQ (supplement 2026-11-09; scripts/popseq_snapshot.py). A --strategy "
@@ -263,6 +280,7 @@ def main():
                 "runs": "all runs of one species, filtered",
                 "panel": "select N strains, one per isolate, spread across studies",
                 "describe": "everything known about one species, as JSON",
+                "unplaced": "runs with no species taxid, which the other verbs cannot reach",
             },
             "exit_codes": {"0": "ok", "2": "species not found or ambiguous",
                            "3": "filters left nothing"},

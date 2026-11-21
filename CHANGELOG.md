@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-21: runs with no species taxid get their own table; verb `unplaced`; schema 1.3.0 (issue #22)
+
+Nothing moved and nothing was removed.
+
+- **Decision:** the runs whose `tax_id` gives no species are listed in their own table, not rolled up to a ranked
+  ancestor. A run filed as a genus or as `Fungi` is not evidence for any one species.
+- **New table** `catalog/summary/unplaced_runs.csv.gz`, built by the new `scripts/popseq_unplaced.py` from the run
+  table and the taxonomy map (no network; gzip mtime 0, so a rebuild is byte-identical). One row for every run with an
+  empty `species_taxid`: 922 of 256,089 runs. `placement`: above_species 822, multiple_taxids 88, not_in_taxonomy_map
+  12. The issue's 648 above species and 98 unresolved are the ILLUMINA rows (648 + 88 + 10); BGISEQ/DNBSEQ add 174 and 2.
+- **New verb** `popseq unplaced` (`--placement`, `--rank`, `--contains`, `--limit`, `--format csv|tsv|json|accessions`),
+  function `popseq.unplaced`, MCP tool `popseq_unplaced`. `popseq species` says on stderr how many runs no species row
+  holds, and its JSON answer gains `unplaced_runs`.
+- **Schema 1.2.0 to 1.3.0** (minor: a verb, a table and a JSON key added, per the rule in spec 007). `catalog/index.json`
+  (table `unplaced_runs`, verb, column notes, one caveat) and `catalog/api/` are regenerated; the API files change only
+  in `popseq_schema`, and `api/index.json` also in its date, verbs and caveats. Spec 001 has the new section, spec 007 the
+  1.3.0 row. The package version is not bumped.
+- **Tests:** `tests/test_unplaced.py`. The table must hold exactly the runs with an empty `species_taxid`. The issue's
+  figures are asserted only while the run table is the 2026-11-18 build.
+
 ## 2026-11-19: run QC can skip runs by default; the `species_match` check; schema 1.2.0 (issue #52)
 
 Owner decisions 2026-11-18 and 2026-11-19 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.

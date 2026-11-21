@@ -1,6 +1,6 @@
 {
-  "popseq_schema": "1.2.0",
-  "generated": "2026-11-18",
+  "popseq_schema": "1.3.0",
+  "generated": "2026-11-21",
   "archive_snapshot": "2026-11-06",
   "archive_snapshots": [
     {
@@ -35,7 +35,8 @@
       "species": "list species with counts; the discovery entry point",
       "runs": "all runs of one species, filtered",
       "panel": "select N strains, one per isolate, spread across studies",
-      "describe": "everything known about one species, as JSON"
+      "describe": "everything known about one species, as JSON",
+      "unplaced": "runs with no species taxid, which the other verbs cannot reach"
     },
     "exit_codes": {
       "0": "ok",
@@ -1055,6 +1056,28 @@
       "bytes": 118437,
       "sha256": "9929d8a35e46288ae85c4e20b005cb9442dec8894f2d6230ecf5e5f0d952e735"
     },
+    "unplaced_runs": {
+      "path": "catalog/summary/unplaced_runs.csv.gz",
+      "grain": "one row per run with an empty species_taxid: tax_id above species rank, several taxids, or none in the taxonomy map (issue #22). Every such run of the run table is here",
+      "key": "run_accession",
+      "built_by": "scripts/popseq_unplaced.py",
+      "columns": [
+        "run_accession",
+        "study_accession",
+        "sample_accession",
+        "scientific_name",
+        "tax_id",
+        "instrument_platform",
+        "first_public",
+        "placement",
+        "resolved_rank",
+        "ranked_taxid",
+        "ranked_name",
+        "part_species_taxids"
+      ],
+      "bytes": 9868,
+      "sha256": "9d84bbcca3a6bb82073f9d46d24082493da9058cd277177c8ef1b60516dd5443"
+    },
     "vocab_country_aliases": {
       "path": "catalog/vocab/country_aliases.csv",
       "grain": "one row per curated country spelling",
@@ -1305,6 +1328,8 @@
     "label_agreement": "same, tie_includes_ncbi, differs, ncbi_unnamed (the NCBI name is sp./cf. or blank) or no_call, against ncbi_species.",
     "ncbi_species": "The NCBI taxonomy name of the assembly's species_taxid, or the deposited organism name when the taxid is not in the taxonomy map.",
     "curated_species": "A curator's species for this assembly. Ours, entered by hand, never overwritten by an import. When set it wins over label_species.",
+    "placement": "unplaced_runs only. Why the run has no species_taxid: above_species, multiple_taxids (a ';'-joined tax_id), not_in_taxonomy_map, unresolved_in_map, no_taxid, or species_in_map (the run table is older than the map). Added in 1.3.0.",
+    "resolved_rank": "unplaced_runs only. The rank tax_id resolved to (genus, section, subphylum, kingdom, ...) or unresolved. These runs are listed, not rolled up to an ancestor (issue #22). Added in 1.3.0.",
     "sample_accession": "BioSample. In the raw ENA export this field is sometimes ';'-joined for multi-sample runs (issue #3)."
   },
   "caveats": [
@@ -1313,6 +1338,7 @@
     "est_depth_x comes from metadata, not from the reads.",
     "Only 113 species were reconciled against NCBI. For every other species ncbi_status is not_checked, which is not the same as absent.",
     "Nothing here has been downloaded or verified. These are archive records.",
+    "Runs whose tax_id gives no species (filed as a genus, a section or 'Fungi', with several taxids, or with a taxid outside the fungal taxonomy map) are in no species row and no species query. They are listed in catalog/summary/unplaced_runs.csv.gz (`popseq unplaced`; issue #22).",
     "Scope: the run table holds only ENA runs with library_strategy=WGS and library_source=GENOMIC, on instrument_platform ILLUMINA (snapshot 2026-11-06) or BGISEQ/DNBSEQ (supplement 2026-11-09; scripts/popseq_snapshot.py). A --strategy filter for anything else returns nothing because those runs were never harvested, not because none exist (issue #24). The --platform filter defaults to ILLUMINA; pass BGISEQ, DNBSEQ or '' to see the others."
   ]
 }

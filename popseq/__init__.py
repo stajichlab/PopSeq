@@ -7,6 +7,7 @@ The same four operations the CLI exposes, importable:
     popseq.describe(taxid=1047171)
     popseq.runs(taxid=746128, min_depth=30)
     popseq.panel(taxid=746128, n=100, min_depth=30)
+    popseq.unplaced(placement="above_species")   # runs with no species taxid
 
 Everything reads committed catalog files. No network, no credentials, no
 database. A call on the largest species in the catalog takes about two seconds.
@@ -29,11 +30,12 @@ from popseq.query import (  # noqa: F401
     runs,
     species,
     to_sample_sheet,
+    unplaced,
 )
 
 __all__ = [
     "SCHEMA_VERSION", "CatalogError", "SpeciesNotFound", "EmptyResult",
     "species", "runs", "panel", "describe", "resolve_species", "index",
-    "preload", "preload_clear", "to_sample_sheet",
+    "preload", "preload_clear", "to_sample_sheet", "unplaced",
 ]
 __version__ = "0.2.0"

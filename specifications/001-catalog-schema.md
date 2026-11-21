@@ -216,6 +216,45 @@ the string does not say which Korea. Host resolution is exact-name only (scienti
 first, then synonyms and common names, then the binomial prefix or `<Genus> sp.`). It does
 no fuzzy matching, so a misspelt host stays `unresolved` rather than becoming a wrong taxon.
 
+### Runs with no species taxid (issue #22)
+
+`species_taxid` is the species-rank ancestor of the run's `tax_id`, from
+`catalog/taxonomy_species_map.csv.gz` (`scripts/popseq_taxonomy.py`). A strain or
+subspecies rolls up to its species. A taxid at genus rank or above does not roll down, and a
+taxid the map does not hold resolves to nothing. Those runs keep an empty `species_taxid`.
+`popseq species`, `runs`, `panel` and every per-species table cannot reach them.
+
+**Decision (issue #22): they are listed in their own table, not rolled up to an ancestor.**
+A run filed as *Aspergillus* or *Fungi* is not evidence for any one species. A rolled-up
+row would make the species claim that the taxid key exists to avoid.
+
+`catalog/summary/unplaced_runs.csv.gz` (`scripts/popseq_unplaced.py`, index table
+`unplaced_runs`, verb `popseq unplaced`) has one row for every run of the run table with an
+empty `species_taxid`, and no other rows. A test holds the two equal
+(`tests/test_unplaced.py`).
+
+| Column | Notes |
+|---|---|
+| `run_accession`, `study_accession`, `sample_accession`, `scientific_name`, `tax_id`, `instrument_platform`, `first_public` | from the run table, unchanged |
+| `placement` | `above_species`, `multiple_taxids` (a `;`-joined `tax_id`), `not_in_taxonomy_map`, `unresolved_in_map`, `no_taxid`, `species_in_map` (the run table is older than the map: rebuild it) |
+| `resolved_rank` | the rank `tax_id` resolved to (`genus`, `section`, `kingdom`, ...), or `unresolved` |
+| `ranked_taxid`, `ranked_name` | the nearest ranked taxon at or above `tax_id`, from the map. Blank when the map cannot name it: the map has no parent column |
+| `part_species_taxids` | for `multiple_taxids`: the distinct species the parts resolve to, `;`-joined |
+
+Counts on the 2026-11-18 run table (256,089 runs; source: the `popseq_unplaced.py` log):
+
+| | ILLUMINA | BGISEQ + DNBSEQ | all |
+|---|---|---|---|
+| `above_species` | 648 | 174 | 822 |
+| `multiple_taxids` | 88 | 0 | 88 |
+| `not_in_taxonomy_map` | 10 | 2 | 12 |
+| total | 746 | 176 | 922 |
+
+Issue #22 counted 648 above species and 98 unresolved. Those are the ILLUMINA rows. The
+above-species ranks: genus 346, kingdom 268, subphylum 145, section 41, phylum 13,
+species group 4, family 3, order 2. Every above-species `tax_id` is itself the ranked
+taxon, so `ranked_taxid` is filled for all 822.
+
 ## `catalog/biosamples/<taxid>.<name>.biosample.csv.gz`
 
 One line per **BioSample**. Harvested from NCBI Entrez, which carries far richer sample
@@ -267,3 +306,5 @@ A drop almost always means the query changed, not the archive.
 - 2026-11-09: BGISEQ and DNBSEQ WGS runs added from a supplementary snapshot (owner
   decision 2026-11-08). The default platform filter stays ILLUMINA. New derived table
   `catalog/species_layout.csv.gz`.
+- 2026-11-21: runs with no species taxid are listed in `catalog/summary/unplaced_runs.csv.gz`,
+  not rolled up (issue #22). Schema 1.3.0.
