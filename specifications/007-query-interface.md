@@ -1,6 +1,6 @@
 # 007: The query interface
 
-**Status:** implemented, schema 1.1.0
+**Status:** implemented, schema 1.3.0
 **Supersedes:** nothing. Extends 001 (catalog schema) and 003 (sample sheets).
 
 ## Why this exists
@@ -14,7 +14,7 @@ So the catalog advertises one interface and keeps the tables private behind it.
 
 ## The contract
 
-Four verbs. **Verb names, flag names, JSON key names and exit codes are the
+Five verbs. **Verb names, flag names, JSON key names and exit codes are the
 contract.** Table paths and columns are not; they may
 change under a consumer without notice, which is the point.
 
@@ -24,6 +24,7 @@ change under a consumer without notice, which is the point.
 | `runs` | every run of one species, filtered |
 | `panel` | N strains to profile, one per isolate, spread across studies |
 | `describe` | everything known about one species, as JSON |
+| `unplaced` | the runs no species query reaches: `tax_id` above species rank, several taxids, or none in the taxonomy map (issue #22; spec 001) |
 
 | exit | meaning |
 |---|---|
@@ -60,6 +61,8 @@ checks the major number keeps working across minor bumps.
 | 1.1.0 | 2026-11-12 | added only. Run table: `country_iso`, `country_name`, `country_status`, `host`, `host_taxid`, `host_name`, `host_status`, `ena_layout`. New tables: `catalog/species_layout.csv.gz`, `catalog/vocab/{country_aliases,host_overrides}.csv`, `catalog/vocab/host_taxa.csv.gz`, `catalog/kingdom/fungi_assemblies.csv.gz`, `catalog/labels/{assembly_labels,run_labels}.csv.gz`, `catalog/labels/sources.csv`. Index key `archive_snapshots`. 15 new BioSample attribute columns |
 | 1.2.0 | 2026-11-19 | added only (owner decision: minor). Run fields `effective_species` and `qc_status` in `runs` and `panel` answers (and the static API panels); flag `--include-flagged` / argument `include_flagged`; JSON keys `qc_skipped` and `qc_skipped_runs`; table `catalog/qc/sources.csv` (index table `qc_sources`) with the column `exclude_statuses`; QC columns `filed_name`, `detected_species`, `purity`, `best_share`. **Behaviour with imported data:** `runs` and `panel` skip, by default, runs whose QC finding the source lists in `exclude_statuses`, as they already skip `exclusion` rows; `--include-flagged` restores them. Until a source with `exclude_statuses` is imported the answers are unchanged |
 
+| 1.3.0 | 2026-11-21 | added only. Verb `unplaced` (CLI `popseq unplaced --placement --rank --contains --limit --format`, function `popseq.unplaced`, MCP tool `popseq_unplaced`); table `catalog/summary/unplaced_runs.csv.gz` (index table `unplaced_runs`), columns `placement`, `resolved_rank`, `ranked_taxid`, `ranked_name`, `part_species_taxids`; JSON key `unplaced_runs` in the `species --format json` answer, and a stderr caveat with the count for the other formats. Answers of the other verbs are unchanged |
+
 The package version (`popseq.__version__`, `pyproject.toml`) is separate. It tracks
 the code, and a git tag `v<version>` marks each release.
 
@@ -94,7 +97,7 @@ once per species. Measured: 2.0 s to hold 220,917 rows, after which 20 panels ta
 0.58 s rather than 44 s. The answers are identical either way.
 
 **The MCP server** exposes `popseq_index`, `popseq_species`, `popseq_describe`,
-`popseq_panel` and `popseq_runs`. Register it with:
+`popseq_panel`, `popseq_runs` and `popseq_unplaced`. Register it with:
 
 ```bash
 claude mcp add popseq -- uv --directory /bigdata/stajichlab/shared/projects/Fungi/PopSeq \

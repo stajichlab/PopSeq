@@ -1,5 +1,5 @@
 {
- "popseq_schema": "1.2.0",
+ "popseq_schema": "1.3.0",
  "species_taxid": 5007,
  "species_name": "Brettanomyces bruxellensis",
  "summary": {
@@ -60,7 +60,7 @@
   },
   "selection_rule": "one run per isolate, deepest wins; then round-robin across studies. A sampling rule, not a guarantee of independence.",
   "selected": 100,
-  "isolates_available": 1081,
+  "isolates_available": 1080,
   "studies_in_panel": 14,
   "runs": [
    {
@@ -78,6 +78,20 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR105/070/SRR10551670/SRR10551670_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR105/070/SRR10551670/SRR10551670_2.fastq.gz"
    },
    {
+    "run_accession": "SRR9914356",
+    "sample_accession": "SAMN12257691",
+    "study_accession": "PRJNA554210",
+    "strain": "UCD 2041",
+    "read_count": "944916",
+    "base_count": "408325583",
+    "est_depth_x": "31.1",
+    "country": "Thailand",
+    "collection_date": "2013-08-06",
+    "first_public": "2019-10-17",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR991/006/SRR9914356/SRR9914356_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR991/006/SRR9914356/SRR9914356_2.fastq.gz"
+   },
+   {
     "run_accession": "SRR1222151",
     "sample_accession": "SAMN02721324",
     "study_accession": "PRJNA244003",
@@ -90,20 +104,6 @@
     "first_public": "2015-06-05",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR122/001/SRR1222151/SRR1222151_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR122/001/SRR1222151/SRR1222151_2.fastq.gz"
-   },
-   {
-    "run_accession": "ERR10466327",
-    "sample_accession": "SAMEA111557367",
-    "study_accession": "PRJEB57332",
-    "strain": "",
-    "read_count": "10885330",
-    "base_count": "1566859689",
-    "est_depth_x": "119.2",
-    "country": "",
-    "collection_date": "",
-    "first_public": "2022-11-14",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR104/027/ERR10466327/ERR10466327_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR104/027/ERR10466327/ERR10466327_2.fastq.gz"
    },
    {
     "run_accession": "SRR945561",
@@ -120,18 +120,18 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR945/SRR945561/SRR945561_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR945/SRR945561/SRR945561_2.fastq.gz"
    },
    {
-    "run_accession": "SRR9914356",
-    "sample_accession": "SAMN12257691",
-    "study_accession": "PRJNA554210",
-    "strain": "UCD 2041",
-    "read_count": "944916",
-    "base_count": "408325583",
-    "est_depth_x": "31.1",
-    "country": "Thailand",
-    "collection_date": "2013-08-06",
-    "first_public": "2019-10-17",
+    "run_accession": "SRR12907806",
+    "sample_accession": "SAMN16512078",
+    "study_accession": "PRJNA647756",
+    "strain": "NRRL Y-12961",
+    "read_count": "1425349",
+    "base_count": "698421010",
+    "est_depth_x": "53.1",
+    "country": "USA: Madison, Wisconsin",
+    "collection_date": "2016",
+    "first_public": "2021-11-02",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR991/006/SRR9914356/SRR9914356_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR991/006/SRR9914356/SRR9914356_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR129/006/SRR12907806/SRR12907806_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR129/006/SRR12907806/SRR12907806_2.fastq.gz"
    },
    {
     "run_accession": "ERR2764725",
@@ -162,20 +162,6 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR200/006/ERR2004536/ERR2004536_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR200/006/ERR2004536/ERR2004536_2.fastq.gz"
    },
    {
-    "run_accession": "ERR1102659",
-    "sample_accession": "SAMEA3639848",
-    "study_accession": "PRJEB11548",
-    "strain": "",
-    "read_count": "38171761",
-    "base_count": "7710695722",
-    "est_depth_x": "586.4",
-    "country": "",
-    "collection_date": "",
-    "first_public": "2015-10-29",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR110/009/ERR1102659/ERR1102659_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR110/009/ERR1102659/ERR1102659_2.fastq.gz"
-   },
-   {
     "run_accession": "ERR4624299",
     "sample_accession": "SAMEA7339831",
     "study_accession": "PRJEB40511",
@@ -188,6 +174,20 @@
     "first_public": "2021-03-24",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR462/009/ERR4624299/ERR4624299_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR462/009/ERR4624299/ERR4624299_2.fastq.gz"
+   },
+   {
+    "run_accession": "ERR10466327",
+    "sample_accession": "SAMEA111557367",
+    "study_accession": "PRJEB57332",
+    "strain": "",
+    "read_count": "10885330",
+    "base_count": "1566859689",
+    "est_depth_x": "119.2",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2022-11-14",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR104/027/ERR10466327/ERR10466327_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR104/027/ERR10466327/ERR10466327_2.fastq.gz"
    },
    {
     "run_accession": "SRR2000109",
@@ -218,18 +218,32 @@
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/053/ERR12523353/ERR12523353_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/053/ERR12523353/ERR12523353_2.fastq.gz"
    },
    {
-    "run_accession": "SRR12907806",
-    "sample_accession": "SAMN16512078",
-    "study_accession": "PRJNA647756",
+    "run_accession": "SRR16974407",
+    "sample_accession": "SAMN20341471",
+    "study_accession": "PRJNA736342",
     "strain": "NRRL Y-12961",
     "read_count": "1425349",
     "base_count": "698421010",
     "est_depth_x": "53.1",
     "country": "USA: Madison, Wisconsin",
     "collection_date": "2016",
-    "first_public": "2021-11-02",
+    "first_public": "2023-07-29",
     "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR129/006/SRR12907806/SRR12907806_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR129/006/SRR12907806/SRR12907806_2.fastq.gz"
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/007/SRR16974407/SRR16974407_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/007/SRR16974407/SRR16974407_2.fastq.gz"
+   },
+   {
+    "run_accession": "ERR1102659",
+    "sample_accession": "SAMEA3639848",
+    "study_accession": "PRJEB11548",
+    "strain": "",
+    "read_count": "38171761",
+    "base_count": "7710695722",
+    "est_depth_x": "586.4",
+    "country": "",
+    "collection_date": "",
+    "first_public": "2015-10-29",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR110/009/ERR1102659/ERR1102659_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR110/009/ERR1102659/ERR1102659_2.fastq.gz"
    },
    {
     "run_accession": "SRR3927079",
@@ -244,20 +258,6 @@
     "first_public": "2016-07-17",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR392/009/SRR3927079/SRR3927079_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR392/009/SRR3927079/SRR3927079_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR16974407",
-    "sample_accession": "SAMN20341471",
-    "study_accession": "PRJNA736342",
-    "strain": "NRRL Y-12961",
-    "read_count": "1425349",
-    "base_count": "698421010",
-    "est_depth_x": "53.1",
-    "country": "USA: Madison, Wisconsin",
-    "collection_date": "2016",
-    "first_public": "2023-07-29",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/007/SRR16974407/SRR16974407_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR169/007/SRR16974407/SRR16974407_2.fastq.gz"
    },
    {
     "run_accession": "SRR10551734",
@@ -342,20 +342,6 @@
     "first_public": "2024-10-10",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/052/ERR12523352/ERR12523352_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/052/ERR12523352/ERR12523352_2.fastq.gz"
-   },
-   {
-    "run_accession": "SRR065689",
-    "sample_accession": "SAMN00113332",
-    "study_accession": "PRJNA76499",
-    "strain": "CBS 2499",
-    "read_count": "49928430",
-    "base_count": "7589121360",
-    "est_depth_x": "577.1",
-    "country": "",
-    "collection_date": "",
-    "first_public": "2010-09-16",
-    "ncbi_status": "in_ncbi",
-    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/SRR065/SRR065689/SRR065689_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/SRR065/SRR065689/SRR065689_2.fastq.gz"
    },
    {
     "run_accession": "SRR10551731",
@@ -1462,6 +1448,20 @@
     "first_public": "2020-02-23",
     "ncbi_status": "in_ncbi",
     "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR276/005/ERR2764745/ERR2764745_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR276/005/ERR2764745/ERR2764745_2.fastq.gz"
+   },
+   {
+    "run_accession": "ERR12523595",
+    "sample_accession": "SAMEA115119662",
+    "study_accession": "PRJEB71961",
+    "strain": "",
+    "read_count": "6762294",
+    "base_count": "507172050",
+    "est_depth_x": "38.6",
+    "country": "",
+    "collection_date": "not provided",
+    "first_public": "2024-10-10",
+    "ncbi_status": "in_ncbi",
+    "fastq_ftp": "ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/095/ERR12523595/ERR12523595_1.fastq.gz;ftp.sra.ebi.ac.uk/vol1/fastq/ERR125/095/ERR12523595/ERR12523595_2.fastq.gz"
    }
   ],
   "run_fields": [

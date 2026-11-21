@@ -1,0 +1,7 @@
+run_accession,status,filed_name,detected_genus,detected_species,source_note
+DRR1095652,mismatch,Aspergillus fumigatus,Aspergillus,Aspergillus oryzae;Aspergillus flavus,"nearest reference A. oryzae / A. flavus, identity 0.993; study PRJDB43097 is ""566 Aspergillus flavus strains resequencing"" (PopSeq#37)"
+ERR15975954,mismatch,Aspergillus fumigatus,Aspergillus,Aspergillus nidulans,"nearest reference A. nidulans, identity 0.998 (PopSeq#37)"
+ERR16779743,mismatch,Aspergillus fumigatus,Aspergillus,Aspergillus fischeri,"nearest reference A. fischeri, identity 0.998 (PopSeq#37)"
+SRR33818169,mismatch,Aspergillus fumigatus,Aspergillus,Aspergillus lentulus,"nearest reference A. lentulus, identity 0.992 (PopSeq#37)"
+SRR14364164,unverified_species,Aspergillus fumigatus,,,"unresolved: nearest A. hiratsukae, identity 0.937; a section Fumigati species not in the reference set (PopSeq#37)"
+SRR37934298,unverified_species,Aspergillus fumigatus,,,"unresolved: best identity 0.70 to any reference; not an Aspergillus in the set; possibly another organism or a contaminated library (PopSeq#37)"

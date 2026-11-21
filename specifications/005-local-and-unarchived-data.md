@@ -132,6 +132,8 @@ if the data is there.
 4. Classify each row into a provenance class from section 3.
 5. Write `panels/<subproject>/samples.csv` and `metadata.csv` per spec 003, with absolute
    paths, plus a `local_manifest.csv` carrying `local_id`, size, mtime and checksum.
+   `metadata.csv` carries `read_state` (spec 003): `trimmed` when every file of a sample
+   has a trimming-tool name, else `unknown`.
 6. Never move, rename, or delete anything. The subprojects stay exactly as they are.
 
 Point 6 is a hard rule. These are other people's working directories.

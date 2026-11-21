@@ -53,7 +53,7 @@ The per-species files follow the catalog naming rule of `AGENTS.md` section 7 (t
 | `tax_id` | taxid as deposited for the run |
 | `species_taxid`, `species_name` | from `taxonomy_species_map.csv.gz` |
 | `source_id` | a row of `sources.csv` |
-| `check` | `contamination` or `species_match` |
+| `check` | `contamination`, `species_match`, `low_coverage` or `oversized_archive_object` |
 | `status` | the source's own status word (MATPredict screen: `mixed`, `genus_mismatch`, `borderline`; species_match: see below) |
 | `detected_genus` | the genus the method assigned to the reads |
 | `second_taxon` | the second taxon it saw, if any |
@@ -115,6 +115,36 @@ Absence of a row means the run was not examined (`sources.csv` says what each so
 `scripts/popseq_qc_import.py` reads a producer table (CSV or TSV, `.gz`/`.zst` read transparently), resolves each run
 through the PopSeq kingdom run table and the taxonomy map, and writes the per-species files and the `sources.csv` row.
 The column mapping for each producer format is in the script (`FORMATS`); `matpredict_screen` is the first.
+`popseq_findings` is a table already in the QC column names: a hand-entered table in `catalog/qc/findings/` (findings
+reported in an issue, with no producer file of their own) or the output of `scripts/popseq_qc_checks.py`.
+
+## Checks PopSeq evaluates itself (added 2026-11-21)
+
+`scripts/popseq_qc_checks.py` evaluates a check from catalog data and imports the result with `popseq_findings`, so the
+rules above hold. `scripts/popseq_qc_sources_2026-11-21.sh` holds the exact commands for every source added that day.
+
+| check | subcommand | status | rule | input |
+|---|---|---|---|---|
+| `low_coverage` | `low-coverage` | `below_1x` (from `--below`, default 1) | `base_count` / `genome_mb` of the run's species < threshold, for the runs of `--run-list` (the runs named in the linked issues); `--catalog-wide` (opt-in, not committed) examines every run | run table, `catalog/genome_sizes.csv`, `catalog/qc/findings/issue_named_runs.csv` |
+| `oversized_archive_object` | `archive-size` | `oversized` | archive bytes / `base_count` > `--max-bytes-per-base` (default 2.0) | a sizes table (`run_accession, archive_bytes, archive_note`) |
+
+A run whose species has no genome size, or whose `base_count` is empty or 0, is not examined by `low_coverage`. The
+catalog holds no archive sizes, so `oversized_archive_object` examines only the runs of the sizes table. Each source
+lists its status in `exclude_statuses` unless `--no-exclude` is given.
+
+### Sources added 2026-11-21
+
+| source_id | check | runs | statuses (all skip by default) | evidence |
+|---|---|---|---|---|
+| `popseq_low_coverage` | `low_coverage` | 53 *A. fumigatus* | `below_1x` | evaluated here from catalog data for the 55 runs named in issues #37 and #49 only (owner decision: no catalog-wide `below_1x`); runs outside the list are UNMEASURED |
+| `matpredict_afum_species_id_2026-11-10` | `species_match` | 6 *A. fumigatus* | `mismatch` (4), `unverified_species` (2) | MATPredict, transcribed from issue #37; not re-measured here |
+| `matpredict_afum_read_sets_2026-11-10` | `low_coverage` | 54 *A. fumigatus* | `tiny_read_set` | MATPredict, transcribed from issue #37; 53 of them are also `below_1x` here (the same run list), SRR33550994 is 1.016x |
+| `gmg_archive_size_2026-11-21` | `oversized_archive_object` | 1 (SRR065689) | `oversized` | GmG P6 transfer, from issue #49: 51.46 GB `.sra`, 7,589,121,360 bases (run table agrees), 6.78 bytes per base |
+
+UNMEASURED: whether any other run exceeds 2.0 archive bytes per base. A catalog-wide pass over archive sizes would say;
+the threshold is a placeholder that no measured distribution supports (issue #49 reports about 0.4 bytes per base for
+the other runs of *B. bruxellensis*). The four mismatched *A. fumigatus* runs are flagged, not relabelled: a relabel
+goes in `catalog/labels/run_curation.csv` and is the curator's decision (spec 009); it would make these verdicts stale.
 
 ## Changes
 
@@ -123,3 +153,7 @@ The column mapping for each producer format is in the script (`FORMATS`); `matpr
   `runs` and `panel` skip excluding findings by default (`--include-flagged` keeps them); a verdict is stale when `filed_name`
   differs from the run's effective species (curated, else label, else NCBI, spec 009) and then skips nothing; a curator's
   `curated_status=false_positive` lifts the skip.
+- 2026-11-21: checks `low_coverage` and `oversized_archive_object` evaluated by `scripts/popseq_qc_checks.py`; importer format
+  `popseq_findings` and hand-entered inputs in `catalog/qc/findings/`; four sources (issues #37, #49). The importer no longer
+  rewrites a species file whose rows did not change.
+  `low-coverage` takes only the runs of an issue-named `--run-list` by default; the catalog-wide `below_1x` pass is opt-in (`--catalog-wide`) and not committed.

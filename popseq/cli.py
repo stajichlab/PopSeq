@@ -3,6 +3,7 @@
   popseq species --min-isolates 100 --format tsv
   popseq panel --taxid 746128 --n 100 --min-depth 30 --format samples
   popseq describe --taxid 1047171
+  popseq unplaced --placement above_species --rank genus
   popseq index
   popseq fetch SRR1553610 --tier coverage --coverage 30 --out "$SCRATCH/reads"
 
@@ -328,6 +329,23 @@ def main(argv=None) -> int:
     )
     f.add_argument("--header", action="store_true", help="print the result header line first")
 
+    u = sub.add_parser(
+        "unplaced",
+        help="runs with no species taxid (above species rank, several taxids, or none)",
+        description="List the runs that `species`, `runs` and `panel` cannot reach because "
+        "their tax_id gives no species: a genus, section or kingdom, a ';'-joined list, or a "
+        "taxid outside the fungal taxonomy map (issue #22). Listed, never rolled up.",
+    )
+    u.add_argument(
+        "--placement",
+        choices=["above_species", "multiple_taxids", "not_in_taxonomy_map",
+                 "unresolved_in_map", "no_taxid", "species_in_map"],
+    )
+    u.add_argument("--rank", help="resolved_rank: genus, section, kingdom, ... or unresolved")
+    u.add_argument("--contains", help="substring of the deposited scientific_name")
+    u.add_argument("--limit", type=int)
+    u.add_argument("--format", choices=["csv", "tsv", "json", "accessions"], default="csv")
+
     sub.add_parser("index", help="the catalog manifest, JSON")
 
     a = p.parse_args(argv)
@@ -338,13 +356,33 @@ def main(argv=None) -> int:
             rows = q.species(min_isolates=a.min_isolates, contains=a.contains, limit=a.limit)
             if not rows:
                 raise q.EmptyResult("no species match")
+            n_unplaced = q.unplaced_count()
             if a.format == "json":
                 json.dump(
-                    {"popseq_schema": q.SCHEMA_VERSION, "species": rows}, sys.stdout, indent=2
+                    {"popseq_schema": q.SCHEMA_VERSION, "species": rows,
+                     "unplaced_runs": n_unplaced},
+                    sys.stdout, indent=2,
                 )
                 sys.stdout.write("\n")
             else:
                 _write_rows(rows, q.SPECIES_FIELDS, a.format)
+                if n_unplaced:
+                    print(f"# caveat: {n_unplaced} runs have no species taxid and are in no "
+                          "species row; list them with `popseq unplaced`", file=sys.stderr)
+        elif a.cmd == "unplaced":
+            rows = q.unplaced(placement=a.placement, rank=a.rank, contains=a.contains,
+                              limit=a.limit)
+            if not rows:
+                raise q.EmptyResult("no unplaced runs match")
+            if a.format == "json":
+                json.dump({"popseq_schema": q.SCHEMA_VERSION, "returned": len(rows),
+                           "runs": rows}, sys.stdout, indent=2)
+                sys.stdout.write("\n")
+            elif a.format == "accessions":
+                for r in rows:
+                    print(r["run_accession"])
+            else:
+                _write_rows(rows, q.UNPLACED_FIELDS, a.format)
         elif a.cmd == "runs":
             _emit_runs(q.runs(**_target(a), limit=a.limit, **_filters(a)), a.format)
         elif a.cmd == "panel":

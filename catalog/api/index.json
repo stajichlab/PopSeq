@@ -1,6 +1,6 @@
 {
- "popseq_schema": "1.2.0",
- "generated": "2026-11-18",
+ "popseq_schema": "1.3.0",
+ "generated": "2026-11-21",
  "what": "One static JSON file per fungal species with 100 or more isolates. Each holds the full description of the species and a pre-selected panel of up to 100 strains to profile.",
  "scope": "public whole-genome Illumina, BGISEQ and DNBSEQ sequencing runs of fungal isolates, as ENA and NCBI describe them",
  "archive_snapshot": "2026-11-06",
@@ -14,7 +14,8 @@
    "species": "list species with counts; the discovery entry point",
    "runs": "all runs of one species, filtered",
    "panel": "select N strains, one per isolate, spread across studies",
-   "describe": "everything known about one species, as JSON"
+   "describe": "everything known about one species, as JSON",
+   "unplaced": "runs with no species taxid, which the other verbs cannot reach"
   },
   "exit_codes": {
    "0": "ok",
@@ -29,6 +30,7 @@
   "est_depth_x comes from metadata, not from the reads.",
   "Only 113 species were reconciled against NCBI. For every other species ncbi_status is not_checked, which is not the same as absent.",
   "Nothing here has been downloaded or verified. These are archive records.",
+  "Runs whose tax_id gives no species (filed as a genus, a section or 'Fungi', with several taxids, or with a taxid outside the fungal taxonomy map) are in no species row and no species query. They are listed in catalog/summary/unplaced_runs.csv.gz (`popseq unplaced`; issue #22).",
   "Scope: the run table holds only ENA runs with library_strategy=WGS and library_source=GENOMIC, on instrument_platform ILLUMINA (snapshot 2026-11-06) or BGISEQ/DNBSEQ (supplement 2026-11-09; scripts/popseq_snapshot.py). A --strategy filter for anything else returns nothing because those runs were never harvested, not because none exist (issue #24). The --platform filter defaults to ILLUMINA; pass BGISEQ, DNBSEQ or '' to see the others."
  ],
  "species_count": 115,
@@ -71,7 +73,7 @@
    "studies": 139,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/746128.json",
-   "bytes": 55806
+   "bytes": 55844
   },
   {
    "species_taxid": 5476,
@@ -181,7 +183,7 @@
    "studies": 16,
    "panel_available": 100,
    "url": "https://raw.githubusercontent.com/stajichlab/PopSeq/main/catalog/api/5007.json",
-   "bytes": 54469
+   "bytes": 54490
   },
   {
    "species_taxid": 34373,

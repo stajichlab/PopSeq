@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-11-21: runs with no species taxid get their own table; verb `unplaced`; schema 1.3.0 (issue #22)
+
+Nothing moved and nothing was removed.
+
+- **Decision:** the runs whose `tax_id` gives no species are listed in their own table, not rolled up to a ranked
+  ancestor. A run filed as a genus or as `Fungi` is not evidence for any one species.
+- **New table** `catalog/summary/unplaced_runs.csv.gz`, built by the new `scripts/popseq_unplaced.py` from the run
+  table and the taxonomy map (no network; gzip mtime 0, so a rebuild is byte-identical). One row for every run with an
+  empty `species_taxid`: 922 of 256,089 runs. `placement`: above_species 822, multiple_taxids 88, not_in_taxonomy_map
+  12. The issue's 648 above species and 98 unresolved are the ILLUMINA rows (648 + 88 + 10); BGISEQ/DNBSEQ add 174 and 2.
+- **New verb** `popseq unplaced` (`--placement`, `--rank`, `--contains`, `--limit`, `--format csv|tsv|json|accessions`),
+  function `popseq.unplaced`, MCP tool `popseq_unplaced`. `popseq species` says on stderr how many runs no species row
+  holds, and its JSON answer gains `unplaced_runs`.
+- **Schema 1.2.0 to 1.3.0** (minor: a verb, a table and a JSON key added, per the rule in spec 007). `catalog/index.json`
+  (table `unplaced_runs`, verb, column notes, one caveat) and `catalog/api/` are regenerated; the API files change only
+  in `popseq_schema`, and `api/index.json` also in its date, verbs and caveats. Spec 001 has the new section, spec 007 the
+  1.3.0 row. The package version is not bumped.
+- **Tests:** `tests/test_unplaced.py`. The table must hold exactly the runs with an empty `species_taxid`. The issue's
+  figures are asserted only while the run table is the 2026-11-18 build.
+
+## Unreleased: panel `metadata.csv` gains `read_state` (issue #5)
+
+- **New column `read_state`** in the `metadata.csv` that `scripts/popseq_inventory.py` writes: `raw`, `trimmed` or
+  `unknown`, per sample. `trimmed` when every file's basename carries `_val_`, `_trimmed` or `.trim.`; anything else
+  is `unknown`. The converter never writes `raw`. Spec 003 has the definition; spec 005 section 6 points to it.
+- The converter's per-panel summary line adds `read_state_trimmed=` and `read_state_unknown=` counts.
+- `read_state` is an additive inventory column of the panel `metadata.csv`; it is not part of the catalog query contract and
+  makes no schema version change.
+- **Not done here:** no panel was regenerated; `popseq_panel_set.py` panels (archive URLs) do not carry the column yet.
+
+## 2026-11-21: run-QC checks `low_coverage` and `oversized_archive_object`; flags for issues #37 and #49
+
+Nothing was removed from the catalog. All new statuses are in their source's `exclude_statuses`, so `popseq runs` and
+`popseq panel` skip these runs by default; `--include-flagged` keeps them. Pending owner review (PR, not merged).
+
+- **`low_coverage`** (`scripts/popseq_qc_checks.py low-coverage`, source `popseq_low_coverage`): base_count / genome size
+  below 1x, evaluated from catalog data for the runs the linked issues name only (`catalog/qc/findings/issue_named_runs.csv`:
+  the 54 runs of #37 and SRR065689 of #49): 55 examined, 53 `below_1x`. Owner decision: no catalog-wide pass. The check
+  requires `--run-list`; `--catalog-wide` is the opt-in for a full sweep and is not committed. UNMEASURED: depth of every
+  run outside the list.
+- **Issue #37**: 4 *A. fumigatus* runs `species_match:mismatch` and 2 `species_match:unverified_species`
+  (`matpredict_afum_species_id_2026-11-10`), and 54 tiny read sets `low_coverage:tiny_read_set`
+  (`matpredict_afum_read_sets_2026-11-10`). MATPredict's evidence, transcribed from the issue; the runs are not relabelled.
+- **Issue #49**: SRR065689 `oversized_archive_object:oversized` (`gmg_archive_size_2026-11-21`, 6.78 archive bytes per
+  base; threshold 2.0 is a placeholder). UNMEASURED: whether other runs trip the check.
+- Importer: format `popseq_findings`; hand-entered inputs in `catalog/qc/findings/`; a species file whose rows do not
+  change is no longer rewritten. `catalog/index.json` and 22 `catalog/api/` species files (plus `api/index.json`) are regenerated.
+
 ## 2026-11-19: run QC can skip runs by default; the `species_match` check; schema 1.2.0 (issue #52)
 
 Owner decisions 2026-11-18 and 2026-11-19 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.

@@ -9,7 +9,7 @@ Register it with Claude Code (adjust the path if the repo lives elsewhere):
     claude mcp add popseq -- uv --directory /bigdata/stajichlab/shared/projects/Fungi/PopSeq \\
         run --extra mcp python -m popseq.mcp_server
 
-It speaks stdio and exposes the same four operations the CLI does, with the same
+It speaks stdio and exposes the same query operations the CLI does, with the same
 arguments and the same return shapes. There is no second implementation: every
 tool here calls popseq.query.
 
@@ -141,6 +141,20 @@ def popseq_runs(taxid: Optional[int] = None, species_name: Optional[str] = None,
                             only_exclusion=only_exclusion))
     except q.CatalogError as exc:
         return f"error: {exc}"
+
+
+@mcp.tool()
+def popseq_unplaced(placement: Optional[str] = None, rank: Optional[str] = None,
+                    contains: Optional[str] = None, limit: int = 200) -> str:
+    """Runs that no species query reaches, because their taxid gives no species:
+    filed above species rank (a genus, section, kingdom), with several taxids, or
+    with a taxid outside the fungal taxonomy map (issue #22). Listed, never
+    rolled up to an ancestor. placement is above_species, multiple_taxids,
+    not_in_taxonomy_map, unresolved_in_map, no_taxid or species_in_map; rank is
+    the resolved rank (genus, ...) or unresolved.
+    """
+    rows = q.unplaced(placement=placement, rank=rank, contains=contains, limit=limit)
+    return _json({"returned": len(rows), "runs": rows})
 
 
 def main() -> None:

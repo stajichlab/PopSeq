@@ -40,6 +40,37 @@ was recoverable, so that a question nobody anticipated can still be asked.
 | `taxid` | NCBI taxonomy id. **Mandatory.** A panel without taxids cannot be regenerated. |
 | `scientific_name` | as recorded at NCBI, not corrected |
 
+### `read_state`
+
+Whether the panel's files are the reads as sequenced or the output of a trimming step.
+A panel that mixes raw and trimmed reads gives results that cannot be compared across
+samples, and without this column nothing in the panel reveals it (issue #5).
+
+| Value | Meaning |
+|---|---|
+| `trimmed` | every file of the sample is the output of a trimming tool |
+| `raw` | the reads are known to be as sequenced. Set only from a record that says so, never inferred from a file name |
+| `unknown` | anything else. The default |
+
+Rules:
+
+- **Inferred from the file names only.** A file is trimmed when its basename contains
+  `_val_` (trim_galore paired output, `<x>_1_val_1.fq.gz`), `_trimmed` (trim_galore
+  single-end and others) or `.trim.`. Matching ignores case. A directory name such as
+  `trimmed/` does not count.
+- **Never guess `raw`.** A file name with no trimming marker is `unknown`, because the
+  absence of a marker is not evidence that nothing was done to the reads.
+- **Per sample.** `metadata.csv` has one line per sample, so the value is per sample. A
+  sample is `trimmed` only when every one of its files is; a sample whose files mix
+  trimmed and unmarked names, or that has no files, is `unknown`. A panel that mixes raw
+  and trimmed samples is not collapsed to one value: the column shows the mix sample by
+  sample, and `popseq_inventory.py` prints the per-panel counts (`read_state_trimmed=`,
+  `read_state_unknown=`).
+- Written by `scripts/popseq_inventory.py`, the converter for local subprojects (spec
+  005), on every panel it emits. Panels built from archive URLs by
+  `scripts/popseq_panel_set.py` do not carry the column yet; a consumer treats a missing
+  column as `unknown`.
+
 ### Harvested columns
 
 Everything else harvested from the BioSample record keeps NCBI's `harmonized_name` where one
@@ -90,3 +121,5 @@ depth_tier: full
 ## Changes
 
 - 2026-11-06: first draft.
+- 2026-11-21: `read_state` column (`raw`, `trimmed`, `unknown`), inferred from file names
+  by the inventory converter (issue #5).
