@@ -1,0 +1,26 @@
+# The test suite, on every push and pull request.
+#
+# It needs no network beyond installing packages: tests/conftest.py refuses any
+# socket connection that leaves the machine (issue #19). It includes
+# tests/test_api_fresh.py, which re-renders catalog/api/ and fails when the committed
+# files are stale (issue #21).
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install from uv.lock
+        run: uv sync --locked
+      - name: catalog/api/ matches a fresh render
+        run: uv run pytest -q tests/test_api_fresh.py
+      - name: Full suite, no network
+        run: uv run pytest -q

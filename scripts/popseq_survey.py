@@ -160,6 +160,18 @@ def ena_runs(taxid, fields=RUN_FIELDS):
     return query, list(reader)
 
 
+def split_samples(value):
+    """The BioSamples of a run. ENA's sample_accession is multi-valued: a run that
+    pools several BioSamples carries them ';'-joined (spec 001, issue #3)."""
+    return [s.strip() for s in (value or "").split(";") if s.strip()]
+
+
+def isolate_key(row):
+    """One key per isolate: the run's BioSamples, split, de-duplicated and sorted, so
+    'S2;S1' and 'S1;S2' are the same unit. Empty when the run names no BioSample."""
+    return ";".join(sorted(set(split_samples(row.get("sample_accession")))))
+
+
 def classify_exclusion(row):
     """Return an excluded_as category, or '' when the row is kept.
 
@@ -252,7 +264,8 @@ def main():
         r["eligible_reason"] = ";".join(reasons)
 
     eligible = [r for r in rows if r["eligible"] == "true"]
-    isolates = {r["sample_accession"] for r in eligible if r.get("sample_accession")}
+    # A ';'-joined sample_accession names several BioSamples; count each (issue #3).
+    isolates = {s for r in eligible for s in split_samples(r.get("sample_accession"))}
     excluded_counts = {}
     for r in rows:
         if r["excluded_as"]:
@@ -262,7 +275,7 @@ def main():
     # as the question allows.
     per_isolate = {}
     for r in eligible:
-        s = r["sample_accession"]
+        s = isolate_key(r)
         if s not in per_isolate or r["est_gz_bytes"] < per_isolate[s]["est_gz_bytes"]:
             per_isolate[s] = r
     dl_tb = sum(r["est_gz_bytes"] for r in per_isolate.values()) / 1e12

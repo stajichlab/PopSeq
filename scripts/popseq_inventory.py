@@ -97,11 +97,18 @@ def candidates_for(filebase, index):
             continue
         base_stable = os.path.basename(stable)
         has_dir = "/" in piece
+        # A FileBase with no wildcard is a whole name: an accession or a bare prefix.
+        # The file name must not continue it with a letter or digit, or SRR1636746
+        # would also take the files of SRR16367460.
+        whole = not re.search(r"[\[\*\?]", piece)
         for rel, ap, bn in index:
             if has_dir:
                 if rel.startswith(stable):
                     hits.append((rel, ap, bn))
             elif bn.startswith(base_stable):
+                nxt = bn[len(base_stable):len(base_stable) + 1]
+                if whole and nxt.isalnum():
+                    continue
                 hits.append((rel, ap, bn))
     # Stable order, no duplicates.
     seen, out = set(), []
