@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-21: run-QC checks `low_coverage` and `oversized_archive_object`; flags for issues #37 and #49
+
+Nothing was removed from the catalog. All new statuses are in their source's `exclude_statuses`, so `popseq runs` and
+`popseq panel` skip these runs by default; `--include-flagged` keeps them. Pending owner review (PR, not merged).
+
+- **`low_coverage`** (`scripts/popseq_qc_checks.py low-coverage`, source `popseq_low_coverage`): base_count / genome size
+  below 1x, evaluated from catalog data for the runs the linked issues name only (`catalog/qc/findings/issue_named_runs.csv`:
+  the 54 runs of #37 and SRR065689 of #49): 55 examined, 53 `below_1x`. Owner decision: no catalog-wide pass. The check
+  requires `--run-list`; `--catalog-wide` is the opt-in for a full sweep and is not committed. UNMEASURED: depth of every
+  run outside the list.
+- **Issue #37**: 4 *A. fumigatus* runs `species_match:mismatch` and 2 `species_match:unverified_species`
+  (`matpredict_afum_species_id_2026-11-10`), and 54 tiny read sets `low_coverage:tiny_read_set`
+  (`matpredict_afum_read_sets_2026-11-10`). MATPredict's evidence, transcribed from the issue; the runs are not relabelled.
+- **Issue #49**: SRR065689 `oversized_archive_object:oversized` (`gmg_archive_size_2026-11-21`, 6.78 archive bytes per
+  base; threshold 2.0 is a placeholder). UNMEASURED: whether other runs trip the check.
+- Importer: format `popseq_findings`; hand-entered inputs in `catalog/qc/findings/`; a species file whose rows do not
+  change is no longer rewritten. `catalog/index.json` and 22 `catalog/api/` species files (plus `api/index.json`) are regenerated.
+
 ## 2026-11-19: run QC can skip runs by default; the `species_match` check; schema 1.2.0 (issue #52)
 
 Owner decisions 2026-11-18 and 2026-11-19 (made in a GmG session; spec 008 is amended to match). Nothing was removed from the catalog.
