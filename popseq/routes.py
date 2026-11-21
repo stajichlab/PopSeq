@@ -20,6 +20,7 @@ import hashlib
 import os
 import socket
 import subprocess
+import sys
 import time
 
 from popseq import downloads as dl
@@ -55,6 +56,12 @@ MAX_NO_PROGRESS = 5  # consecutive attempts that added no bytes before the trans
 RESUMABLE_RC = {6, 7, 18, 28, 35, 52, 55, 56, 124}
 
 
+def _trace(url, notes, how):
+    """Say on stderr (the per-run log) how a transfer that needed resuming went; silent when it did not."""
+    if notes:
+        print(f"curl_resume {os.path.basename(url)}: {len(notes)} resume(s) [{'; '.join(notes)}], {how}", file=sys.stderr)
+
+
 def curl_resume(
     url,
     dest,
@@ -81,12 +88,15 @@ def curl_resume(
     stuck, last, notes = 0, size(), []
     while True:
         if expected and size() == expected:
+            _trace(url, notes, "complete")
             return 0, time.monotonic() - t0, "", ""
         rc, _sec, out, err = _run(cmd, timeout)
         now = size()
         if rc == 0:
+            _trace(url, notes, f"done at {now} bytes")
             return 0, time.monotonic() - t0, out, err
         if expected and now == expected:  # 33 or 22 on a range request for a complete file
+            _trace(url, notes, f"complete at {now} bytes after rc {rc}")
             return 0, time.monotonic() - t0, out, err
         if rc == 33 or (expected and now > expected):
             # the server will not resume, or the partial file is wrong: start again, once per loop
