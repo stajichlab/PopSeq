@@ -18,6 +18,13 @@ and all four are handled:
     22687-1_ACTTGA_L001                         a bare prefix, no extension
     AF100.run1/lane1/x_R[12]_001.fastq.gz;...   several relative paths, one per lane
 
+Read state (spec 003, issue #5): each metadata.csv row carries `read_state`, one of
+raw, trimmed, unknown, inferred from the resolved file names only. A file is trimmed when
+its basename contains `_val_` (trim_galore paired output), `_trimmed` (trim_galore
+single-end, many others) or `.trim.`. A sample is trimmed only when every one of its files
+is; anything else, including a sample with no files, is unknown. The converter never
+writes raw: a file name without a trimming marker does not prove the reads are untouched.
+
 Checksums: computed only for local_only samples, which are the irreplaceable ones,
 and only with --checksum. Hashing every FASTQ in these subprojects would read
 terabytes to tell us something we only need for data that cannot be refetched.
@@ -44,6 +51,9 @@ MATE_RE = [
     re.compile(r"^(?P<stem>.+?)[._](?P<mate>[12])([._].*)?$"),
 ]
 FASTQ_EXT = re.compile(r"\.(fastq|fq)(\.gz|\.bz2|\.zst)?$", re.I)
+# Trimming-tool output markers, matched against the basename only (spec 003 read_state).
+TRIMMED_RE = re.compile(r"_val_|_trimmed|\.trim\.", re.I)
+READ_STATES = ("raw", "trimmed", "unknown")
 
 
 def read_config(path):
@@ -132,6 +142,22 @@ def pair_up(hits):
     return pairs
 
 
+def file_read_state(path):
+    """'trimmed' when the basename carries a trimming-tool marker, else 'unknown'.
+
+    Never 'raw': the absence of a marker is not evidence that nothing was done."""
+    return "trimmed" if TRIMMED_RE.search(os.path.basename(path)) else "unknown"
+
+
+def sample_read_state(pairs):
+    """read_state for one sample from its resolved (r1, r2) pairs.
+
+    'trimmed' only when every file is trimmed. A sample that mixes trimmed and
+    unmarked files, or has no files, is 'unknown'."""
+    states = {file_read_state(f) for p in pairs for f in p if f}
+    return "trimmed" if states == {"trimmed"} else "unknown"
+
+
 def sha256(path, chunk=1 << 20):
     h = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -218,6 +244,7 @@ def process(name, cfgdir, out_root, do_checksum):
             "run_accession": acc, "provenance": prov,
             "source_subproject": name, "source_sheet": os.path.relpath(sheet, PG_ROOT),
             "filebase": fb, "n_files": sum(1 for p in pairs for f in p if f),
+            "read_state": sample_read_state(pairs),
             "curated_notes": "",
         })
 
@@ -245,10 +272,14 @@ def process(name, cfgdir, out_root, do_checksum):
     dump("samples.csv", samples, ["sample", "fastq_1", "fastq_2"])
     dump("metadata.csv", meta, ["sample", "biosample", "run_accession", "provenance",
                                 "source_subproject", "source_sheet", "filebase",
-                                "n_files", "curated_notes"])
+                                "n_files", "read_state", "curated_notes"])
     dump("local_manifest.csv", manifest, ["local_id", "path", "bytes", "mtime", "sha256"])
+    states = {}
+    for m in meta:
+        key = "read_state_" + m["read_state"]
+        states[key] = states.get(key, 0) + 1
     return {"subproject": name, "status": "ok", "n": len(meta),
-            "files": len(manifest), "fastq_indexed": len(index), **counts}
+            "files": len(manifest), "fastq_indexed": len(index), **counts, **states}
 
 
 def main():
@@ -281,7 +312,8 @@ def main():
         res = process(nm, d, args.out_root, args.checksum)
         results.append(res)
         extra = " ".join(f"{k}={v}" for k, v in res.items()
-                         if k in ("archived", "archived_local", "local_only", "listed_absent"))
+                         if k in ("archived", "archived_local", "local_only", "listed_absent")
+                         or k.startswith("read_state_"))
         print(f"{nm:<42} {res['status']:<16} n={res['n']:<5} files={res.get('files',0):<6} {extra}")
 
     tot = {}
